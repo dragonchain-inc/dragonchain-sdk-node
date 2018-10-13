@@ -1,0 +1,7 @@
+/bundle-analysis
+/.nyc_output
+/node_modules
+/coverage
+/lib
+/docs
+yarn-error.log

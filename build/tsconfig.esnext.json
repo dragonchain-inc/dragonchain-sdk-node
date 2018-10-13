@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "target": "esnext",
+    "outDir": "../lib/module/esnext",
+    "rootDir": "../src",
+    "module": "esnext",
+    "declaration": true,
+    "declarationDir": "../lib/types",
+    "inlineSourceMap": false
+  },
+  "include": [
+    "./declarations/**/*.ts",
+    "../src/**/*.ts"
+  ]
+}

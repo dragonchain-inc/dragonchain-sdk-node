@@ -1,0 +1,121 @@
+{
+  "name": "dragonchain-sdk",
+  "version": "0.0.1",
+  "description": "Dragonchain SDK for Node",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/dragonchain-inc/dragonchain-sdk-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dragonchain-inc/dragonchain-sdk-node.git"
+  },
+  "keywords": [
+    "dragonchain",
+    "sdk"
+  ],
+  "bugs": {
+    "url": "https://github.com/dragonchain-inc/dragonchain-sdk-node/issues"
+  },
+  "author": {
+    "name": "Dragonchain, Inc.",
+    "email": "support@dragonchain.com"
+  },
+  "main": "lib/module/commonjs/index.js",
+  "module": "lib/module/esnext/index.js",
+  "jsnext:main": "lib/module/esnext/index.js",
+  "types": "lib/types/index.d.ts",
+  "engines": {
+    "node": ">=4"
+  },
+  "scripts": {
+    "h": "yarn npm-scripts-info",
+    "i": "yarn h",
+    "build": "yarn build:node",
+    "build:node": "yarn build:node:commonjs && yarn build:node:esnext",
+    "build:node:commonjs": "tsc --project build/tsconfig.commonjs.json",
+    "build:node:esnext": "tsc --project build/tsconfig.esnext.json",
+    "lint": "tslint -p tsconfig.json --format codeFrame",
+    "fix": "tslint -p tsconfig.json --fix",
+    "test": "NODE_ENV=test nyc -x **/*spec.ts --reporter=html --reporter=text mocha --opts ./spec/mocha.opts",
+    "test:watch": "NODE_ENV=test mocha --require ts-node/register ./src/**/*.spec.ts --watch --watch-dirs ./src/ --watch-extensions ts",
+    "coverage": "yarn test && yarn coverage:show",
+    "coverage:show": "opn coverage/index.html",
+    "docs": "typedoc ./src --mode modules --target es6 --mode file --theme default --out docs --ignoreCompilerErrors --excludeExternals --gaSite 'dragonchain-sdk-node' --hideGenerator",
+    "docs:preview": "yarn docs && opn docs/index.html",
+    "docs:publish": "ts-node build/tools/gh-pages-publish.ts",
+    "prepublishOnly": "yarn lint && yarn test && yarn build",
+    "commit": "git-cz"
+  },
+  "scripts-info": {
+    "h": "Display information about the scripts",
+    "i": "Alias for h",
+    "build": "Build node module and browser bundle",
+    "build:node": "Build node commonjs and es6 modules",
+    "build:node:commonjs": "Build node commonjs module",
+    "build:node:esnext": "Build node es6 module",
+    "lint": "Lint typescript code",
+    "fix": "Fix ts lint errors",
+    "test": "Run tests and check code coverage",
+    "test:ts": "Run tests for typescript",
+    "test:ts:watch": "Watching typescript files for changes and run specified tests",
+    "coverage": "Check coverage for typescript files",
+    "coverage:show": "Open typescript coverage report in browser",
+    "docs": "Build documentation",
+    "docs:publish": "Build and publish documentation on github pages"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -x @commitlint/config-conventional -e $GIT_PARAMS",
+      "pre-push": "yarn test"
+    }
+  },
+  "dependencies": {
+    "@types/ini": "^1.3.29",
+    "ini": "^1.3.5",
+    "node-fetch": "^2.2.0",
+    "tslib": "^1.9.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "6.1.0",
+    "@commitlint/config-conventional": "6.1.0",
+    "@types/chai": "^4.1.2",
+    "@types/json-schema": "^7.0.1",
+    "@types/loader-utils": "^1.1.2",
+    "@types/lodash.camelcase": "^4.3.3",
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^9.4.6",
+    "@types/node-fetch": "^2.1.2",
+    "@types/sinon-chai": "^3.2.0",
+    "@types/webpack": "^3.8.8",
+    "@webpack-contrib/test-utils": "^0.1.2",
+    "awesome-typescript-loader": "^3.4.1",
+    "chai": "^4.1.2",
+    "chai-match": "^1.1.1",
+    "colors": "^1.1.2",
+    "commitizen": "^2.9.6",
+    "cz-conventional-changelog": "^2.1.0",
+    "husky": "^0.15.0-rc.8",
+    "jsdom": "^11.6.2",
+    "loader-utils": "^1.1.0",
+    "lodash.camelcase": "^4.3.0",
+    "mocha": "^5.0.1",
+    "node-delete": "^0.1.2",
+    "npm-scripts-info": "^0.3.7",
+    "nyc": "^11.4.1",
+    "opn-cli": "^3.1.0",
+    "shelljs": "^0.8.1",
+    "sinon": "^6.3.5",
+    "sinon-chai": "^3.2.0",
+    "ts-loader": "^3.5.0",
+    "ts-node": "^5.0.0",
+    "tslint": "^5.9.1",
+    "tslint-config-standard": "^7.0.0",
+    "typedoc": "^0.10.0",
+    "typescript": "^3.0.1",
+    "webpack": "^4.0.1"
+  }
+}

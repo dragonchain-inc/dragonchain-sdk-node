@@ -1,0 +1,58 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "./",
+    "rootDir": "./",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "declaration": false,
+    "importHelpers": true,
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "listFiles": false,
+    "traceResolution": false,
+    "pretty": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "downlevelIteration": true,
+    "allowUnreachableCode": false,
+    "allowJs": false,
+    "lib": [
+      "dom",
+      "es5",
+      "es6",
+      "es7",
+      "es2017.object",
+      "esnext",
+      "esnext.asynciterable"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "typescript-node-module-starter-kit": [
+        "src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules/**",
+    "lib/**/*.ts"
+  ],
+  "compileOnSave": false
+}
