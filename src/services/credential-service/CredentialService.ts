@@ -100,7 +100,12 @@ export class CredentialService {
    * @returns {string} dragonchain credential file path from system root.
    * @example e.g.: "/Users/Sally/.dragonchain/credentials"
    */
-  private static getCredentialFilePath = () => path.join(os.homedir(), '.dragonchain', 'credentials')
+  private static getCredentialFilePath = () => {
+    if (os.platform() === 'win32') {
+      path.join(process.env.LOCALAPPDATA, 'dragonchain', 'credentials')
+    }
+    return path.join(os.homedir(), '.dragonchain', 'credentials')
+  }
 
   /**
    * @hidden
