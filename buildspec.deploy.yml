@@ -1,0 +1,18 @@
+version: 0.1
+
+phases:
+  install:
+    commands:
+      - npm install -g yarn
+      - yarn install
+  pre_build:
+    commands:
+      - yarn docs
+  build:
+    commands:
+      - yarn build
+      # deploy to NPM
+      - VERSION=$(node -e "console.log(require('./package.json').version)")
+      - aws cp --recursive ./docs/* s3://dragonchain-sdk-node-docs/latest
+      - aws cp --recursive ./docs/* s3://dragonchain-sdk-node-docs/$VERSION
+

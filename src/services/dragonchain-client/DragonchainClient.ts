@@ -27,7 +27,8 @@ import {
   L1DragonchainTransactionQueryResult,
   DragonchainContractCreateResponse,
   FetchOptions,
-  L1DragonchainStatusResult
+  L1DragonchainStatusResult,
+  SmartContractType
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 
@@ -92,7 +93,7 @@ export class DragonchainClient {
    * @hidden
    * @static
    * @name isValidRuntime
-   * @param {string} runtime runtime to validate
+   * @param {ContractRuntime} runtime runtime to validate
    * @returns {boolean} true if runtime is valid, false if not.
    */
   static isValidRuntime = (runtime: ContractRuntime) => validRuntimes.includes(runtime)
@@ -102,10 +103,10 @@ export class DragonchainClient {
    * @hidden
    * @static
    * @name isValidSmartContractType
-   * @param {string} smartContractType smartContractType to validate
+   * @param {SmartContractType} smartContractType smartContractType to validate
    * @returns {boolean} true if smart contract type is valid, false if not
    */
-  static isValidSmartContractType = (smartContractType: string) => validSmartContractTypes.includes(smartContractType)
+  static isValidSmartContractType = (smartContractType: SmartContractType) => validSmartContractTypes.includes(smartContractType)
 
   /**
    * This method is used to override this SDK's attempt to look-up your credentials in your home directory.
@@ -130,7 +131,7 @@ export class DragonchainClient {
    *
    * After using this command, subsequent requests to your dragonchain will attempt to locate credentials in your home directory for the new dragonchainId.
    * If unable to locate your credentials for the new chain, requests may throw a `FailureByDesign('NOT_FOUND')` error.
-   * If credentials were previously forcefully overridden and mismatch the ID you have set, your requests to dragonchain's api will fail due to an unverifiable HMAC signature.
+   * If credentials were previously forcefully overridden and mismatch the ID you have set, your requests to dragonchain's api will 403 due to an unverifiable HMAC signature.
    * @param dragonchainId The id of the dragonchain you want to talk to.
    */
   public setDragonchainId = (dragonchainId: string) => {
@@ -146,7 +147,13 @@ export class DragonchainClient {
   }
 
   /**
-   * Query transactions using Apache Lucene for Elastic Search
+   * Query transactions using ElasticSearch query-string syntax
+   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
+   * @example
+   * ```javascript
+   * myClient.queryTransactions('tag:(bananas OR apples)').then( ...do stuff )
+   * ```
    */
   public queryTransactions = (luceneQuery: string): Promise<L1DragonchainTransactionQueryResult> => {
     return this.get(`/transaction?q=${luceneQuery}`)
