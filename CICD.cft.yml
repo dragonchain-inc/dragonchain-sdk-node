@@ -4,9 +4,12 @@ Parameters:
   GitHubSecret:
     Type: AWS::SSM::Parameter::Value<String>
     Default: GitHubReadOnlyToken
+  IntegrationTestApiKey:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: DragonchainNodeSdkIntegrationTestApiKey
 
 Resources:
-  StagingCodebuildProject:
+  UnittestCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: 'dragonchain-sdk-node-unittest'
@@ -44,6 +47,10 @@ Resources:
           - Name: STAGE
             Type: PLAINTEXT
             Value: stage
+          - Name: API_KEY
+            Type: PLAINTEXT
+            Value:
+              Ref: IntegrationTestApiKey
         PrivilegedMode: true
       Source:
         Type: CODEPIPELINE
@@ -216,7 +223,7 @@ Resources:
                 Version: 1 # No idea!?
               Configuration:
                 ProjectName:
-                  Ref: StagingCodebuildProject
+                  Ref: UnittestCodeBuildProject
               InputArtifacts:
                 - Name: DragonchainSdkNode
               OutputArtifacts:
