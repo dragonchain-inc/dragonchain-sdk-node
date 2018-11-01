@@ -36,6 +36,7 @@
     "lint": "tslint -p tsconfig.json --format codeFrame",
     "fix": "tslint -p tsconfig.json --fix",
     "test": "NODE_ENV=test nyc -x **/*spec.ts --reporter=html --reporter=text mocha --opts ./spec/mocha.opts",
+    "integration": "NODE_ENV=test node ./spec/integration.js",
     "test:watch": "NODE_ENV=test mocha --require ts-node/register ./src/**/*.spec.ts --watch --watch-dirs ./src/ --watch-extensions ts",
     "coverage": "yarn test && yarn coverage:show",
     "coverage:show": "opn coverage/index.html",
@@ -43,7 +44,8 @@
     "docs:preview": "yarn docs && opn docs/index.html",
     "docs:publish": "ts-node build/tools/gh-pages-publish.ts",
     "prepublishOnly": "yarn lint && yarn test && yarn build",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "cicd:update": "aws cloudformation update-stack --stack-name DragonchainSdkNode-CICD --template-body file://./CICD.cft.yml --region us-west-2 --profile default --capabilities CAPABILITY_NAMED_IAM"
   },
   "scripts-info": {
     "h": "Display information about the scripts",

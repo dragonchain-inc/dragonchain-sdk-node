@@ -13,6 +13,6 @@ phases:
       - yarn build
       # deploy to NPM
       - VERSION=$(node -e "console.log(require('./package.json').version)")
-      - aws cp --recursive ./docs/* s3://dragonchain-sdk-node-docs/latest
-      - aws cp --recursive ./docs/* s3://dragonchain-sdk-node-docs/$VERSION
+      - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/latest
+      - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/$VERSION
 

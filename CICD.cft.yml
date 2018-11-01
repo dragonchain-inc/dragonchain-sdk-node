@@ -4,12 +4,15 @@ Parameters:
   GitHubSecret:
     Type: AWS::SSM::Parameter::Value<String>
     Default: GitHubReadOnlyToken
+  IntegrationTestApiKey:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: DragonchainNodeSdkIntegrationTestApiKey
 
 Resources:
-  StagingCodebuildProject:
+  UnittestCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: 'dragonchain-sdk-node-unittest'
+      Name: 'dragonchain-sdk-node-unittest-codebuild-project'
       ServiceRole:
         Ref: CodeBuildRole
       Artifacts:
@@ -44,13 +47,17 @@ Resources:
           - Name: STAGE
             Type: PLAINTEXT
             Value: stage
+          - Name: API_KEY
+            Type: PLAINTEXT
+            Value:
+              Ref: IntegrationTestApiKey
         PrivilegedMode: true
       Source:
         Type: CODEPIPELINE
         BuildSpec: buildspec.integration.yml
       TimeoutInMinutes: 10
 
-  DevDeployCodeBuildProject:
+  StageDeployCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: 'dragonchain-sdk-node-codebuild-deploy-stage'
@@ -177,6 +184,18 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
 
+  ReadPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DocsWebsiteBucket
+      PolicyDocument:
+        Statement:
+        - Action: 's3:GetObject'
+          Effect: Allow
+          Resource: !Sub 'arn:aws:s3:::${DocsWebsiteBucket}/*'
+          Principal: '*'
+
+
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -216,7 +235,7 @@ Resources:
                 Version: 1 # No idea!?
               Configuration:
                 ProjectName:
-                  Ref: StagingCodebuildProject
+                  Ref: UnittestCodeBuildProject
               InputArtifacts:
                 - Name: DragonchainSdkNode
               OutputArtifacts:
@@ -250,9 +269,9 @@ Resources:
               Version: 1
             Configuration:
               ProjectName:
-                Ref: DevDeployCodeBuildProject
+                Ref: StageDeployCodeBuildProject
             InputArtifacts:
-              - Name: TestedDragonchainSdkNode
+              - Name: DragonchainSdkNode
             OutputArtifacts:
               - Name: DevDeploy
             RoleArn:
@@ -281,7 +300,7 @@ Resources:
               ProjectName:
                 Ref: ProdDeployCodeBuildProject
             InputArtifacts:
-              - Name: TestedDragonchainSdkNode
+              - Name: DragonchainSdkNode
             OutputArtifacts:
               - Name: BuiltDragonchainSdkNodeProdCode
             RoleArn:
