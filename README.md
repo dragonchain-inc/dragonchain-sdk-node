@@ -1,11 +1,17 @@
 # Dragonchain JS SDK
 ![code-build status](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiUFpHWHVOTHpQSHo4T3ZHSjBUT3JZQ0kzRHBybUFvbCt4WjB6MHFhY2F1dmxPTU1mUUZUYXk4d0QzTXpUMzhRek9sZ2dLclkwcTVjTEpJaElUN3cxQUdjPSIsIml2UGFyYW1ldGVyU3BlYyI6Ik56K0RLUFUxVnhpUHNCNWoiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 
-This is the Javascript SDK for interacting with a dragonchain. It provides functionality to be able to interact with a dragonchain through a simple sdk with minimal configuration needed.
+Talk to your dragonchain.
 
-## Getting started
+# Latest Official JS Docs
+These docs are auto-generated.
+* [getBlock](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#getblock)
+* [getVerifications](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#getverifications)
+* [getTransaction](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#getTransaction)
+* [createContract](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#createContract)
+* [listContracts](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#listContracts)
 
-### Install
+### Installation
 ```bash
 npm i dragonchain-sdk --save
 ```
@@ -27,7 +33,7 @@ try {
 
 #### QueryTransactions
 ```javascript
-const searchResult = await dragonchain.searchTransaction(`tag:"MyAwesomeTransactionTag"`)
+const searchResult = await dragonchain.queryTransactions('tag:"MyAwesomeTransactionTag"')
 ```
 
 #### OverrideCredentials
