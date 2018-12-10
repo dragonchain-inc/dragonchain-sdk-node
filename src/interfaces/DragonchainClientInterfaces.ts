@@ -208,7 +208,7 @@ export interface L1DragonchainStatusResult {
 export interface L1BlockAtRest {
   'version': '2'
   'dcrn': 'Block::L1::AtRest'
-  header: {
+  'header': {
     'dc_id': string
     'block_id': string
     'level': 1
@@ -216,10 +216,10 @@ export interface L1BlockAtRest {
     'prev_id': string
     'prev_proof': string
   }
-  transaction: {
+  'transaction': {
     'items': string
   }
-  proof: {
+  'proof': {
     'scheme': string
     'proof': string
   }
@@ -252,7 +252,7 @@ export interface L2BlockAtRest {
 export interface L1BlockAtRest {
   'version': '2'
   'dcrn': 'Block::L1::AtRest'
-  header: {
+  'header': {
     'dc_id': string
     'block_id': string
     'level': 1
@@ -260,10 +260,10 @@ export interface L1BlockAtRest {
     'prev_id': string
     'prev_proof': string
   }
-  transaction: {
+  'transaction': {
     'items': string
   }
-  proof: {
+  'proof': {
     'scheme': string
     'proof': string
   }
