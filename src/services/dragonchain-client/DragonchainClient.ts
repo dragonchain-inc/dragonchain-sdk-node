@@ -28,9 +28,11 @@ import {
   DragonchainContractCreateResponse,
   FetchOptions,
   L1DragonchainStatusResult,
-  SmartContractType
+  SmartContractType,
+  DragonchainBlockQueryResult
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
+// import { start } from 'repl';
 
 /**
  * HTTP Client that interfaces with the dragonchain api, using credentials stored on your machine.
@@ -83,7 +85,8 @@ export class DragonchainClient {
     this.defaultFetchOptions = {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        dragonchain: this.dragonchainId
       }
     } as FetchOptions
   }
@@ -155,8 +158,9 @@ export class DragonchainClient {
    * myClient.queryTransactions('tag:(bananas OR apples)').then( ...do stuff )
    * ```
    */
-  public queryTransactions = (luceneQuery: string): Promise<L1DragonchainTransactionQueryResult> => {
-    return this.get(`/transaction?q=${luceneQuery}`)
+  public queryTransactions = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<L1DragonchainTransactionQueryResult> => {
+    const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
+    return this.get(`/transaction${queryParams}`)
   }
 
   /**
@@ -172,12 +176,58 @@ export class DragonchainClient {
   }
 
   /**
-   * Get a single smart contract by name
+   * Query blocks using ElasticSearch query-string syntax
+   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
+   * @example
+   * ```javascript
+   * myClient.queryBlocks('tag:(bananas OR apples)').then( ...do stuff )
+   * ```
    */
-  public getSmartcontract = (contractName: string): Promise<SmartContractAtRest> => {
-    return this.get(`/smartcontract/${contractName}`)
+  public queryBlocks = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<DragonchainBlockQueryResult> => {
+    const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
+    return this.get(`/block${queryParams}`)
   }
 
+  /**
+   * Get a single smart contract by name
+   */
+  public getSmartContract = (contractName: string): Promise<SmartContractAtRest> => {
+    return this.get(`/contract/${contractName}`)
+  }
+
+  /**
+   * Query smart contracts using ElasticSearch query-string syntax
+   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
+   * @example
+   * ```javascript
+   * myClient.querySmartContracts('tag:(bananas OR apples)').then( ...do stuff )
+   * ```
+   */
+  public querySmartContracts = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<SmartContractAtRest> => {
+    const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
+    return this.get(`/contract${queryParams}`)
+  }
+
+  /**
+   * Updates existing contract fields
+   */
+  public updateSmartContract = (name: string, status: string, scType: string, code: string, runtime: string, serial: boolean, envVars: {}) => {
+    const body: any = {
+      'version': '1',
+      'name': name,
+      'status': status,
+      'sc_type': scType,
+      'code': code,
+      'runtime': runtime,
+      'is_serial': serial
+    }
+    if (envVars) {
+      body['custom_environment_variables'] = envVars
+    }
+    return this.put(`/contract/${name}`, body)
+  }
   /**
    * Create a new Transaction on your Dragonchain.
    * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
@@ -196,10 +246,51 @@ export class DragonchainClient {
    * Create a new custom smart contract on your dragonchain
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
-  public createCustomContract = (input: CustomContractCreationSchema | LibraryContractCreationSchema): Promise<DragonchainContractCreateResponse> => {
-    return this.post(`/contract`, input)
+  public createContract = (body: CustomContractCreationSchema | LibraryContractCreationSchema, name: string): Promise<DragonchainContractCreateResponse> => {
+    return this.post(`/contract/${name}`, body)
   }
 
+  /**
+   * Get all the verifications for one block_id.
+   * @param {string} block_id
+   * @param {number} level
+   */
+  public getVerification = (blockId: string, level = 0) => {
+    if (level) {
+      return this.get(`/verification/${blockId}?level=${level}`)
+    }
+    return this.get(`/verification/${blockId}`)
+  }
+
+  public getSmartContractHeap = (key: string, scName: string) => {
+    return this.get(`/get/${scName}/HEAP/${key}`)
+  }
+
+  public listSmartcontractHeap = (scName: string) => {
+    return this.get(`/list/${scName}`)
+  }
+
+  getLuceneParams = (query: string, sort?: string, offset = 0, limit = 10) => {
+    const params: any = {
+      'query': query,
+      'offset': offset,
+      'limit': limit
+    }
+    if (sort) {
+      params['sort'] = sort
+    }
+
+    return this.generateQueryString(params)
+  }
+
+  generateQueryString = (queryObject: object) => {
+    let queryString = '?'
+    for (const [key, value] of Object.entries(queryObject)) {
+      queryString = `${queryString}=${key}:${value}&`
+    }
+    return queryString
+
+  }
   /**
    * @hidden
    */
@@ -217,10 +308,10 @@ export class DragonchainClient {
   }
 
   // PUT => NOT IMPLEMENTED
-  // private put (path: string, body: object) {
-  //   const options = { method: 'PUT', body: JSON.stringify(body) } as FetchOptions
-  //   return this.makeRequest(path, options)
-  // }
+  private put (path: string, body: object) {
+    const options = { method: 'PUT', body: JSON.stringify(body) } as FetchOptions
+    return this.makeRequest(path, options)
+  }
 
   // DELETE => NOT IMPLEMENTED
   // private delete (path: string) {
@@ -245,16 +336,23 @@ export class DragonchainClient {
    * @hidden
    */
   private async makeRequest (path: string, options: FetchOptions) {
-
     const fetchOptions = { ...this.defaultFetchOptions, ...options } as FetchOptions
     const dro = new DragonchainRequestObject(path, this.dragonchainId, fetchOptions)
+    this.defaultFetchOptions.headers.timestamp = dro.timestamp
     // Add authorization header
     fetchOptions.headers.Authorization = await this.credentialService.getAuthorizationHeader(dro)
     this.logger.debug(`[DragonchainClient][${dro.method}][HEADER] => ${JSON.stringify(dro.headers)}`)
     this.logger.debug(`[DragonchainClient][${dro.method}] => ${dro.url}`)
+    console.log(dro.url, dro.asFetchOptions())
     const res = await this.toggleSslCertVerification(() => this.fetch(dro.url, dro.asFetchOptions()))
     this.logger.debug(`[DragonchainClient][${dro.method}] <= ${dro.url} ${res.status} ${res.statusText}`)
-    return res.json()
+    const result = await res.json()
+    console.log('[RESULT]---->>>>>>', result)
+    if (res.status >= 200 && res.status < 300) {
+      return result
+    } else {
+      throw new Error(`Unexpected response from the dragonchain. Response: ${res.status} | Error: ${res.statusText}`)
+    }
   }
 }
 

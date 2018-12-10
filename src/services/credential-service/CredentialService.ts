@@ -95,8 +95,8 @@ export class CredentialService {
    * @description transform a DragonchainRequestObject into a compliant hmac message string
    */
   private static getHmacMessageString = (dro: DragonchainRequestObject) => {
-    const base64EncodedBody = Buffer.from(dro.body || '' as string).toString('base64')
-    const hashedBase64Content = crypto.createHash(dro.hmacAlgo).update(base64EncodedBody).digest('base64')
+    const binaryBody = Buffer.from(dro.body || '' as string, 'UTF-8')
+    const hashedBase64Content = crypto.createHash(dro.hmacAlgo).update(binaryBody).digest('base64')
     return [
       dro.method.toUpperCase(),
       dro.path,

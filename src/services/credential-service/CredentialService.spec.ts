@@ -25,11 +25,11 @@ describe('CredentialService', () => {
       const authKey = 'key'
       const authKeyId = 'id'
       stub(CredentialService, 'getDragonchainCredentials').onFirstCall().returns(Promise.resolve({ authKey, authKeyId }))
-      const dro = {
+      const dro: any = {
         method: 'GET', // get
         path: '/chain/transaction',
         dragonchainId: 'a dragonchain id',
-        timestamp: 12345,
+        timestamp: '12345',
         headers: {},
         body: '',
         contentType: '',

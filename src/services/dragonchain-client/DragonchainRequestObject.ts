@@ -19,7 +19,7 @@ import { OverriddenCredentials, FetchOptions } from 'src/interfaces/DragonchainC
 export class DragonchainRequestObject {
   method: string
   dragonchainId: string
-  timestamp: string | number
+  timestamp: string
   contentType: string
   url: string
   path: string
@@ -39,7 +39,7 @@ export class DragonchainRequestObject {
     this.dragonchainId = dragonchainId
     this.path = path
     this.url = `https://${this.dragonchainId}.api.dragonchain.com${path}`
-    this.timestamp = new Date().toISOString()
+    this.timestamp = this.getTimeStamp()
     this.hmacAlgo = fetchOptions.hmacAlgo || 'sha256' // only sha256 for now
     this.contentType = fetchOptions.contentType || 'application/json'
     this.overriddenCredentials = fetchOptions.overriddenCredentials
@@ -54,6 +54,11 @@ export class DragonchainRequestObject {
       body: this.body
     }
   }
+
+  getTimeStamp = () => {
+    return new Date().toISOString()
+  }
+
 }
 
 /**
