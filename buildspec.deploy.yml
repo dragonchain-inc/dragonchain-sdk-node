@@ -5,6 +5,8 @@ phases:
     commands:
       - npm install -g yarn
       - yarn install
+      # - apt-get update
+      - apt-get install jq
   pre_build:
     commands:
       - yarn docs
@@ -16,4 +18,7 @@ phases:
       - [ $STAGE -eq 'prod' ]; then aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/latest
       - [ $STAGE -eq 'prod' ]; then aws s3 rm --recursive s3://dragonchain-sdk-node-docs/$VERSION/*
       - [ $STAGE -eq 'prod' ]; then aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/$VERSION/
+      - [ $STAGE -eq 'prod' ]; export NPM_TOKEN=$(aws secretsmanager get-secret-value --secret-id npm/publish/token | jq -r '.SecretString' | jq -r '.NPM_TOKEN')
+      - [ $STAGE -eq 'prod' ]; npm publish --access restricted
+
 

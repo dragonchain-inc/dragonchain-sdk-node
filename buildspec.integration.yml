@@ -7,7 +7,7 @@ phases:
       - yarn install
   pre_build:
     commands:
-      - yarn test
+      - yarn integration
   build:
     commands:
       - yarn build

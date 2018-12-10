@@ -130,15 +130,26 @@ export interface SmartContractAtRest {
 export type SmartContractType = 'transaction' | 'cron'
 
 export interface CustomContractCreationSchema {
-  dcrn?: 'SmartContract::L1::Create'
-  version: '2',
-  name: string,
-  sc_type: 'cron' | 'transaction',
-  is_serial: boolean,
-  custom_environment_variables?: object,
-  runtime: ContractRuntime,
-  code: string,
-  origin: 'custom'
+  'version': '2',
+  'dcrn': 'SmartContract::L1::Create',
+  'name': string,
+  'sc_type': SmartContractType,
+  'is_serial': boolean,
+  'custom_environment_variables': {},
+  'runtime': ContractRuntime,
+  'origin': 'Custom',
+  'code': '',
+}
+export interface LibraryContractCreationSchema {
+  'version': '2',
+  'dcrn': 'SmartContract::L1::Create',
+  'name': string,
+  'sc_type': SmartContractType,
+  'is_serial': boolean,
+  'custom_environment_variables': {},
+  'runtime': ContractRuntime,
+  'origin': 'Library',
+  'libraryContractName': string,
 }
 
 export interface L1DragonchainTransactionQueryResult {
@@ -146,15 +157,13 @@ export interface L1DragonchainTransactionQueryResult {
   total: number
 }
 
-export interface LibraryContractCreationSchema {
-  dcrn?: 'SmartContract::L1::Create'
-  version: '2',
-  name: string,
-  custom_environment_variables?: object,
-  s3_bucket: string,
-  s3_path: string,
-  origin: 'library'
+export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4BlockAtRest | L5BlockAtRest
+
+export interface DragonchainBlockQueryResult {
+  results: BlockSchemaType[]
+  total: number
 }
+
 /**
  * ContractCreationSchema
  * Input verification schema
@@ -173,6 +182,8 @@ export interface FetchOptions {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   headers: {
     'Content-Type': 'application/json'
+    dragonchain: string
+    timestamp: null | string
     Authorization: string
   }
   body: string,
@@ -192,4 +203,159 @@ export interface L1DragonchainStatusResult {
   isUpdateLocked: boolean,
   cloudformationStatus: string,
   cloudformationLastUpdatedTime: string
+}
+
+export interface L1BlockAtRest {
+  'version': '2'
+  'dcrn': 'Block::L1::AtRest'
+  'header': {
+    'dc_id': string
+    'block_id': string
+    'level': 1
+    'timestamp': string
+    'prev_id': string
+    'prev_proof': string
+  }
+  'transaction': {
+    'items': string
+  }
+  'proof': {
+    'scheme': string
+    'proof': string
+  }
+}
+
+export interface L2BlockAtRest {
+  'version': '2'
+  'dcrn': 'Block::L2::AtRest'
+  'header': {
+    'dc_id': string
+    'block_id': string
+    'level': 2
+    'timestamp': string
+    'prev_id': string
+    'prev_proof': string
+  }
+  'validation': {
+    'dc_id': string
+    'block_id': string
+    'stripped_proof': string
+    'transactions': {
+    }
+  }
+  'proof': {
+    'scheme': string
+    'proof': string
+  }
+}
+
+export interface L1BlockAtRest {
+  'version': '2'
+  'dcrn': 'Block::L1::AtRest'
+  'header': {
+    'dc_id': string
+    'block_id': string
+    'level': 1
+    'timestamp': string
+    'prev_id': string
+    'prev_proof': string
+  }
+  'transaction': {
+    'items': string
+  }
+  'proof': {
+    'scheme': string
+    'proof': string
+  }
+}
+
+export interface L2BlockAtRest {
+  'version': '2'
+  'dcrn': 'Block::L2::AtRest'
+  'header': {
+    'dc_id': string
+    'block_id': string
+    'level': 2
+    'timestamp': string
+    'prev_id': string
+    'prev_proof': string
+  }
+  'validation': {
+    'dc_id': string
+    'block_id': string
+    'stripped_proof': string
+    'transactions': {
+    }
+  }
+  'proof': {
+    'scheme': string
+    'proof': string
+  }
+}
+
+export interface L3BlockAtRest {
+  'version': '2'
+  'dcrn': 'Block::L3::AtRest'
+  'header': {
+    'dc_id': string
+    'level': 3
+    'block_id': string
+    'timestamp': string
+    'prev_proof': string
+  }
+  'l2-Validations': {
+    'l1_dc_id': string
+    'l1_block_id': string
+    'l1_proof': string
+    'ddss': string
+    'count': string
+    'regions': string
+    'clouds': string
+  }
+  'proof': {
+    'scheme': string
+    'proof': string
+  }
+}
+
+export interface L4BlockAtRest {
+  'version': '2'
+  'dcrn': 'Block::L4::AtRest'
+  'header': {
+    'type': object
+    'dc_id': string
+    'level': 4
+    'block_id': string
+    'timestamp': string
+    'l1_dc_id': string
+    'l1_block_id': string
+    'l1_proof': string
+    'prev_proof': string
+  }
+  'l3-Validations': {
+  }
+  'proof': {
+    'scheme': string
+    'proof': string
+  }
+}
+
+export interface L5BlockAtRest {
+  'version': '2'
+  'dcrn': 'Block::L4::AtRest'
+  'header': {
+    'dc_id': string
+    'level': 5
+    'block_id': string
+    'timestamp': string
+    'prev_proof': string
+  }
+  'l4-blocks': {
+
+  }
+  'proof': {
+    'scheme': string
+    'proof': string
+    'nonce': number | null
+  }
 }
