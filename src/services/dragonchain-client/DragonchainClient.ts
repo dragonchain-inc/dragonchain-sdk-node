@@ -267,7 +267,7 @@ export class DragonchainClient {
   }
 
   public listSmartcontractHeap = (scName: string) => {
-    return this.get(`/list/${scName}`)
+    return this.get(`/list/${scName}/`)
   }
 
   getLuceneParams = (query: string, sort?: string, offset = 0, limit = 10) => {
