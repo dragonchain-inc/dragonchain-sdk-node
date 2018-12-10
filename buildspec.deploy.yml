@@ -6,7 +6,7 @@ phases:
       - npm install -g yarn
       - yarn install
       # - apt-get update
-      # - apt-get install jq
+      - apt-get install jq
   pre_build:
     commands:
       - yarn docs
