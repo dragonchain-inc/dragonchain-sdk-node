@@ -39,7 +39,7 @@ const searchResult = await dragonchain.queryTransactions('tag:"MyAwesomeTransact
 #### OverrideCredentials
 This is fine for quick tests. For actual production use, you should use the [credential ini file](#configuration)
 ```javascript
-dragonchain.overrideCredentials('DRAGONCHAIN_AUTH_KEY_ID','DRAGONCHAIN_AUTH_KEY')
+dragonchain.overrideCredentials('AUTH_KEY_ID','AUTH_KEY')
 dragonchain.clearOverriddenCredentials() // unset credentials
 ```
 ## Configuration
@@ -47,7 +47,7 @@ dragonchain.clearOverriddenCredentials() // unset credentials
 In order to use this SDK, you need to have an Auth Key as well as an Auth Key ID for a given dragonchain.
 This can be loaded into the sdk in various ways, and are checked in the following order of precedence:
 
-1. The environment variables `DRAGONCHAIN_AUTH_KEY` and `DRAGONCHAIN_AUTH_KEY_ID` can be set with the appropriate values
+1. The environment variables `AUTH_KEY` and `AUTH_KEY_ID` can be set with the appropriate values
 1. Write an ini-style credentials file at `~/.dragonchain/credentials` (or on Windows: `%LOCALAPPDATA%\dragonchain\credentials`) where the section name is the dragonchain id, with values for `auth_key` and `auth_key_id` like so:
 
 ```ini
