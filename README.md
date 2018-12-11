@@ -5,11 +5,23 @@ Talk to your dragonchain.
 
 # Latest Official JS Docs
 These docs are auto-generated.
-* [getBlock](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#getblock)
-* [getVerifications](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#getverifications)
-* [getTransaction](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#getTransaction)
-* [createContract](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#createContract)
-* [listContracts](https://docs.dragonchain.com/dragonchain-sdk-node/latest/classes/dragonchainclient.html#listContracts)
+
+* [constructor](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#constructor)
+* [clearOverriddenCredentials](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#clearOverriddenCredentials)
+* [createCustomContract](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#createCustomContract)
+* [createTransaction](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#createTransaction)
+* [getBlock](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#getBlock)
+* [getSmartcontract](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#getSmartcontract)
+* [getStatus](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#getStatus)
+* [getTransaction](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#getTransaction)
+* [overrideCredentials](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#overrideCredentials)
+* [queryTransactions](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#queryTransactions)
+* [setDragonchainId](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#setDragonchainId)
+* [getBlock](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#getblock)
+* [getVerifications](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#getverifications)
+* [getTransaction](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#getTransaction)
+* [createContract](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#createContract)
+* [listContracts](https://node-sdk-docs.dragonchain.com/classes/dragonchainclient.html#listContracts)
 
 ### Installation
 ```bash
@@ -55,10 +67,3 @@ This can be loaded into the sdk in various ways, and are checked in the followin
 auth_key_id = JSDMWFUJDVTC
 auth_key = n3hlldsFxFdP2De0yMu6A4MFRh1HGzFvn6rJ0ICZzkE
 ```
-
-
-## Documentation
-[link to github pages]()
-
-
-
