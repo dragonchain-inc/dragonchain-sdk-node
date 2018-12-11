@@ -200,7 +200,7 @@ export class DragonchainClient {
    * List all smart contracts for a given chain.
    */
   public listSmartContracts = (): Promise<SmartContractAtRest[]>=> {
-    return this.get('/contract');
+    return this.get('/contract')
   }
 
   /**
