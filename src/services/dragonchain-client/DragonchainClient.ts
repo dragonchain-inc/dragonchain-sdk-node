@@ -197,6 +197,13 @@ export class DragonchainClient {
   }
 
   /**
+   * List all smart contracts for a given chain.
+   */
+  public listSmartContracts = (): Promise<SmartContractAtRest[]>=> {
+    return this.get('/contract');
+  }
+
+  /**
    * Query smart contracts using ElasticSearch query-string syntax
    * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
    * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
