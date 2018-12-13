@@ -1,4 +1,4 @@
-version: 0.1
+version: 0.2
 
 phases:
   install:
@@ -7,18 +7,14 @@ phases:
       - yarn install
       - apt-get update
       - apt-get install jq
-  pre_build:
-    commands:
-      - yarn docs
   build:
     commands:
-      - yarn build
       - VERSION=$(node -e "console.log(require('./package.json').version)")
-      - aws s3 rm --recursive s3://dragonchain-sdk-node-docs/latest/*
-      - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/latest
-      - aws s3 rm --recursive s3://dragonchain-sdk-node-docs/$VERSION/*
-      - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/$VERSION/
-      - export NPM_TOKEN=$(aws secretsmanager get-secret-value --secret-id npm/publish/token | jq -r '.SecretString' | jq -r '.NPM_TOKEN')
-      - npm publish --access restricted
-
-
+      - yarn build
+      - "[ $STAGE -eq 'prod' ]; export NPM_TOKEN=$(aws secretsmanager get-secret-value --secret-id npm/publish/token | jq -r '.SecretString' | jq -r '.NPM_TOKEN')"
+      - "[ $STAGE -eq 'prod' ]; npm publish --access restricted"
+      - yarn docs
+      - "[ $STAGE -eq 'prod' ]; then aws s3 rm --recursive s3://dragonchain-sdk-node-docs/latest/*"
+      - "[ $STAGE -eq 'prod' ]; then aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/latest"
+      - "[ $STAGE -eq 'prod' ]; then aws s3 rm --recursive s3://dragonchain-sdk-node-docs/$VERSION/*"
+      - "[ $STAGE -eq 'prod' ]; then aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/$VERSION/"
