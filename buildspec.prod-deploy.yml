@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install -g yarn
+      - yarn install
+      - apt-get update
+      - apt-get install jq
+  build:
+    commands:
+      - VERSION=$(node -e "console.log(require('./package.json').version)")
+      - yarn build
+      - export NPM_TOKEN=$(aws secretsmanager get-secret-value --secret-id npm/publish/token | jq -r '.SecretString' | jq -r '.NPM_TOKEN')
+      - npm publish --access restricted
+      - yarn docs
+      - aws s3 rm --recursive s3://dragonchain-sdk-node-docs/latest/*
+      - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/latest
+      - aws s3 rm --recursive s3://dragonchain-sdk-node-docs/$VERSION/*
+      - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/$VERSION/

@@ -69,14 +69,9 @@ Resources:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_LARGE
         Image: aws/codebuild/nodejs:8.11.0
-        EnvironmentVariables:
-          - Name: STAGE
-            Type: PLAINTEXT
-            Value: stage
-        PrivilegedMode: true
       Source:
         Type: CODEPIPELINE
-        BuildSpec: buildspec.deploy.yml
+        BuildSpec: buildspec.stage-deploy.yml
       TimeoutInMinutes: 10
 
   ProdDeployCodeBuildProject:
@@ -91,14 +86,9 @@ Resources:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_LARGE
         Image: aws/codebuild/nodejs:8.11.0
-        EnvironmentVariables:
-          - Name: STAGE
-            Type: PLAINTEXT
-            Value: prod
-        PrivilegedMode: true
       Source:
         Type: CODEPIPELINE
-        BuildSpec: buildspec.deploy.yml
+        BuildSpec: buildspec.prod-deploy.yml
       TimeoutInMinutes: 10
 
   CodePipelineRole:
