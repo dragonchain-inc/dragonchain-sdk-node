@@ -14,7 +14,7 @@ Resources:
     Properties:
       Name: 'dragonchain-sdk-node-unittest-codebuild-project'
       ServiceRole:
-        Ref: CodeBuildRole
+        Ref: TestingCodebuildRole
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -36,7 +36,7 @@ Resources:
     Properties:
       Name: 'dragonchain-sdk-node-integration'
       ServiceRole:
-        Ref: CodeBuildRole
+        Ref: TestingCodebuildRole
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -57,29 +57,12 @@ Resources:
         BuildSpec: buildspec.integration.yml
       TimeoutInMinutes: 10
 
-  StageDeployCodeBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: 'dragonchain-sdk-node-codebuild-deploy-stage'
-      ServiceRole:
-        Ref: CodeBuildRole
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_LARGE
-        Image: aws/codebuild/nodejs:8.11.0
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: buildspec.stage-deploy.yml
-      TimeoutInMinutes: 10
-
   ProdDeployCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: 'dragonchain-sdk-node-deploy-prod'
       ServiceRole:
-        Ref: CodeBuildRole
+        Ref: ProdCodeBuildRole
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -88,7 +71,7 @@ Resources:
         Image: aws/codebuild/nodejs:8.11.0
       Source:
         Type: CODEPIPELINE
-        BuildSpec: buildspec.prod-deploy.yml
+        BuildSpec: buildspec.deploy.yml
       TimeoutInMinutes: 10
 
   CodePipelineRole:
@@ -109,20 +92,16 @@ Resources:
             Statement:
               - Action:
                 - 'logs:*'
-                - 'ecs:*'
-                - 'codecommit:*'
-                - 'ssm:GetParameters'
-                - 'ecr:*'
                 - 'sts:AssumeRole'
                 - 'codebuild:*'
                 - 's3:*'
                 Effect: Allow
                 Resource: '*'
 
-  CodeBuildRole:
+  ProdCodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: dragonchain-sdk-node-CodebuildRole
+      RoleName: dragonchain-sdk-node-ProdCodebuildRole
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -131,36 +110,49 @@ Resources:
             Service: [codebuild.amazonaws.com,  codepipeline.amazonaws.com]
         Version: '2012-10-17'
       Policies:
-        - PolicyName: CodeBuildAccess
+        - PolicyName: ProdNodeSdkCodeBuildPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Action:
                 - 'logs:*'
-                - 'ecs:*'
-                - 'codecommit:*'
-                - 'ssm:GetParameter'
-                - 'ecr:*'
                 - 's3:*'
-                - 'cloudformation:*'
-                - 'iam:*'
-                - 'lambda:*'
+                Effect: Allow
+                Resource: '*'
+              # NPM_PUBLISH_TOKEN PERMISSIONS
+              - Action:
+                - 'ssm:GetParameters'
+                Effect: Allow
+                Resource: arn:aws:ssm:us-west-2:381978683274:parameter/npm-publish-token
+              - Action:
+                - 'kms:Decrypt'
+                Effect: Allow
+                Resource: arn:aws:kms:us-west-2:381978683274:key/277b0ec3-8c59-4647-8909-183db0226586
+
+  TestingCodebuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: dragonchain-sdk-node-TestingCodebuildRole
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com,  codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Policies:
+        - PolicyName: TestingCodeBuildAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 'logs:*'
                 Effect: Allow
                 Resource: '*'
               - Action:
-                - route53:GetHostedZone
-                - route53:ListHostedZones
-                - route53:ChangeResourceRecordSets
-                - route53:ListResourceRecordSets
-                - acm:ListCertificates
-                - cloudfront:UpdateDistribution
-                - apigateway:DELETE
-                - apigateway:GET
-                - apigateway:POST
-                - apigateway:PUT
+                - 's3:*'
                 Effect: Allow
-                Resource: '*'
-
+                Resource: 'arn:aws:s3:::dragonchain-sdk-node-codebuild-artifacts/*'
 
   ArtifactBucket:
     Type: AWS::S3::Bucket
@@ -193,7 +185,7 @@ Resources:
       ArtifactStore:
         Location:
           Ref: ArtifactBucket
-        Type: S3  # this is literally the only possible option. https://docs.aws.amazon.com/codepipeline/latest/APIReference/API_ArtifactStore.html
+        Type: S3
       RestartExecutionOnUpdate: true
       RoleArn:
         Fn::GetAtt: CodePipelineRole.Arn
@@ -202,10 +194,10 @@ Resources:
           Actions:
             - Name: Source
               ActionTypeId:
-                Category: Source # ...guess
+                Category: Source
                 Owner: ThirdParty
                 Provider: GitHub
-                Version: 1 # No idea!?
+                Version: 1
               Configuration:
                 Owner: dragonchain-inc
                 Repo: dragonchain-sdk-node
@@ -219,10 +211,10 @@ Resources:
           Actions:
             - Name: Unit
               ActionTypeId:
-                Category: Test # ...guess
+                Category: Test
                 Owner: AWS
                 Provider: CodeBuild
-                Version: 1 # No idea!?
+                Version: 1
               Configuration:
                 ProjectName:
                   Ref: UnittestCodeBuildProject
@@ -235,10 +227,10 @@ Resources:
               RunOrder: 2
             - Name: Integration
               ActionTypeId:
-                Category: Build # ...guess
+                Category: Build
                 Owner: AWS
                 Provider: CodeBuild
-                Version: 1 # No idea!?
+                Version: 1
               Configuration:
                 ProjectName:
                   Ref: IntegrationCodeBuildProject
@@ -249,35 +241,6 @@ Resources:
               RoleArn:
                 Fn::GetAtt: CodePipelineRole.Arn
               RunOrder: 2
-        - Name: DeployDev
-          Actions:
-          - Name: Deploy
-            ActionTypeId:
-              Category: Build
-              Owner: AWS
-              Provider: CodeBuild
-              Version: 1
-            Configuration:
-              ProjectName:
-                Ref: StageDeployCodeBuildProject
-            InputArtifacts:
-              - Name: DragonchainSdkNode
-            OutputArtifacts:
-              - Name: DevDeploy
-            RoleArn:
-              Fn::GetAtt: CodePipelineRole.Arn
-            RunOrder: 3
-        - Name: ManualGate
-          Actions:
-          - Name: PromoteToProd
-            ActionTypeId:
-              Category: Approval
-              Owner: AWS
-              Provider: Manual
-              Version: 1
-            RoleArn:
-              Fn::GetAtt: CodePipelineRole.Arn
-            RunOrder: 4
         - Name: Prod
           Actions:
           - Name: Test-Build-Deploy
