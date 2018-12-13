@@ -8,8 +8,4 @@ phases:
   pre_build:
     commands:
       - yarn test
-  # build:
-  #   commands:
-  #     - yarn build
-      # - publish to NPM
 
