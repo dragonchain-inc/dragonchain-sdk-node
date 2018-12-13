@@ -43,7 +43,7 @@
     "docs": "typedoc ./src --mode modules --target es6 --mode file --theme default --out docs --ignoreCompilerErrors --excludeExternals --gaSite 'dragonchain-sdk-node' --hideGenerator",
     "docs:preview": "yarn docs && opn docs/index.html",
     "docs:publish": "ts-node build/tools/gh-pages-publish.ts",
-    "prepublishOnly": "yarn lint && yarn test && yarn build",
+    "prepublishOnly": "yarn test && yarn build",
     "commit": "git-cz",
     "cicd:update": "aws cloudformation update-stack --stack-name DragonchainSdkNode-CICD --template-body file://./CICD.cft.yml --region us-west-2 --profile default --capabilities CAPABILITY_NAMED_IAM"
   },
