@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install -g yarn
+      - yarn install
+      - apt-get update
+      - apt-get install jq
+  build:
+    commands:
+      - yarn build
