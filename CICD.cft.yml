@@ -121,7 +121,7 @@ Resources:
                 Resource: '*'
               # NPM_PUBLISH_TOKEN PERMISSIONS
               - Action:
-                - 'ssm:GetParameters'
+                - 'ssm:GetParameter'
                 Effect: Allow
                 Resource: arn:aws:ssm:us-west-2:381978683274:parameter/npm-publish-token
               - Action:
