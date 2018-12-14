@@ -17,8 +17,7 @@
 import { expect } from 'chai'
 import { CredentialService } from './CredentialService'
 import { DragonchainRequestObject } from '../dragonchain-client/DragonchainRequestObject'
-import { stub, sandbox } from 'sinon'
-import { OverriddenCredentials } from 'src/interfaces/DragonchainClientInterfaces';
+import { sandbox } from 'sinon'
 
 describe('CredentialService', () => {
   let dro: any;
