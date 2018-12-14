@@ -1,6 +1,6 @@
 {
   "name": "@dragonchain-dev/dragonchain-sdk",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Dragonchain SDK for Node",
   "license": "Apache-2.0",
   "homepage": "https://github.com/dragonchain-inc/dragonchain-sdk-node#readme",
@@ -32,7 +32,7 @@
     "build:node:esnext": "tsc --project build/tsconfig.esnext.json",
     "lint": "tslint -p tsconfig.json --format codeFrame",
     "fix": "tslint -p tsconfig.json --fix",
-    "test": "NODE_ENV=test nyc -x **/*spec.ts --reporter=html --reporter=text mocha --opts ./spec/mocha-unit.opts",
+    "test": "yarn lint && NODE_ENV=test nyc -x **/*spec.ts --reporter=html --reporter=text mocha --opts ./spec/mocha-unit.opts",
     "integration": "NODE_ENV=test nyc -x ./spec/integration.ts --reporter=html --reporter=text mocha --opts ./spec/mocha-integration.opts",
     "test:watch": "NODE_ENV=test mocha --require ts-node/register ./src/**/*.spec.ts --watch --watch-dirs ./src/ --watch-extensions ts",
     "coverage": "yarn test && yarn coverage:show",

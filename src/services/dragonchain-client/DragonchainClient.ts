@@ -23,16 +23,34 @@ import {
   SmartContractAtRest,
   ContractRuntime,
   CustomContractCreationSchema,
-  LibraryContractCreationSchema,
   L1DragonchainTransactionQueryResult,
   DragonchainContractCreateResponse,
   FetchOptions,
   L1DragonchainStatusResult,
   SmartContractType,
-  DragonchainBlockQueryResult
+  DragonchainBlockQueryResult,
+  validContractLibraries,
+  DragonchainBulkTransactions
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 // import { start } from 'repl';
+
+const validRuntimes = [
+  'nodejs6.10',
+  'nodejs8.10',
+  'java8',
+  'python2.7',
+  'python3.6',
+  'dotnetcore1.0',
+  'dotnetcore2.0',
+  'dotnetcore2.1',
+  'go1.x'
+]
+
+const validSmartContractTypes = [
+  'transaction',
+  'cron'
+]
 
 /**
  * HTTP Client that interfaces with the dragonchain api, using credentials stored on your machine.
@@ -158,7 +176,7 @@ export class DragonchainClient {
    * myClient.queryTransactions('tag:(bananas OR apples)').then( ...do stuff )
    * ```
    */
-  public queryTransactions = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<L1DragonchainTransactionQueryResult> => {
+  public queryTransactions = (luceneQuery?: string, sort?: string, offset = 0, limit = 10): Promise<L1DragonchainTransactionQueryResult> => {
     const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
     return this.get(`/transaction${queryParams}`)
   }
@@ -184,7 +202,7 @@ export class DragonchainClient {
    * myClient.queryBlocks('tag:(bananas OR apples)').then( ...do stuff )
    * ```
    */
-  public queryBlocks = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<DragonchainBlockQueryResult> => {
+  public queryBlocks = (luceneQuery?: string, sort?: string, offset = 0, limit = 10): Promise<DragonchainBlockQueryResult> => {
     const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
     return this.get(`/block${queryParams}`)
   }
@@ -205,7 +223,7 @@ export class DragonchainClient {
    * myClient.querySmartContracts('tag:(bananas OR apples)').then( ...do stuff )
    * ```
    */
-  public querySmartContracts = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<SmartContractAtRest> => {
+  public querySmartContracts = (luceneQuery?: string, sort?: string, offset = 0, limit = 10): Promise<SmartContractAtRest> => {
     const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
     return this.get(`/contract${queryParams}`)
   }
@@ -213,7 +231,7 @@ export class DragonchainClient {
   /**
    * Updates existing contract fields
    */
-  public updateSmartContract = (name: string, status: string, scType: string, code: string, runtime: string, serial: boolean, envVars: {}) => {
+  public updateSmartContract = (name: string, status?: string, scType?: string, code?: string, runtime?: string, serial?: boolean, envVars?: {}) => {
     const body: any = {
       'version': '1',
       'name': name,
@@ -226,7 +244,28 @@ export class DragonchainClient {
     if (envVars) {
       body['custom_environment_variables'] = envVars
     }
-    return this.put(`/contract/${name}`, body)
+    return this.put(`/contract/${body.name}`, body)
+  }
+  /**
+   *  Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
+   *  If you are a level 5 you're required to update your asking price and broadcast interval
+   */
+
+  public updateMatchmakingData = (askingPrice?: number, broadcastInterval?: number) => {
+    const updateMatchmakingData: any = {
+      'properties': {
+        'askingPrice': askingPrice,
+        'broadcastInterval': broadcastInterval
+      }
+    }
+    return this.put(`/update-matchmaking-data`, updateMatchmakingData)
+  }
+
+  public updateDragonnetData = (maximumPrice: number) => {
+    const updateDragonnetData: any = {
+      'maximumPrice': maximumPrice
+    }
+    return this.put(`/update-matchmaking-data`, updateDragonnetData)
   }
   /**
    * Create a new Transaction on your Dragonchain.
@@ -241,13 +280,21 @@ export class DragonchainClient {
     return this.post(`/transaction`, transactionObject)
   }
 
+  public createBulkTransaction = (transactionBulkObject: DragonchainBulkTransactions): Promise<DragonchainTransactionCreateResponse> => {
+    return this.post(`/transaction_bulk`, transactionBulkObject)
+  }
+
   /**
    * Create a new Smart Contract on your Dragonchain.
    * Create a new custom smart contract on your dragonchain
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
-  public createContract = (body: CustomContractCreationSchema | LibraryContractCreationSchema, name: string): Promise<DragonchainContractCreateResponse> => {
-    return this.post(`/contract/${name}`, body)
+  public createCustomContract = (body: CustomContractCreationSchema): Promise<DragonchainContractCreateResponse> => {
+    return this.post(`/contract/${body.name}`, body)
+  }
+
+  public createLibraryContract = (body: validContractLibraries): Promise<DragonchainContractCreateResponse> => {
+    return this.post(`/contract/${body.name}`, body)
   }
 
   /**
@@ -270,23 +317,24 @@ export class DragonchainClient {
     return this.get(`/list/${scName}/`)
   }
 
-  getLuceneParams = (query: string, sort?: string, offset = 0, limit = 10) => {
-    const params: any = {
-      'query': query,
-      'offset': offset,
-      'limit': limit
+  getLuceneParams = (query?: string, sort?: string, offset = 0, limit = 10) => {
+    const params = new Map()
+    if (query) {
+      params.set('q', query)
     }
     if (sort) {
-      params['sort'] = sort
+      params.set('sort', sort)
     }
+    params.set('offset', offset)
+    params.set('limit', limit)
 
     return this.generateQueryString(params)
   }
 
-  generateQueryString = (queryObject: object) => {
+  generateQueryString = (queryObject: Map<any,any>) => {
     let queryString = '?'
-    for (const [key, value] of Object.entries(queryObject)) {
-      queryString = `${queryString}=${key}:${value}&`
+    for (const [key, value] of queryObject.entries()) {
+      queryString = `${queryString}${key}=${value}&`
     }
     return queryString
 
@@ -355,23 +403,6 @@ export class DragonchainClient {
     }
   }
 }
-
-const validRuntimes = [
-  'nodejs6.10',
-  'nodejs8.10',
-  'java8',
-  'python2.7',
-  'python3.6',
-  'dotnetcore1.0',
-  'dotnetcore2.0',
-  'dotnetcore2.1',
-  'go1.x'
-]
-
-const validSmartContractTypes = [
-  'transaction',
-  'cron'
-]
 
 /**
  * All Humans are welcome.
