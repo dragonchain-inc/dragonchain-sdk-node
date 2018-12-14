@@ -44,8 +44,8 @@ export class CredentialService {
    * @public
    */
   public static getAuthorizationHeader = async (dro: DragonchainRequestObject) => {
-    const { version, hmacAlgo, dragonchainId } = dro
-    const dcCreds = await CredentialService.getDragonchainCredentials(dragonchainId)
+    const { version, hmacAlgo, dragonchainId, overriddenCredentials } = dro
+    const dcCreds = overriddenCredentials || await CredentialService.getDragonchainCredentials(dragonchainId)
     const { authKey, authKeyId } = dcCreds
     const message = CredentialService.getHmacMessageString(dro)
     const hmac = crypto.createHmac(hmacAlgo, authKey)

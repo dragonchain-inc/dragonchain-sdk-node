@@ -119,7 +119,7 @@ export class DragonchainClient {
    * @param {string} authKeyId Auth Key ID used in HMAC
    * @param {string} authKey Auth Key used in HMAC
    */
-  public overrideCredentials = (authKey: string, authKeyId: string) => {
+  public overrideCredentials = (authKeyId: string, authKey: string) => {
     this.defaultFetchOptions.overriddenCredentials = { authKey, authKeyId }
   }
 
