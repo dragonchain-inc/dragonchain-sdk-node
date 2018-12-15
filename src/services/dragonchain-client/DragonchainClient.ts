@@ -331,7 +331,7 @@ export class DragonchainClient {
     return this.generateQueryString(params)
   }
 
-  generateQueryString = (queryObject: Map<any,any>) => {
+  generateQueryString = (queryObject: Map<string, string|number>) => {
     let queryString = '?'
     for (const [key, value] of queryObject.entries()) {
       queryString = `${queryString}${key}=${value}&`
