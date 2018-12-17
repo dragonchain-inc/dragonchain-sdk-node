@@ -17,11 +17,11 @@
 import { expect } from 'chai'
 import { CredentialService } from './CredentialService'
 import { DragonchainRequestObject } from '../dragonchain-client/DragonchainRequestObject'
-import { sandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 describe('CredentialService', () => {
   let dro: any
-  const testBed = sandbox.create()
+  const testBed = createSandbox()
 
   afterEach(() => {
     testBed.restore()
