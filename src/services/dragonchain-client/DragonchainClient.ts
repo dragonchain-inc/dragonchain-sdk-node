@@ -23,35 +23,16 @@ import {
   SmartContractAtRest,
   ContractRuntime,
   CustomContractCreationSchema,
+  LibraryContractCreationSchema,
   L1DragonchainTransactionQueryResult,
   DragonchainContractCreateResponse,
   FetchOptions,
   L1DragonchainStatusResult,
   SmartContractType,
-  DragonchainBlockQueryResult,
-  validContractLibraries,
-  DragonchainBulkTransactions
+  DragonchainBlockQueryResult
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
-import { URLSearchParams } from 'url'
 // import { start } from 'repl';
-
-const validRuntimes = [
-  'nodejs6.10',
-  'nodejs8.10',
-  'java8',
-  'python2.7',
-  'python3.6',
-  'dotnetcore1.0',
-  'dotnetcore2.0',
-  'dotnetcore2.1',
-  'go1.x'
-]
-
-const validSmartContractTypes = [
-  'transaction',
-  'cron'
-]
 
 /**
  * HTTP Client that interfaces with the dragonchain api, using credentials stored on your machine.
@@ -177,7 +158,7 @@ export class DragonchainClient {
    * myClient.queryTransactions('tag:(bananas OR apples)').then( ...do stuff )
    * ```
    */
-  public queryTransactions = (luceneQuery?: string, sort?: string, offset = 0, limit = 10): Promise<L1DragonchainTransactionQueryResult> => {
+  public queryTransactions = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<L1DragonchainTransactionQueryResult> => {
     const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
     return this.get(`/transaction${queryParams}`)
   }
@@ -203,7 +184,7 @@ export class DragonchainClient {
    * myClient.queryBlocks('tag:(bananas OR apples)').then( ...do stuff )
    * ```
    */
-  public queryBlocks = (luceneQuery?: string, sort?: string, offset = 0, limit = 10): Promise<DragonchainBlockQueryResult> => {
+  public queryBlocks = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<DragonchainBlockQueryResult> => {
     const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
     return this.get(`/block${queryParams}`)
   }
@@ -224,22 +205,15 @@ export class DragonchainClient {
    * myClient.querySmartContracts('tag:(bananas OR apples)').then( ...do stuff )
    * ```
    */
-  public querySmartContracts = (luceneQuery?: string, sort?: string, offset = 0, limit = 10): Promise<SmartContractAtRest> => {
+  public querySmartContracts = (luceneQuery: string, sort?: string, offset = 0, limit = 10): Promise<SmartContractAtRest> => {
     const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
     return this.get(`/contract${queryParams}`)
   }
 
   /**
-   * Updates existing contract fields in a custom contract
-   * @param {string} name The name of the existing contract you want to update
-   * @param {string} status update the status of the contract
-   * @param {string} scType update the smart contract type
-   * @param {string} code update the code on the contract
-   * @param {string} runtime update the runtime of the contract
-   * @param {boolean} serial update whether or not the contract runs serial
-   * @param {object} envVars update the envrionment variables on a contract
+   * Updates existing contract fields
    */
-  public updateCustomSmartContract = (name: string, status?: string, scType?: string, code?: string, runtime?: string, serial?: boolean, envVars?: {}) => {
+  public updateSmartContract = (name: string, status: string, scType: string, code: string, runtime: string, serial: boolean, envVars: {}) => {
     const body: any = {
       'version': '1',
       'name': name,
@@ -252,102 +226,8 @@ export class DragonchainClient {
     if (envVars) {
       body['custom_environment_variables'] = envVars
     }
-    return this.put(`/contract/${body.name}`, body)
+    return this.put(`/contract/${name}`, body)
   }
-  /**
-   * Update the status of a library contract
-   * @param {string} name the name of the existing library contract that you want to update
-   * @param {string} status update the status
-   */
-  public updateLibrarySmartContract = (name: string, status?: string) => {
-    const body: any = {
-      'version': '1',
-      'name': name,
-      'status': status
-    }
-    return this.put(`/contract/${body.name}`, body)
-  }
-  /**
-   *  Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
-   *  If you are a level 5 you're required to update your asking price and broadcast interval
-   * @param {number} askingPrice update the asking price for your node as a level 2-5
-   * @param {number} broadcastInterval update the broadcastInterval as a level 5
-   */
-  public updateMatchmakingData = (askingPrice?: number, broadcastInterval?: number) => {
-    const matchmaking: any = {
-
-    }
-    return this.put(`/update-matchmaking-data`, matchmaking)
-  }
-  /**
-   * Update your maximum price for each level of verification as a level 1
-   * @param {number} maximumPrice maximum price for each level of verification
-   */
-  // public updateDragonnetData = (maximumPrice: number, level: number = 0) => {
-  //   if (level === 0) {
-  //     const updateDragonnet: any {
-  //       'dragonnet': {
-  //         'l2': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //         'l3': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //         'l4': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //         'l5': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //       }
-
-  //     }
-  //     return this.put(`/update-matchmaking-data`, updateDragonnet)
-
-  //   }
-  //   switch (level) {
-  //     case 2: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l2': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //     case 3: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l3': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //     case 4: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l4': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //     case 5: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l5': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //   }
-  // }
   /**
    * Create a new Transaction on your Dragonchain.
    * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
@@ -360,29 +240,14 @@ export class DragonchainClient {
   public createTransaction = (transactionObject: DragonchainTransactionCreatePayload): Promise<DragonchainTransactionCreateResponse> => {
     return this.post(`/transaction`, transactionObject)
   }
-  /**
-   * Create a bulk transaction by string together a bunch of transactions as JSON objects into an array
-   * @param {DragonchainBulkTransactions} transactionBulkObject array of transactions
-   * @return {Promise<DragonchainTransactionCreateResponse>}
-   */
-  public createBulkTransaction = (transactionBulkObject: DragonchainBulkTransactions): Promise<DragonchainTransactionCreateResponse> => {
-    return this.post(`/transaction_bulk`, transactionBulkObject)
-  }
 
   /**
    * Create a new Smart Contract on your Dragonchain.
    * Create a new custom smart contract on your dragonchain
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
-  public createCustomContract = (body: CustomContractCreationSchema): Promise<DragonchainContractCreateResponse> => {
-    return this.post(`/contract/${body.name}`, body)
-  }
-  /**
-   * Create a preconfigure contract from our library, using the provided interfaces
-   * @param {validContractLibraries} body the preconfigured interfaces for smart contract libraries
-   */
-  public createLibraryContract = (body: validContractLibraries): Promise<DragonchainContractCreateResponse> => {
-    return this.post(`/contract/${body.name}`, body)
+  public createContract = (body: CustomContractCreationSchema | LibraryContractCreationSchema, name: string): Promise<DragonchainContractCreateResponse> => {
+    return this.post(`/contract/${name}`, body)
   }
 
   /**
@@ -405,25 +270,24 @@ export class DragonchainClient {
     return this.get(`/list/${scName}/`)
   }
 
-  getLuceneParams = (query?: string, sort?: string, offset = 0, limit = 10) => {
-    const params = new Map()
-    if (query) {
-      params.set('q', query)
+  getLuceneParams = (query: string, sort?: string, offset = 0, limit = 10) => {
+    const params: any = {
+      'query': query,
+      'offset': offset,
+      'limit': limit
     }
     if (sort) {
-      params.set('sort', sort)
+      params['sort'] = sort
     }
-    params.set('offset', String(offset))
-    params.set('limit', String(limit))
 
     return this.generateQueryString(params)
   }
 
-  generateQueryString = (queryObject: Map<string, string>) => {
-    const query = '?'
-    const params = new URLSearchParams(queryObject)
-    const queryString = `${query}${params}`
-
+  generateQueryString = (queryObject: object) => {
+    let queryString = '?'
+    for (const [key, value] of Object.entries(queryObject)) {
+      queryString = `${queryString}=${key}:${value}&`
+    }
     return queryString
 
   }
@@ -491,6 +355,23 @@ export class DragonchainClient {
     }
   }
 }
+
+const validRuntimes = [
+  'nodejs6.10',
+  'nodejs8.10',
+  'java8',
+  'python2.7',
+  'python3.6',
+  'dotnetcore1.0',
+  'dotnetcore2.0',
+  'dotnetcore2.1',
+  'go1.x'
+]
+
+const validSmartContractTypes = [
+  'transaction',
+  'cron'
+]
 
 /**
  * All Humans are welcome.

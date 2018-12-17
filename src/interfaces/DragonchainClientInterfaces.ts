@@ -107,10 +107,6 @@ export interface DragonchainTransactionCreatePayload {
   tag: string
 }
 
-export interface DragonchainBulkTransactions {
-  payload: DragonchainTransactionCreatePayload[]
-}
-
 export interface DragonchainTransactionCreateResponse {
   transaction_id: string
 }
@@ -142,7 +138,18 @@ export interface CustomContractCreationSchema {
   'custom_environment_variables': {},
   'runtime': ContractRuntime,
   'origin': 'Custom',
-  'code': string,
+  'code': '',
+}
+export interface LibraryContractCreationSchema {
+  'version': '2',
+  'dcrn': 'SmartContract::L1::Create',
+  'name': string,
+  'sc_type': SmartContractType,
+  'is_serial': boolean,
+  'custom_environment_variables': {},
+  'runtime': ContractRuntime,
+  'origin': 'Library',
+  'libraryContractName': string,
 }
 
 export interface L1DragonchainTransactionQueryResult {
@@ -168,7 +175,7 @@ export interface ContractCreationSchema {
 }
 
 export interface DragonchainContractCreateResponse {
-  success: 'Contract creation in progress.',
+  body: string,
 }
 
 export interface FetchOptions {
@@ -351,115 +358,4 @@ export interface L5BlockAtRest {
     'proof': string
     'nonce': number | null
   }
-}
-
-export type precisionRange = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18
-export type validContractLibraries = ContractCreateCurrencyContract | ContractCreateEthereumInterchainWatcher | ContractCreateNeoInterchainWatcher | ContractCreateBtcInterchainWatcher | ContractCreateEthereumPublisher | ContractCreateNeoPublisher | ContractCreateBtcPublisher
-export interface ContractCreateCurrencyContract {
-  'custom_environment_variables': {
-    'addressScheme'?: 'ethereum' | 'bitcoin' | 'dragon' | 'custom',
-    'governance'?: 'ethereum' | 'bitcoin' | 'dragon' | 'custom',
-    'originWalletAddress': string,
-    'precision'?: precisionRange,
-    'totalAmount': number
-  }
-  'dcrn': 'SmartContract::L1::Create',
-  'is_serial': true,
-  'libraryContractName': 'currency',
-  'name': string,
-  'origin': 'library',
-  'runtime': 'nodejs8.10',
-  'sc_type': 'transaction',
-  'version': '2'
-}
-
-export interface ContractCreateEthereumInterchainWatcher {
-  'custom_environment_variables': {
-    'address': string,
-    'url': string,
-    'contract'?: string,
-    'tokenContractAddress'?: string,
-    'apiKey'?: string,
-    'ethereumNetwork': 'classic' | 'ropsten' | 'mainnet' | 'ropsten-infura'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'interchainWatcher',
-  'name':	string,
-  'origin': 'library',
-  'runtime': 'nodejs8.10',
-  'sc_type': 'cron',
-  'version':	'2'
-}
-
-export interface ContractCreateNeoInterchainWatcher {
-  'custom_environment_variables': {
-    'address': string,
-    'apiKey'?: string,
-    'network': 'neo' | 'testnet'
-  }
-  'dcrn':	'SmartContract::L1::Create'
-  'libraryContractName': 'neoWatcher'
-  'name':	string
-  'origin':	'library'
-  'runtime': 'nodejs8.10'
-  'sc_type': 'cron'
-  'version': '2'
-}
-
-export interface ContractCreateBtcInterchainWatcher {
-  'custom_environment_variables': {
-    'address': string,
-    'apiKey'?: string,
-    'network': 'BTC' | 'testnet3'
-    'url': string
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName': 'btcWatcher',
-  'name':	string,
-  'origin':	'library',
-  'runtime': 'nodejs8.10',
-  'sc_type': 'cron',
-  'version': '2'
-}
-
-export interface ContractCreateEthereumPublisher {
-  'custom_environment_variables': {
-    'authorizationHeader'?: string,
-    'network': 'ETH' | 'Ropsten' | 'ETC' | 'Morden' | 'ropsten-infura'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'ethereumPublisher',
-  'name':	string,
-  'origin':	'library',
-  'runtime':	'nodejs8.10',
-  'sc_type':	'transaction',
-  'version':	'2'
-}
-
-export interface ContractCreateNeoPublisher {
-  'custom_environment_variables': {
-    'authorizationHeader'?: string,
-    'network': 'NEO' | 'NEOtestnet'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'neoPublisher',
-  'name':	string,
-  'origin':	'library',
-  'runtime':	'nodejs8.10',
-  'sc_type':	'transaction',
-  'version':	'2'
-}
-
-export interface ContractCreateBtcPublisher {
-  'custom_environment_variables': {
-    'authorizationHeader'?: string,
-    'network': 'BTC' | 'testnet3'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'btcPublisher',
-  'name':	string,
-  'origin':	'library',
-  'runtime':	'nodejs8.10',
-  'sc_type':	'transaction',
-  'version':	'2'
 }

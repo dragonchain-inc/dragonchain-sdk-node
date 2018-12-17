@@ -68,7 +68,7 @@ export class CredentialService {
     if (creds) return creds
 
     // make sure dragonchainId is passed so we can look on disk
-    if (dragonchainId === '') { throw new FailureByDesign('VALIDATION_ERROR', '"dragonchainId" can not be undefined when checking Dragonchain credential file.') }
+    if (dragonchainId === undefined) { throw new FailureByDesign('VALIDATION_ERROR', '"dragonchainId" can not be undefined when checking Dragonchain credential file.') }
 
     // check credential file on disk.
     const credentialFilePath = CredentialService.getCredentialFilePath()
