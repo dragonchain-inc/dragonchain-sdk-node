@@ -17,15 +17,15 @@
 import { expect } from 'chai'
 import { CredentialService } from './CredentialService'
 import { DragonchainRequestObject } from '../dragonchain-client/DragonchainRequestObject'
-import { sandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 describe('CredentialService', () => {
-  let dro: any;
-  const testBed = sandbox.create();
+  let dro: any
+  const testBed = createSandbox()
 
   afterEach(() => {
     testBed.restore()
-  });
+  })
 
   before(() => {
     dro = {
@@ -45,17 +45,17 @@ describe('CredentialService', () => {
   describe('.getAuthorizationHeader', () => {
 
     it('should use overridden creds', async () => {
-      dro.overriddenCredentials = { authKey: 'banana1', authKeyId: 'banana2' };
+      dro.overriddenCredentials = { authKey: 'banana1', authKeyId: 'banana2' }
       const spy = testBed.stub(CredentialService, 'getDragonchainCredentials')
       await CredentialService.getAuthorizationHeader(dro)
       spy.neverCalledWith(dro.dragonchainId)
-      dro.overriddenCredentials = undefined;
+      dro.overriddenCredentials = undefined
     })
     it('returns expected hmac', async () => {
       const authKey = 'key'
       const authKeyId = 'id'
       testBed.stub(CredentialService, 'getDragonchainCredentials').onFirstCall().returns(Promise.resolve({ authKey, authKeyId }))
-      
+
       const result = await CredentialService.getAuthorizationHeader(dro)
       expect(result).to.equal('DC1-HMAC-SHA256 id:XBzopP+FZkSKZezdNzF0WW1I8E98Fp+q/8AicSk9FqY=')
     })
