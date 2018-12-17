@@ -423,9 +423,7 @@ export class DragonchainClient {
     const query = '?'
     const params = new URLSearchParams(queryObject)
     const queryString = `${query}${params}`
-    // for (const [key, value] of queryObject.entries()) {
-    //   queryString = `${queryString}${key}=${value}&`
-    // }
+
     return queryString
 
   }
