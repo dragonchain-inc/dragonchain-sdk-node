@@ -106,7 +106,7 @@ describe('DragonchainClient', () => {
         expect(result.success).to.equal('Contract creation in progress.')
       }).timeout(10000)
 
-      it.only('POST Currency contract successfully', async () => {
+      it('POST Currency contract successfully', async () => {
         let contractNameValue = Math.floor((Math.random() * 10000) + 1)
         let contractName = `baconPoolParty${contractNameValue}`
         const currencyContractPayload: validContractLibraries = {

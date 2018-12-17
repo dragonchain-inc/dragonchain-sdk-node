@@ -283,42 +283,71 @@ export class DragonchainClient {
    * Update your maximum price for each level of verification as a level 1
    * @param {number} maximumPrice maximum price for each level of verification
    */
-  public updateDragonnetData = (maximumPrice: number) => {
-    const updateDragonnet: any = {
-      'l2': {
-        'maximumPrice': maximumPrice,
-        'nodesRequired': 3,
-        'minimumIdentity': '',
-        'ddssRequired': 0,
-        'preferredCloud': 'AWS',
-        'preferredRegion': 'us-west-2'
-      }, 'l3': {
-        'maximumPrice': maximumPrice,
-        'nodesRequired': 3,
-        'minimumIdentity': '',
-        'ddssRequired': 0,
-        'preferredCloud': 'AWS',
-        'preferredRegion': 'us-west-2'
-      }, 'l4': {
-        'maximumPrice': maximumPrice,
-        'nodesRequired': 3,
-        'minimumIdentity': '',
-        'ddssRequired': 0,
-        'preferredCloud': 'AWS',
-        'preferredRegion': 'us-west-2'
-      }, 'l5': {
-        'maximumPrice': maximumPrice,
-        'nodesRequired': 3,
-        'minimumIdentity': '',
-        'ddssRequired': 0,
-        'preferredCloud': 'AWS',
-        'preferredRegion': 'us-west-2',
-        'maxBroadcastInterval': 12
-      }, 'dcrn': 'L1::DragonNetConfiguration',
-      'version': '1'
-    }
-    return this.put(`/update-matchmaking-data`, updateDragonnet)
-  }
+  // public updateDragonnetData = (maximumPrice: number, level: number = 0) => {
+  //   if (level === 0) {
+  //     const updateDragonnet: any {
+  //       'dragonnet': {
+  //         'l2': {
+  //           'maximumPrice': maximumPrice
+  //         }
+  //         'l3': {
+  //           'maximumPrice': maximumPrice
+  //         }
+  //         'l4': {
+  //           'maximumPrice': maximumPrice
+  //         }
+  //         'l5': {
+  //           'maximumPrice': maximumPrice
+  //         }
+  //       }
+
+  //     }
+  //     return this.put(`/update-matchmaking-data`, updateDragonnet)
+
+  //   }
+  //   switch (level) {
+  //     case 2: {
+  //       const updateDragonnet: any = {
+  //         'dragonnet': {
+  //           'l2': {
+  //             'maximumPrice': maximumPrice
+  //           }
+  //         }
+  //       }
+  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
+  //     }
+  //     case 3: {
+  //       const updateDragonnet: any = {
+  //         'dragonnet': {
+  //           'l3': {
+  //             'maximumPrice': maximumPrice
+  //           }
+  //         }
+  //       }
+  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
+  //     }
+  //     case 4: {
+  //       const updateDragonnet: any = {
+  //         'dragonnet': {
+  //           'l4': {
+  //             'maximumPrice': maximumPrice
+  //           }
+  //         }
+  //       }
+  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
+  //     }
+  //     case 5: {
+  //       const updateDragonnet: any = {
+  //         'dragonnet': {
+  //           'l5': {
+  //             'maximumPrice': maximumPrice
+  //           }
+  //         }
+  //       }
+  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
+  //     }
+  //   }
+  // }
   /**
    * Create a new Transaction on your Dragonchain.
    * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
