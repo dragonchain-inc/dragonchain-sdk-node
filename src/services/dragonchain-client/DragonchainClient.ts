@@ -33,6 +33,7 @@ import {
   DragonchainBulkTransactions
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
+import { URLSearchParams } from 'url'
 // import { start } from 'repl';
 
 const validRuntimes = [
@@ -229,9 +230,16 @@ export class DragonchainClient {
   }
 
   /**
-   * Updates existing contract fields
+   * Updates existing contract fields in a custom contract
+   * @param {string} name The name of the existing contract you want to update
+   * @param {string} status update the status of the contract
+   * @param {string} scType update the smart contract type
+   * @param {string} code update the code on the contract
+   * @param {string} runtime update the runtime of the contract
+   * @param {boolean} serial update whether or not the contract runs serial
+   * @param {object} envVars update the envrionment variables on a contract
    */
-  public updateSmartContract = (name: string, status?: string, scType?: string, code?: string, runtime?: string, serial?: boolean, envVars?: {}) => {
+  public updateCustomSmartContract = (name: string, status?: string, scType?: string, code?: string, runtime?: string, serial?: boolean, envVars?: {}) => {
     const body: any = {
       'version': '1',
       'name': name,
@@ -247,25 +255,69 @@ export class DragonchainClient {
     return this.put(`/contract/${body.name}`, body)
   }
   /**
+   * Update the status of a library contract
+   * @param {string} name the name of the existing library contract that you want to update
+   * @param {string} status update the status
+   */
+  public updateLibrarySmartContract = (name: string, status?: string) => {
+    const body: any = {
+      'version': '1',
+      'name': name,
+      'status': status
+    }
+    return this.put(`/contract/${body.name}`, body)
+  }
+  /**
    *  Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
    *  If you are a level 5 you're required to update your asking price and broadcast interval
+   * @param {number} askingPrice update the asking price for your node as a level 2-5
+   * @param {number} broadcastInterval update the broadcastInterval as a level 5
    */
-
   public updateMatchmakingData = (askingPrice?: number, broadcastInterval?: number) => {
-    const updateMatchmakingData: any = {
-      'properties': {
-        'askingPrice': askingPrice,
-        'broadcastInterval': broadcastInterval
-      }
-    }
-    return this.put(`/update-matchmaking-data`, updateMatchmakingData)
-  }
+    const matchmaking: any = {
 
-  public updateDragonnetData = (maximumPrice: number) => {
-    const updateDragonnetData: any = {
-      'maximumPrice': maximumPrice
     }
-    return this.put(`/update-matchmaking-data`, updateDragonnetData)
+    return this.put(`/update-matchmaking-data`, matchmaking)
+  }
+  /**
+   * Update your maximum price for each level of verification as a level 1
+   * @param {number} maximumPrice maximum price for each level of verification
+   */
+  public updateDragonnetData = (maximumPrice: number) => {
+    const updateDragonnet: any = {
+      'l2': {
+        'maximumPrice': maximumPrice,
+        'nodesRequired': 3,
+        'minimumIdentity': '',
+        'ddssRequired': 0,
+        'preferredCloud': 'AWS',
+        'preferredRegion': 'us-west-2'
+      }, 'l3': {
+        'maximumPrice': maximumPrice,
+        'nodesRequired': 3,
+        'minimumIdentity': '',
+        'ddssRequired': 0,
+        'preferredCloud': 'AWS',
+        'preferredRegion': 'us-west-2'
+      }, 'l4': {
+        'maximumPrice': maximumPrice,
+        'nodesRequired': 3,
+        'minimumIdentity': '',
+        'ddssRequired': 0,
+        'preferredCloud': 'AWS',
+        'preferredRegion': 'us-west-2'
+      }, 'l5': {
+        'maximumPrice': maximumPrice,
+        'nodesRequired': 3,
+        'minimumIdentity': '',
+        'ddssRequired': 0,
+        'preferredCloud': 'AWS',
+        'preferredRegion': 'us-west-2',
+        'maxBroadcastInterval': 12
+      }, 'dcrn': 'L1::DragonNetConfiguration',
+      'version': '1'
+    }
+    return this.put(`/update-matchmaking-data`, updateDragonnet)
   }
   /**
    * Create a new Transaction on your Dragonchain.
@@ -279,7 +331,11 @@ export class DragonchainClient {
   public createTransaction = (transactionObject: DragonchainTransactionCreatePayload): Promise<DragonchainTransactionCreateResponse> => {
     return this.post(`/transaction`, transactionObject)
   }
-
+  /**
+   * Create a bulk transaction by string together a bunch of transactions as JSON objects into an array
+   * @param {DragonchainBulkTransactions} transactionBulkObject array of transactions
+   * @return {Promise<DragonchainTransactionCreateResponse>}
+   */
   public createBulkTransaction = (transactionBulkObject: DragonchainBulkTransactions): Promise<DragonchainTransactionCreateResponse> => {
     return this.post(`/transaction_bulk`, transactionBulkObject)
   }
@@ -292,7 +348,10 @@ export class DragonchainClient {
   public createCustomContract = (body: CustomContractCreationSchema): Promise<DragonchainContractCreateResponse> => {
     return this.post(`/contract/${body.name}`, body)
   }
-
+  /**
+   * Create a preconfigure contract from our library, using the provided interfaces
+   * @param {validContractLibraries} body the preconfigured interfaces for smart contract libraries
+   */
   public createLibraryContract = (body: validContractLibraries): Promise<DragonchainContractCreateResponse> => {
     return this.post(`/contract/${body.name}`, body)
   }
@@ -325,17 +384,19 @@ export class DragonchainClient {
     if (sort) {
       params.set('sort', sort)
     }
-    params.set('offset', offset)
-    params.set('limit', limit)
+    params.set('offset', String(offset))
+    params.set('limit', String(limit))
 
     return this.generateQueryString(params)
   }
 
-  generateQueryString = (queryObject: Map<any,any>) => {
-    let queryString = '?'
-    for (const [key, value] of queryObject.entries()) {
-      queryString = `${queryString}${key}=${value}&`
-    }
+  generateQueryString = (queryObject: Map<string, string>) => {
+    const query = '?'
+    const params = new URLSearchParams(queryObject)
+    const queryString = `${query}${params}`
+    // for (const [key, value] of queryObject.entries()) {
+    //   queryString = `${queryString}${key}=${value}&`
+    // }
     return queryString
 
   }
