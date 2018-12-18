@@ -398,10 +398,10 @@ export class DragonchainClient {
   }
 
   public getSmartContractHeap = async (key: string, scName: string) => {
-    this.defaultFetchOptions.contentType = 'application/text';
+    this.defaultFetchOptions.contentType = 'application/text'
     const response = await this.get(`/get/${scName}/HEAP/${key}`)
-    this.defaultFetchOptions.contentType = 'application/json';
-    return response;
+    this.defaultFetchOptions.contentType = 'application/json'
+    return response
   }
 
   public listSmartcontractHeap = (scName: string) => {
@@ -475,7 +475,7 @@ export class DragonchainClient {
    * @hidden
    */
   private async makeRequest (path: string, options: FetchOptions) {
-    let response;
+    let response
     const fetchOptions = { ...this.defaultFetchOptions, ...options } as FetchOptions
     const dro = new DragonchainRequestObject(path, this.dragonchainId, fetchOptions)
     this.defaultFetchOptions.headers.timestamp = dro.timestamp
