@@ -182,7 +182,8 @@ export interface FetchOptions {
   body: string,
   hmacAlgo: string,
   contentType: string,
-  overriddenCredentials?: OverriddenCredentials
+  overriddenCredentials?: OverriddenCredentials,
+  shouldParseResponse?: boolean,
 }
 
 export interface OverriddenCredentials {
