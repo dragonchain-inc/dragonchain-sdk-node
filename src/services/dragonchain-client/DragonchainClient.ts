@@ -273,81 +273,87 @@ export class DragonchainClient {
    * @param {number} askingPrice update the asking price for your node as a level 2-5
    * @param {number} broadcastInterval update the broadcastInterval as a level 5
    */
-  public updateMatchmakingData = (askingPrice?: number, broadcastInterval?: number) => {
-    const matchmaking: any = {
-
+  public updateMatchmakingConfig = (askingPrice: number) => {
+    const matchmakingUpdate: any = {
+      'matchmaking': {
+        'askingPrice': askingPrice
+      }
     }
-    return this.put(`/update-matchmaking-data`, matchmaking)
+    return this.put(`/update-matchmaking-data`, matchmakingUpdate)
   }
   /**
    * Update your maximum price for each level of verification as a level 1
    * @param {number} maximumPrice maximum price for each level of verification
    */
-  // public updateDragonnetData = (maximumPrice: number, level: number = 0) => {
-  //   if (level === 0) {
-  //     const updateDragonnet: any {
-  //       'dragonnet': {
-  //         'l2': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //         'l3': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //         'l4': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //         'l5': {
-  //           'maximumPrice': maximumPrice
-  //         }
-  //       }
+  public updateDragonnetConfig = (maximumPrice: number, level: number = 0) => {
+    let updateDragonnet: any
+    switch (level) {
+      case 0: {
+        updateDragonnet = {
+          'dragonnet': {
+            'l2': {
+              'maximumPrice': maximumPrice
+            },
+            'l3': {
+              'maximumPrice': maximumPrice
+            },
+            'l4': {
+              'maximumPrice': maximumPrice
+            },
+            'l5': {
+              'maximumPrice': maximumPrice
+            }
+          }
+        }
+        break
+      }
+      case 2: {
+        updateDragonnet = {
+          'dragonnet': {
+            'l2': {
+              'maximumPrice': maximumPrice
+            }
+          }
+        }
+        break
+      }
+      case 3: {
+        updateDragonnet = {
+          'dragonnet': {
+            'l3': {
+              'maximumPrice': maximumPrice
+            }
+          }
+        }
+        break
+      }
+      case 4: {
+        updateDragonnet = {
+          'dragonnet': {
+            'l4': {
+              'maximumPrice': maximumPrice
+            }
+          }
+        }
+        break
+      }
+      case 5: {
+        updateDragonnet = {
+          'dragonnet': {
+            'l5': {
+              'maximumPrice': maximumPrice
+            }
+          }
+        }
+        break
+      }
+      default: {
+        return console.log('invalid level specification')
+      }
+    }
+    return this.put(`/update-matchmaking-data`, updateDragonnet)
 
-  //     }
-  //     return this.put(`/update-matchmaking-data`, updateDragonnet)
-
-  //   }
-  //   switch (level) {
-  //     case 2: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l2': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //     case 3: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l3': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //     case 4: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l4': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //     case 5: {
-  //       const updateDragonnet: any = {
-  //         'dragonnet': {
-  //           'l5': {
-  //             'maximumPrice': maximumPrice
-  //           }
-  //         }
-  //       }
-  //       return this.put(`/update-matchmaking-data`, updateDragonnet)
-  //     }
-  //   }
-  // }
+  }
   /**
    * Create a new Transaction on your Dragonchain.
    * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
@@ -445,8 +451,9 @@ export class DragonchainClient {
     const options = { method: 'POST', body: JSON.stringify(body) } as FetchOptions
     return this.makeRequest(path, options)
   }
-
-  // PUT => NOT IMPLEMENTED
+  /**
+   * @hidden
+   */
   private put (path: string, body: object) {
     const options = { method: 'PUT', body: JSON.stringify(body) } as FetchOptions
     return this.makeRequest(path, options)
@@ -488,11 +495,8 @@ export class DragonchainClient {
     this.logger.debug(`[DragonchainClient][${dro.method}] <= ${dro.url} ${res.status} ${res.statusText}`)
     response = (fetchOptions.contentType === 'application/json') ? await res.json() : await res.text()
     console.log('[RESULT]---->>>>>>', response)
-    if (res.status >= 200 && res.status < 300) {
-      return response
-    } else {
-      throw new Error(`Unexpected response from the dragonchain. Response: ${res.status} | Error: ${res.statusText}`)
-    }
+
+    return response
   }
 }
 
