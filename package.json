@@ -41,8 +41,7 @@
     "docs:preview": "yarn docs && opn docs/index.html",
     "docs:publish": "ts-node build/tools/gh-pages-publish.ts",
     "prepublishOnly": "yarn test && yarn build",
-    "commit": "git-cz",
-    "cicd:update": "aws cloudformation update-stack --stack-name DragonchainSdkNode-CICD --template-body file://./CICD.cft.yml --region us-west-2 --profile default --capabilities CAPABILITY_NAMED_IAM"
+    "commit": "git-cz"
   },
   "scripts-info": {
     "h": "Display information about the scripts",
