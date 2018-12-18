@@ -153,6 +153,10 @@ Resources:
                 - 's3:*'
                 Effect: Allow
                 Resource: 'arn:aws:s3:::dragonchain-sdk-node-codebuild-artifacts/*'
+              - Action:
+                - 'secretsmanager:GetSecretValue'
+                Effect: Allow
+                Resource: 'arn:aws:secretsmanager:us-west-2:381978683274:secret:dragonchain-sdk-integration-key-?????'
 
   ArtifactBucket:
     Type: AWS::S3::Bucket
