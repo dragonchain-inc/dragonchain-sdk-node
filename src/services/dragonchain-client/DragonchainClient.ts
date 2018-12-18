@@ -105,8 +105,8 @@ export class DragonchainClient {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        dragonchain: this.dragonchainId,
-      },
+        dragonchain: this.dragonchainId
+      }
     } as FetchOptions
   }
 
