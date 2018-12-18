@@ -486,10 +486,10 @@ export class DragonchainClient {
     console.log(dro.url, dro.asFetchOptions())
     const res = await this.toggleSslCertVerification(() => this.fetch(dro.url, dro.asFetchOptions()))
     this.logger.debug(`[DragonchainClient][${dro.method}] <= ${dro.url} ${res.status} ${res.statusText}`)
-    response = await (fetchOptions.contentType === 'application/json') ? res.json() : res.text();
+    response = await (fetchOptions.contentType === 'application/json') ? res.json() : res.text()
     console.log('[RESULT]---->>>>>>', response)
     if (res.status >= 200 && res.status < 300) {
-      return response;
+      return response
     } else {
       throw new Error(`Unexpected response from the dragonchain. Response: ${res.status} | Error: ${res.statusText}`)
     }
