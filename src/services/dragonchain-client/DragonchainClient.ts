@@ -397,8 +397,11 @@ export class DragonchainClient {
     return this.get(`/verification/${blockId}`)
   }
 
-  public getSmartContractHeap = (key: string, scName: string) => {
-    return this.get(`/get/${scName}/HEAP/${key}`)
+  public getSmartContractHeap = async (key: string, scName: string) => {
+    this.defaultFetchOptions.contentType = 'application/text'
+    const response = await this.get(`/get/${scName}/HEAP/${key}`)
+    this.defaultFetchOptions.contentType = 'application/json'
+    return response
   }
 
   public listSmartcontractHeap = (scName: string) => {
@@ -472,6 +475,7 @@ export class DragonchainClient {
    * @hidden
    */
   private async makeRequest (path: string, options: FetchOptions) {
+    let response
     const fetchOptions = { ...this.defaultFetchOptions, ...options } as FetchOptions
     const dro = new DragonchainRequestObject(path, this.dragonchainId, fetchOptions)
     this.defaultFetchOptions.headers.timestamp = dro.timestamp
@@ -482,10 +486,10 @@ export class DragonchainClient {
     console.log(dro.url, dro.asFetchOptions())
     const res = await this.toggleSslCertVerification(() => this.fetch(dro.url, dro.asFetchOptions()))
     this.logger.debug(`[DragonchainClient][${dro.method}] <= ${dro.url} ${res.status} ${res.statusText}`)
-    const result = await res.json()
-    console.log('[RESULT]---->>>>>>', result)
+    response = (fetchOptions.contentType === 'application/json') ? await res.json() : await res.text()
+    console.log('[RESULT]---->>>>>>', response)
     if (res.status >= 200 && res.status < 300) {
-      return result
+      return response
     } else {
       throw new Error(`Unexpected response from the dragonchain. Response: ${res.status} | Error: ${res.statusText}`)
     }
