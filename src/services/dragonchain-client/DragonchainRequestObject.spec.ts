@@ -23,7 +23,7 @@ const { expect } = chai
 describe('DragonchainRequestObject', () => {
   describe('#constructor', () => {
     it('assigns default instance vars', () => {
-      const fetchOptions = { method: 'PUT', body: 'hi!' } as FetchOptions
+      const fetchOptions = { method: 'PUT', body: 'hi!', headers: { 'Content-Type': 'application/json' } } as FetchOptions
       const dro = new DragonchainRequestObject('/chains/contract', 'myDcid', fetchOptions)
       expect(dro.version).to.equal('1')
       expect(dro.url).to.equal('https://myDcid.api.dragonchain.com/chains/contract')

@@ -41,7 +41,7 @@ export class DragonchainRequestObject {
     this.url = `https://${this.dragonchainId}.api.dragonchain.com${path}`
     this.timestamp = this.getTimeStamp()
     this.hmacAlgo = fetchOptions.hmacAlgo || 'sha256' // only sha256 for now
-    this.contentType = fetchOptions.contentType || 'application/json'
+    this.contentType = fetchOptions.headers['Content-Type'] || 'application/json'
     this.overriddenCredentials = fetchOptions.overriddenCredentials
     this.headers = fetchOptions.headers
     this.body = fetchOptions.body
