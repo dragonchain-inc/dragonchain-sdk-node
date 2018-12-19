@@ -5,3 +5,4 @@
 /lib
 /docs
 yarn-error.log
+.coverage
