@@ -2,6 +2,7 @@ import * as chai from 'chai'
 import * as sinonChai from 'sinon-chai'
 import { DragonchainClient } from '../src/services/dragonchain-client/DragonchainClient'
 import { CustomContractCreationSchema, DragonchainTransactionCreateResponse, L1DragonchainTransactionFull } from '../src/interfaces/DragonchainClientInterfaces'
+import { DragonchainCredentials } from '../src/services/credential-service/DragonchainCredentials'
 
 const { expect } = chai
 const { assert } = chai
@@ -19,15 +20,13 @@ describe('DragonchainClient', () => {
   let postTransaction: DragonchainTransactionCreateResponse
   let getTransaction: L1DragonchainTransactionFull
   let contractName: string
+  let secrets = JSON.parse(process.env['INTEGRATION_CREDENTIALS']!) as DragonchainCredentials
+  console.log(typeof process.env['INTEGRATION_CREDENTIALS'])
+  console.log(secrets, secrets.AUTH_KEY_ID, secrets.AUTH_KEY)
 
   beforeEach(() => {
-    client = new DragonchainClient(chainID)
-  })
-  describe('constructor', () => {
-    it('returns instance of DragonchainClient', () => {
-      const client = new DragonchainClient(chainID)
-      expect(client instanceof DragonchainClient).to.equal(true)
-    })
+    client = new DragonchainClient(secrets.CHAIN_ID)
+    client.overrideCredentials(secrets.AUTH_KEY_ID, secrets.AUTH_KEY)
   })
 
   describe('POST', () => {
