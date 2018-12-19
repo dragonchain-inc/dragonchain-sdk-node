@@ -5,9 +5,10 @@ phases:
     commands:
       - npm install -g yarn
       - yarn install
+      - yum install jq
       # - apt-get update
-      - wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-      - chmod +x jq-linux64
+      # - wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+      # - chmod +x jq-linux64
       # - apt-get install jq=1.5+dfsg-1ubuntu0.1
       # - brew install --HEAD jq
   pre_build:
@@ -16,7 +17,7 @@ phases:
   build:
     commands:
       - yarn build
-      - export AUTH_KEY=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq-linux64 '.SecretString' | jq-linux64 fromjson | jq-linux64 '.AUTH_KEY')
-      - export AUTH_KEY_ID=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq-linux64 '.SecretString' | jq-linux64 fromjson | jq-linux64 '.AUTH_KEY_ID')
+      - export AUTH_KEY=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq '.SecretString' | jq fromjson | jq '.AUTH_KEY')
+      - export AUTH_KEY_ID=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq '.SecretString' | jq fromjson | jq '.AUTH_KEY_ID')
       - yarn integration
 
