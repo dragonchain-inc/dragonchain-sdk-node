@@ -187,40 +187,48 @@
 //       })
 //     })
 
-//     // describe('.createContract', () => {
-//     //   it('create custom contract successfully', async () => {
-//     //     const customContractPayload: CustomContractCreationSchema = {
-//     //       'version': '2',
-//     //       'name': 'name',
-//     //       'sc_type': 'transaction',
-//     //       'is_serial': true,
-//     //       'custom_environment_variables': { 'banana': 'banana', 'apple': 'banana' },
-//     //       'runtime': 'nodejs6.10',
-//     //       'code': 'code',
-//     //       'origin': 'custom'
-//     //     }
-//     //     await client.createContract(customContractPayload, name)
-//     //     const obj = { ...expectedFetchOptions, body: JSON.stringify(customContractPayload) }
-//     //     assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
-//     //   })
+//     describe('.createContract', () => {
+//       it('create custom contract successfully', async () => {
+//         const customContractPayload: CustomContractCreationSchema = {
+//           'version': '2',
+//           'dcrn': 'SmartContract::L1::Create',
+//           'name': 'name',
+//           'sc_type': 'transaction',
+//           'is_serial': true,
+//           'custom_environment_variables': { 'banana': 'banana', 'apple': 'banana' },
+//           'runtime': 'nodejs6.10',
+//           'code': 'code',
+//           'origin': 'Custom'
+//         }
+//         await client.createCustomContract(customContractPayload)
+//         const obj = { ...expectedFetchOptions, body: JSON.stringify(customContractPayload) }
+//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
+//       })
 
-//     //   it('create library contract successfully', async () => {
-//     //     const libraryContractPayload: LibraryContractCreationSchema = {
-//     //       'version': '2',
-//     //       'name': 'name',
-//     //       'custom_environment_variables': { 'banana': 'banana', 'apple': 'banana' },
-//     //       'runtime': 'nodejs6.10',
-//     //       'is_serial': true,
-//     //       'sc_type': 'transaction',
-//     //       'origin': 'library',
-//     //       'libraryContractName': 'banana'
-//     //     }
-//     //     await client.createContract(libraryContractPayload, name)
-//     //     const obj = { ...expectedFetchOptions, body: JSON.stringify(libraryContractPayload) }
-//     //     assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
-//     //   })
+//       it('create library contract successfully', async () => {
+//         const libraryContractPayload: LibraryContractCreationSchema = {
+//           'custom_environment_variables': {
+//             'addressScheme': 'ethereum',
+//             'governance': 'ethereum',
+//             'originWalletAddress': 'string',
+//             'precision': 2,
+//             'totalAmount': 10
+//           },
+//           'dcrn': 'SmartContract::L1::Create',
+//           'is_serial': true,
+//           'libraryContractName': 'currency',
+//           'name': 'string',
+//           'origin': 'library',
+//           'runtime': 'nodejs8.10',
+//           'sc_type': 'transaction',
+//           'version': '2'
+//         }
+//         await client.createLibraryContract(libraryContractPayload)
+//         const obj = { ...expectedFetchOptions, body: JSON.stringify(libraryContractPayload) }
+//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
+//       })
 
-//     // })
+//     })
 
 //   })
 
@@ -243,29 +251,41 @@
 //       }
 //     }
 
-//     describe('.updateSmartContract', () => {
+//     describe('.updateCustomSmartContract', () => {
 //       it('calls #fetch() with correct params', async () => {
 //         const name = 'smartContractName'
 //         const status = 'GrilledCheese'
-//         const scType = 'milkShake'
-//         const code = 'poppin'
-//         const runTime = 'banana'
-//         const serial = true
-//         const envVars = { banana: 'banana' }
 //         const fakeBodyResponse: any = {
-//           'version': '1',
 //           'name': name,
-//           'status': status,
-//           'sc_type': scType,
-//           'code': code,
-//           'runtime': runTime,
-//           'is_serial': serial,
-//           'custom_environment_variables': envVars
+//           'status': status
 //         }
-//         await client.updateSmartContract(name, status, scType, code, runTime, serial, envVars)
+//         await client.updateCustomSmartContract(name, status)
 //         const id = 'smartContractName'
 //         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
 //         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract/${id}`, obj)
+//       })
+//     })
+
+//     describe('.updateDragonnetConfig', () => {
+//       it('calls #fetch() with correct params', async () => {
+//         const maximumPrice = 10
+//         const level = 3
+//         await client.updateDragonnetConfig(maximumPrice, level)
+//       })
+//     })
+
+//     describe('.updateDragonnetConfig', () => {
+//       it('calls #fetch() with correct params', async () => {
+//         const maximumPrice = 10
+//         const fakeBody = {
+//           'dragonnet': {
+//             'l2': {
+//               'maximumPrice': maximumPrice
+//             }
+//           }
+//         }
+//         await client.updateMatchmakingConfig(maximumPrice)
+//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/update-matchmaking-data`, obj)
 //       })
 //     })
 
