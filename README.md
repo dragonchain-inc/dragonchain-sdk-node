@@ -25,7 +25,8 @@ These docs are auto-generated.
 * [createContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcontract)
 
 ### Versions
-* [0.0.2](https://node-sdk-docs.dragonchain.com/0.0.2)
+* [0.1.0](https://node-sdk-docs.dragonchain.com/0.1.0)
+* [latest](https://node-sdk-docs.dragonchain.com/latest)
 
 ### Installation
 ```bash
