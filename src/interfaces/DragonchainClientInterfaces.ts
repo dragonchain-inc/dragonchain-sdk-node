@@ -174,14 +174,13 @@ export interface DragonchainContractCreateResponse {
 export interface FetchOptions {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': string
     dragonchain: string
     timestamp: null | string
     Authorization: string
   }
   body: string,
   hmacAlgo: string,
-  contentType: string,
   overriddenCredentials?: OverriddenCredentials
 }
 

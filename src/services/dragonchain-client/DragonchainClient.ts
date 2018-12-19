@@ -404,9 +404,9 @@ export class DragonchainClient {
   }
 
   public getSmartContractHeap = async (key: string, scName: string) => {
-    this.defaultFetchOptions.contentType = 'application/text'
-    const response = await this.get(`/get/${scName}/HEAP/${key}`)
-    this.defaultFetchOptions.contentType = 'application/json'
+    this.defaultFetchOptions.headers['Content-Type'] = 'application/text'
+    const response = await this.get(`/get/${scName}/${key}`)
+    this.defaultFetchOptions.headers['Content-Type'] = 'application/json'
     return response
   }
 
@@ -488,14 +488,13 @@ export class DragonchainClient {
     this.defaultFetchOptions.headers.timestamp = dro.timestamp
     // Add authorization header
     fetchOptions.headers.Authorization = await this.credentialService.getAuthorizationHeader(dro)
-    this.logger.debug(`[DragonchainClient][${dro.method}][HEADER] => ${JSON.stringify(dro.headers)}`)
-    this.logger.debug(`[DragonchainClient][${dro.method}] => ${dro.url}`)
+    this.logger.debug(`[DragonchainClient][${dro.method}][HEADER] ==> ${JSON.stringify(dro.headers)}`)
+    this.logger.debug(`[DragonchainClient][${dro.method}] ==> ${dro.url}`)
     console.log(dro.url, dro.asFetchOptions())
     const res = await this.toggleSslCertVerification(() => this.fetch(dro.url, dro.asFetchOptions()))
-    this.logger.debug(`[DragonchainClient][${dro.method}] <= ${dro.url} ${res.status} ${res.statusText}`)
-    response = (fetchOptions.contentType === 'application/json') ? await res.json() : await res.text()
-    console.log('[RESULT]---->>>>>>', response)
-
+    this.logger.debug(`[DragonchainClient][${dro.method}] <== ${dro.url} ${res.status} ${res.statusText}`)
+    response = (fetchOptions.headers['Content-Type'] === 'application/json') ? await res.json() : await res.text()
+    this.logger.debug(`[DragonchainClient][${dro.method}] <== ${response}`)
     return response
   }
 }
