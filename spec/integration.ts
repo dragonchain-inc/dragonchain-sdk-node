@@ -7,7 +7,6 @@ import { DragonchainCredentials } from '../src/services/credential-service/Drago
 const { expect } = chai
 const { assert } = chai
 chai.use(sinonChai)
-let chainID: string = '1d144539-30b3-42cd-8ed9-f5d7760409f4'
 
 function delay (ms: number) {
   return new Promise<void>(function (resolve) {
