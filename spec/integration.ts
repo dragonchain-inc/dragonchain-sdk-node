@@ -18,7 +18,7 @@ describe('DragonchainClient', () => {
   let postTransaction: DragonchainTransactionCreateResponse
   let getTransaction: L1DragonchainTransactionFull
   let contractName: string
-  let secrets = JSON.parse(process.env['INTEGRATION_CREDENTIALS']!) as any
+  let secrets = JSON.parse(process.env['INTEGRATION_CREDENTIALS']!)
 
   beforeEach(() => {
     client = new DragonchainClient(secrets.CHAIN_ID)
