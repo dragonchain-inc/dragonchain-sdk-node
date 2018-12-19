@@ -5,8 +5,9 @@ phases:
     commands:
       - npm install -g yarn
       - yarn install
-      - apt-get update
-      - apt-get install jq=1.5+dfsg-1ubuntu0.1
+      # - apt-get update
+      - wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+      # - apt-get install jq=1.5+dfsg-1ubuntu0.1
   pre_build:
     commands:
       # - yarn integration
