@@ -131,10 +131,9 @@ export class CredentialService {
    * @returns {DragonchainCredentials} dragonchain credential file path from system root.
    */
   private static getCredsFromEnvVars = () => {
-    const chainId = process.env['CHAIN_ID']
     const authKey = process.env['AUTH_KEY']
     const authKeyId = process.env['AUTH_KEY_ID']
-    if (authKey && authKeyId && chainId) return { authKey, authKeyId, chainId } as DragonchainCredentials
+    if (authKey && authKeyId) return { authKey, authKeyId } as DragonchainCredentials
     return false
   }
 }
