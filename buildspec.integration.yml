@@ -6,10 +6,10 @@ phases:
       - npm install -g yarn
       - yarn install
       - yum install jq
-      # - apt-get update
+      - apt-get update
       # - wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
       # - chmod +x jq-linux64
-      # - apt-get install jq=1.5+dfsg-1ubuntu0.1
+      - apt-get install jq=1.5+dfsg-1ubuntu0.1
       # - brew install --HEAD jq
   pre_build:
     commands:
