@@ -18,7 +18,7 @@
 // import * as sinonChai from 'sinon-chai'
 // import { stub, assert, useFakeTimers } from 'sinon'
 // import { DragonchainClient } from './DragonchainClient'
-// import { ContractRuntime, SmartContractType, CustomContractCreationSchema, LibraryContractCreationSchema } from 'src/interfaces/DragonchainClientInterfaces'
+// import { ContractRuntime, SmartContractType, CustomContractCreationSchema, ContractCreateCurrencyContract } from 'src/interfaces/DragonchainClientInterfaces'
 
 // const { expect } = chai
 // chai.use(sinonChai)
@@ -62,18 +62,20 @@
 
 //   describe('GET', () => {
 //     let fakeResponseObj
-//     let fakeFetch: any
+//     let FakeFetch: any
 //     let fakeCredentialService
 //     let fakeLogger
 //     let client: DragonchainClient
 //     let expectedFetchOptions: any
+//     let fakeResponseText: string
 
 //     beforeEach(() => {
 //       fakeResponseObj = { body: 'fakeResponseBody' }
-//       fakeFetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj) })
+//       fakeResponseText = 'fakeString'
+//       FakeFetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
 //       fakeCredentialService = { getAuthorizationHeader: stub().resolves('fakeCreds') }
 //       fakeLogger = { log: stub(), debug: stub() }
-//       client = new DragonchainClient('fakeDragonchainId', true, fakeFetch, fakeCredentialService, fakeLogger)
+//       client = new DragonchainClient('fakeDragonchainId', true, FakeFetch, fakeCredentialService, fakeLogger)
 //       fakeTimeStamp = Date.now()
 //       useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
 //       fakeTime = new Date(fakeTimeStamp).toISOString()
@@ -92,7 +94,7 @@
 //     describe('.getStatus', () => {
 //       it('calls #fetch() with correct params', async () => {
 //         await client.getStatus()
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/status`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/status`, expectedFetchOptions)
 //       })
 //     })
 
@@ -100,7 +102,7 @@
 //       it('calls #fetch() with correct params', async () => {
 //         const id = 'batman-transaction-id'
 //         await client.getTransaction(id)
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/transaction/${id}`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/transaction/${id}`, expectedFetchOptions)
 //       })
 //     })
 
@@ -109,7 +111,7 @@
 //         const id = 'goo-transaction-id'
 //         client.setDragonchainId('hotBanana')
 //         await client.getTransaction(id)
-//         assert.calledWith(fakeFetch, `https://hotBanana.api.dragonchain.com/chains/transaction/${id}`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://hotBanana.api.dragonchain.com/transaction/${id}`, expectedFetchOptions)
 //       })
 //     })
 
@@ -117,7 +119,7 @@
 //       it('calls #fetch() with correct params', async () => {
 //         const id = 'robin-block-id'
 //         await client.getBlock(id)
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/block/${id}`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/block/${id}`, expectedFetchOptions)
 //       })
 //     })
 
@@ -125,7 +127,7 @@
 //       it('calls #fetch() with correct params', async () => {
 //         const id = 'joker-smartcontract-id'
 //         await client.getSmartContract(id)
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract/${id}`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/contract/${id}`, expectedFetchOptions)
 //       })
 //     })
 
@@ -133,7 +135,7 @@
 //       it('calls #fetch() with correct params', async () => {
 //         const id = 'block_id'
 //         await client.getVerification(id)
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/verification/${id}`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/verification/${id}`, expectedFetchOptions)
 //       })
 //     })
 
@@ -141,7 +143,7 @@
 //       it('calls #fetch() with correct params', async () => {
 //         const params = 'banana'
 //         await client.queryBlocks(params)
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/block?q=${params}`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/block?q=${params}&offset=0&limit=10`, expectedFetchOptions)
 //       })
 //     })
 
@@ -149,17 +151,18 @@
 //       it('calls #fetch() with correct params', async () => {
 //         const params = 'banana'
 //         await client.querySmartContracts(params)
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract?q=${params}`, expectedFetchOptions)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/contract?q=${params}&offset=0&limit=10`, expectedFetchOptions)
 //       })
 //     })
 //   })
 
 //   describe('POST', () => {
 //     const fakeResponseObj = { body: 'fakeResponseBody' }
-//     const fakeFetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj) })
+//     const fakeResponseText = 'fakeString'
+//     const FakeFetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
 //     const fakeCredentialService = { getAuthorizationHeader: stub().resolves('fakeCreds') }
 //     const fakeLogger = { log: stub(), debug: stub() }
-//     const client = new DragonchainClient('fakeDragonchainId', true, fakeFetch, fakeCredentialService, fakeLogger)
+//     const client = new DragonchainClient('fakeDragonchainId', true, FakeFetch, fakeCredentialService, fakeLogger)
 //     fakeTimeStamp = Date.now()
 //     useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
 //     fakeTime = new Date(fakeTimeStamp).toISOString()
@@ -183,7 +186,7 @@
 //         }
 //         await client.createTransaction(transactionCreatePayload)
 //         const obj = { ...expectedFetchOptions, body: JSON.stringify(transactionCreatePayload) }
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/transaction`, obj)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/transaction`, obj)
 //       })
 //     })
 
@@ -202,11 +205,11 @@
 //         }
 //         await client.createCustomContract(customContractPayload)
 //         const obj = { ...expectedFetchOptions, body: JSON.stringify(customContractPayload) }
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
 //       })
 
 //       it('create library contract successfully', async () => {
-//         const libraryContractPayload: LibraryContractCreationSchema = {
+//         const libraryContractPayload: ContractCreateCurrencyContract = {
 //           'custom_environment_variables': {
 //             'addressScheme': 'ethereum',
 //             'governance': 'ethereum',
@@ -225,7 +228,7 @@
 //         }
 //         await client.createLibraryContract(libraryContractPayload)
 //         const obj = { ...expectedFetchOptions, body: JSON.stringify(libraryContractPayload) }
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract`, obj)
 //       })
 
 //     })
@@ -234,10 +237,11 @@
 
 //   describe('PUT', () => {
 //     const fakeResponseObj = { body: 'fakeResponseBody' }
-//     const fakeFetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj) })
+//     const fakeResponseText = 'fakeString'
+//     const FakeFetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
 //     const fakeCredentialService = { getAuthorizationHeader: stub().resolves('fakeCreds') }
 //     const fakeLogger = { log: stub(), debug: stub() }
-//     const client = new DragonchainClient('fakeDragonchainId', true, fakeFetch, fakeCredentialService, fakeLogger)
+//     const client = new DragonchainClient('fakeDragonchainId', true, FakeFetch, fakeCredentialService, fakeLogger)
 //     fakeTimeStamp = Date.now()
 //     useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
 //     fakeTime = new Date(fakeTimeStamp).toISOString()
@@ -256,36 +260,44 @@
 //         const name = 'smartContractName'
 //         const status = 'GrilledCheese'
 //         const fakeBodyResponse: any = {
+//           'version': '1',
 //           'name': name,
 //           'status': status
 //         }
 //         await client.updateCustomSmartContract(name, status)
 //         const id = 'smartContractName'
 //         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract/${id}`, obj)
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/chains/contract/${id}`, obj)
+//       })
+//     })
+
+//     describe('.updateMatchmakingConfig', () => {
+//       it('calls #fetch() with correct params', async () => {
+//         const askingPrice = 10
+//         const fakeBodyResponse: any = {
+//           'matchmaking': {
+//             'askingPrice': askingPrice
+//           }
+//         }
+//         await client.updateMatchmakingConfig(askingPrice)
+//         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/update-matchmaking-data`, obj)
 //       })
 //     })
 
 //     describe('.updateDragonnetConfig', () => {
 //       it('calls #fetch() with correct params', async () => {
 //         const maximumPrice = 10
-//         const level = 3
-//         await client.updateDragonnetConfig(maximumPrice, level)
-//       })
-//     })
-
-//     describe('.updateDragonnetConfig', () => {
-//       it('calls #fetch() with correct params', async () => {
-//         const maximumPrice = 10
-//         const fakeBody = {
+//         const fakeBodyResponse = {
 //           'dragonnet': {
 //             'l2': {
 //               'maximumPrice': maximumPrice
 //             }
 //           }
 //         }
-//         await client.updateMatchmakingConfig(maximumPrice)
-//         assert.calledWith(fakeFetch, `https://fakeDragonchainId.api.dragonchain.com/update-matchmaking-data`, obj)
+//         await client.updateDragonnetConfig(maximumPrice, 2)
+//         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
+//         assert.calledWith(FakeFetch, `https://fakeDragonchainId.api.dragonchain.com/update-matchmaking-data`, obj)
 //       })
 //     })
 

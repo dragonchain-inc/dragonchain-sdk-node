@@ -490,7 +490,6 @@ export class DragonchainClient {
     fetchOptions.headers.Authorization = await this.credentialService.getAuthorizationHeader(dro)
     this.logger.debug(`[DragonchainClient][${dro.method}][HEADER] ==> ${JSON.stringify(dro.headers)}`)
     this.logger.debug(`[DragonchainClient][${dro.method}] ==> ${dro.url}`)
-    console.log(dro.url, dro.asFetchOptions())
     const res = await this.toggleSslCertVerification(() => this.fetch(dro.url, dro.asFetchOptions()))
     this.logger.debug(`[DragonchainClient][${dro.method}] <== ${dro.url} ${res.status} ${res.statusText}`)
     response = (fetchOptions.headers['Content-Type'] === 'application/json') ? await res.json() : await res.text()
