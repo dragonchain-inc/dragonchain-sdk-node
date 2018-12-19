@@ -16,7 +16,7 @@ phases:
   build:
     commands:
       - yarn build
-      - export AUTH_KEY=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq '.SecretString' | jq fromjson | jq '.AUTH_KEY')
-      - export AUTH_KEY_ID=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq '.SecretString' | jq fromjson | jq '.AUTH_KEY_ID')
+      - export AUTH_KEY=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq-linux64 '.SecretString' | jq-linux64 fromjson | jq-linux64 '.AUTH_KEY')
+      - export AUTH_KEY_ID=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq-linux64 '.SecretString' | jq-linux64 fromjson | jq-linux64 '.AUTH_KEY_ID')
       - yarn integration
 
