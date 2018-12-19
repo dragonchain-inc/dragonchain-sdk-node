@@ -15,9 +15,8 @@
  */
 
 export interface DragonchainCredentials {
-  AUTH_KEY: string
-  AUTH_KEY_ID: string
-  CHAIN_ID: string
+  authKey: string
+  authKeyId: string
 }
 
 /**
