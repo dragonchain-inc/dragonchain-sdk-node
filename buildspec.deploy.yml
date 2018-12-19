@@ -19,3 +19,4 @@ phases:
       - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/latest
       - aws s3 rm --recursive s3://dragonchain-sdk-node-docs/$VERSION/*
       - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/$VERSION/
+      - aws s3api put-object --website-redirect-location /latest --content-type text/html --bucket dragonchain-sdk-node-docs --key index.html
