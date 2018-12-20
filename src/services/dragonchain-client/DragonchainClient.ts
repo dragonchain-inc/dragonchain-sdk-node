@@ -34,6 +34,8 @@ import {
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
+import { getLogger, LogLevel } from '../../Logger'
+
 // import { start } from 'repl';
 
 const validRuntimes = [
@@ -98,7 +100,7 @@ export class DragonchainClient {
     ) {
     this.dragonchainId = dragonchainId
     this.verify = verify
-    this.logger = injectedLogger || console
+    this.logger = injectedLogger || getLogger()
     this.fetch = injectedFetch || fetch
     this.credentialService = injectedCredentialService || CredentialService
     this.defaultFetchOptions = {
@@ -166,6 +168,14 @@ export class DragonchainClient {
    */
   public getTransaction = (transactionId: string): Promise<L1DragonchainTransactionFull> => {
     return this.get(`/transaction/${transactionId}`)
+  }
+
+  /**
+   * set the log level of the Dragonchain client
+   * @param LogLevel default='error'
+   */
+  public setLogLevel = (level: LogLevel) => {
+    this.logger = getLogger(level)
   }
 
   /**
@@ -348,7 +358,7 @@ export class DragonchainClient {
         break
       }
       default: {
-        return console.log('invalid level specification')
+        return this.logger.error('invalid level specification')
       }
     }
     return this.put(`/update-matchmaking-data`, updateDragonnet)

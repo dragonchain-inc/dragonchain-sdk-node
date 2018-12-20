@@ -23,6 +23,7 @@ import { DragonchainRequestObject } from '../dragonchain-client/DragonchainReque
 import { DragonchainCredentials } from './DragonchainCredentials'
 import { FailureByDesign } from '../../errors/FailureByDesign'
 import { promisify } from 'util'
+import { getLogger } from '../../Logger'
 
 /**
  * @class CredentialService
@@ -80,7 +81,7 @@ export class CredentialService {
       const { auth_key_id, auth_key } = config[dragonchainId]
       return { authKey: auth_key, authKeyId: auth_key_id } as DragonchainCredentials
     } catch (e) {
-      console.error(e)
+      getLogger().error(e)
       if (e.message === 'MISCONFIGURED_CRED_FILE') { throw new FailureByDesign('NOT_FOUND', `credential file is missing a config for ${dragonchainId}`) }
       if (e.code === 'ENOENT') { throw new FailureByDesign('NOT_FOUND', `credential file not found at "${credentialFilePath}"`) }
       throw new FailureByDesign('UNEXPECTED_ERROR', `Something unexpected happened while looking for credentials at "${credentialFilePath}"`)
