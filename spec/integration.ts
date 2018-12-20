@@ -101,6 +101,23 @@ describe('DragonchainClient', () => {
       const result = await client.getSmartContract(contractName)
       expect(result.name).to.equal(contractName)
     })
+
+    it('calls getVerifications successfully', async () => {
+      const response = {
+        2: [],
+        3: [],
+        4: [],
+        5: []
+      }
+      const result = await client.getVerifications(getTransaction.header.block_id)
+      expect(result).to.eql(response)
+    })
+
+    it('calls getVerifications successfully for one level', async () => {
+      const response: any = []
+      const result = await client.getVerifications(getTransaction.header.block_id, 2)
+      expect(result).to.eql(response)
+    })
   })
 
   describe('PUT', () => {
