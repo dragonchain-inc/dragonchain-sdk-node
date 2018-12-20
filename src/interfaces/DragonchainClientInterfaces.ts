@@ -16,6 +16,24 @@
 
 export type ContractRuntime = 'nodejs6.10' | 'nodejs8.10' | 'java8' | 'python2.7' | 'python3.6' | 'dotnetcore1.0' | 'dotnetcore2.0' | 'dotnetcore2.1' | 'go1.x'
 
+export interface Response<T> {
+  /**
+   * Boolean result passed from the fetch library.
+   *
+   * This can be used to quickly determine if the status code is 2xx.
+   */
+  ok: boolean,
+  /**
+   * HTTP Status Code
+   */
+  status: number,
+  /**
+   * Responses from Dragonchain will return here.
+   *
+   * Check the docs for the specific function you are calling to see what will appear here.
+   */
+  response: T
+}
 /**
  * Example Transaction At Rest Object
  * @name Transaction::L1::FullTransaction
