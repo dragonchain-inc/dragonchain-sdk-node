@@ -271,12 +271,12 @@ export class DragonchainClient {
   }
 
   /**
-   *  Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
-   *  If you are a level 5 you're required to update your asking price and broadcast interval
-   * @param {number} askingPrice update the asking price for your node as a level 2-5
-   * @param {number} broadcastInterval update the broadcastInterval as a level 5
+   * Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
+   * If you are a level 5 you're required to update your asking price and broadcast interval
+   * @param {number} askingPrice (0.0001-1000.0000) the price in DRGN to charge L1 nodes for your verification of their data. Setting this number too high will cause L1's to ignore you more often.
    */
   public updateMatchmakingConfig = async (askingPrice: number) => {
+    if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
     const matchmakingUpdate: any = {
       'matchmaking': {
         'askingPrice': askingPrice
@@ -285,10 +285,13 @@ export class DragonchainClient {
     return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<any> // TODO: Properly type this!!
   }
   /**
-   * Update your maximum price for each level of verification as a level 1
-   * @param {number} maximumPrice maximum price for each level of verification
+   * Update your maximum price for each level of verification.
+   * This method is only relevant for L1 nodes.
+   * @param {number} maximumPrice (0-1000) maximum price in DRGN you are willing to pay for verifications. If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
    */
   public updateDragonnetConfig = async (maximumPrice: number, level?: number) => {
+    if (isNaN(maximumPrice) || maximumPrice < 0 || maximumPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `maxPrice must be between 0 and 1000.`) }
+
     const dragonnet = {} as any
     if (!level)[2,3,4,5].forEach(i => { dragonnet[`l${i}`] = { maximumPrice } })
     if (isNaN(level!) || level! > 5 || level! < 0) throw new FailureByDesign('BAD_REQUEST', `Invalid verification level "${level}" requested. Must be between 1-5`)
@@ -460,9 +463,9 @@ export class DragonchainClient {
     this.logger.debug(`[DragonchainClient][${dro.method}][HEADER] ==> ${JSON.stringify(dro.headers)}`)
     this.logger.debug(`[DragonchainClient][${dro.method}] ==> ${dro.url}`)
     const res = await this.toggleSslCertVerification(async () => this.fetch(dro.url, await dro.asFetchOptions(this.credentialService)))
-    const { status, ok, statusText, json, text } = res
+    const { status, ok, statusText } = res
     this.logger.debug(`[DragonchainClient][${dro.method}] <== ${dro.url} ${status} ${statusText}`)
-    const response = await (jsonParse ? json() : text())
+    const response = await (jsonParse ? res.json() : res.text())
     this.logger.debug(`[DragonchainClient][${dro.method}] <== ${JSON.stringify(response)}`)
     return { status, response, ok } as Response<any>
   }

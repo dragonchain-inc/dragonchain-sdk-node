@@ -3,11 +3,12 @@
 
 Talk to your dragonchain.
 
-# Latest Official JS Docs
+# Method Quicklinks
 These docs are auto-generated.
 
 * [constructor](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#constructor)
 * [clearOverriddenCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#clearOverriddenCredentials)
+* [createContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcontract)
 * [createCustomContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcustomcontract)
 * [createLibraryContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createlibrarycontract)
 * [createTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createtransaction)
@@ -15,14 +16,17 @@ These docs are auto-generated.
 * [getSmartcontract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getsmartcontract)
 * [getStatus](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getstatus)
 * [getTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getTransaction)
-* [queryTransactions](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querytransactions)
 * [overrideCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#overridecredentials)
-* [queryTransactions](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querytransactions)
 * [setDragonchainId](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#setdragonchainId)
-* [getBlock](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getblock)
 * [getVerifications](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getverifications)
-* [getTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#gettransaction)
-* [createContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcontract)
+* [setLogLevel](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#setloglevel)
+* [queryTransactions](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querytransactions)
+* [queryBlocks](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#queryblocks)
+* [querySmartContracts](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querysmartcontracts)
+* [updateCustomSmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatesmartcontract)
+* [updateLibrarySmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatelibrarysmartcontract)
+* [updateMatchmakingConfig](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatematchmakingconfig)
+* [updateDragonnetConfig](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatedragonnetconfig)
 
 ### Versions
 * [0.1.0](https://node-sdk-docs.dragonchain.com/0.1.0)
