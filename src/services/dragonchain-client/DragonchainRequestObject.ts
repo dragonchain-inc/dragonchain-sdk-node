@@ -15,6 +15,7 @@
  */
 
 import { OverriddenCredentials, FetchOptions } from 'src/interfaces/DragonchainClientInterfaces'
+import { CredentialService } from '../credential-service/CredentialService'
 
 export class DragonchainRequestObject {
   method: string
@@ -39,26 +40,24 @@ export class DragonchainRequestObject {
     this.dragonchainId = dragonchainId
     this.path = path
     this.url = `https://${this.dragonchainId}.api.dragonchain.com${path}`
-    this.timestamp = this.getTimeStamp()
     this.hmacAlgo = fetchOptions.hmacAlgo || 'sha256' // only sha256 for now
-    this.contentType = fetchOptions.headers['Content-Type'] || 'application/json'
-    this.overriddenCredentials = fetchOptions.overriddenCredentials
-    this.headers = fetchOptions.headers
+    this.contentType = 'application/json'
     this.body = fetchOptions.body
   }
 
-  asFetchOptions = () => {
+  asFetchOptions = async (injectedCS: any = undefined) => {
+    this.timestamp = new Date().toISOString()
     return {
       method: this.method,
-      headers: this.headers,
-      body: this.body
+      body: this.body,
+      headers: {
+        'Content-Type': this.contentType,
+        dragonchain: this.dragonchainId,
+        Authorization: await (injectedCS || CredentialService).getAuthorizationHeader(this),
+        timestamp: this.timestamp
+      }
     }
   }
-
-  getTimeStamp = () => {
-    return new Date().toISOString()
-  }
-
 }
 
 /**
