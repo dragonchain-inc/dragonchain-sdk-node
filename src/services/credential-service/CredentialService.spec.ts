@@ -16,8 +16,8 @@
 
 import { expect } from 'chai'
 import { CredentialService } from './CredentialService'
-import { DragonchainRequestObject } from '../dragonchain-client/DragonchainRequestObject'
 import { createSandbox } from 'sinon'
+import { DragonchainRequestObject } from '../dragonchain-client/DragonchainRequestObject'
 
 describe('CredentialService', () => {
   let dro: any
@@ -39,7 +39,18 @@ describe('CredentialService', () => {
       url: 'http.fake.org',
       hmacAlgo: 'sha256',
       version: '1',
-      asFetchOptions: () => ({ method: dro.method, headers: dro.headers, body: dro.body })
+      asFetchOptions: () => (
+        {
+          method: dro.method,
+          body: dro.body,
+          headers: {
+            'Content-Type': dro.contentType,
+            dragonchain: dro.dragonchainId,
+            Authorization: 'whocares',
+            timestamp: dro.timestamp
+          }
+        }
+      ) as any
     } as DragonchainRequestObject
   })
   describe('.getAuthorizationHeader', () => {

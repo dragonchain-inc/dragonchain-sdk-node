@@ -33,7 +33,7 @@ describe('DragonchainClient', () => {
         'tag': 'pottery',
         'payload': {}
       }
-      postTransaction = await client.createTransaction(payload)
+      postTransaction = (await client.createTransaction(payload)).response
       expect(postTransaction.transaction_id).to.be.a('string')
     }).timeout(10000)
 
@@ -53,7 +53,7 @@ describe('DragonchainClient', () => {
           'origin': 'Custom',
           'code': encoded64bit
         }
-        const result = await client.createCustomContract(customContractPayload)
+        const result = (await client.createCustomContract(customContractPayload)).response
         expect(result.success).to.not.equal(undefined)
       }).timeout(10000)
 
@@ -68,12 +68,12 @@ describe('DragonchainClient', () => {
     }).timeout(50000)
 
     it('calls getStatus successfully', async () => {
-      const result = await client.getStatus()
+      const result = (await client.getStatus()).response
       expect(result.level).to.equal('1')
     })
 
     it('calls getTransaction successfully', async () => {
-      getTransaction = await client.getTransaction(postTransaction.transaction_id)
+      getTransaction = (await client.getTransaction(postTransaction.transaction_id)).response
       expect(getTransaction.header.txn_id).to.equal(postTransaction.transaction_id)
     })
 
@@ -88,7 +88,7 @@ describe('DragonchainClient', () => {
     }).timeout(5000)
 
     it('calls getBlock successfully', async () => {
-      const result = await client.getBlock(getTransaction.header.block_id)
+      const result = (await client.getBlock(getTransaction.header.block_id)).response
       expect(result.header.block_id).to.equal(getTransaction.header.block_id)
     })
 
@@ -98,7 +98,7 @@ describe('DragonchainClient', () => {
     })
 
     it('calls getSmartContract successfully', async () => {
-      const result = await client.getSmartContract(contractName)
+      const result = (await client.getSmartContract(contractName)).response
       expect(result.name).to.equal(contractName)
     })
 
@@ -122,7 +122,7 @@ describe('DragonchainClient', () => {
 
   describe('PUT', () => {
     it('updates metadata in matchmaking config file', async () => {
-      const result = await client.updateDragonnetConfig(10.0005)
+      const result = (await client.updateDragonnetConfig(10.0005)).response
       expect(result.success).to.not.equal(undefined)
     })
     // --------------------------------------------------------------------------------------
