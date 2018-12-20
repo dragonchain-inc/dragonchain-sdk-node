@@ -25,7 +25,7 @@ describe('DragonchainClient', () => {
     client.overrideCredentials(secrets.AUTH_KEY_ID, secrets.AUTH_KEY)
   })
 
-  describe.only('POST', () => {
+  describe('POST', () => {
     it('POST transaction successfully', async () => {
       const payload: any = {
         'version': '1',
@@ -62,7 +62,7 @@ describe('DragonchainClient', () => {
   })
 
   describe('GET', () => {
-    it.only('Wait for the POST request updates to complete', async () => {
+    it('Wait for the POST request updates to complete', async () => {
       console.log('waiting for the POST updates to complete.....')
       await delay(5000)
     }).timeout(50000)
@@ -72,7 +72,7 @@ describe('DragonchainClient', () => {
       expect(result.level).to.equal('1')
     })
 
-    it.only('calls getTransaction successfully', async () => {
+    it('calls getTransaction successfully', async () => {
       getTransaction = await client.getTransaction(postTransaction.transaction_id)
       expect(getTransaction.header.txn_id).to.equal(postTransaction.transaction_id)
     })
@@ -102,14 +102,21 @@ describe('DragonchainClient', () => {
       expect(result.name).to.equal(contractName)
     })
 
-    it.only('calls getVerifications successfully', async () => {
+    it('calls getVerifications successfully', async () => {
+      const response = {
+        2: [],
+        3: [],
+        4: [],
+        5: []
+      }
       const result = await client.getVerifications(getTransaction.header.block_id)
-      expect(result).to.not.equal(undefined)
+      expect(result).to.eql(response)
     })
 
-    it.only('calls getVerifications successfully for one level', async () => {
+    it('calls getVerifications successfully for one level', async () => {
+      const response: any = []
       const result = await client.getVerifications(getTransaction.header.block_id, 2)
-      expect(result).to.not.equal(undefined)
+      expect(result).to.eql(response)
     })
   })
 
