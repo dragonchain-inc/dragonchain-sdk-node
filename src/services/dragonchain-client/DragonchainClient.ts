@@ -396,11 +396,11 @@ export class DragonchainClient {
    * @param {string} block_id
    * @param {number} level
    */
-  public getVerification = (blockId: string, level = 0) => {
+  public getVerifications = (blockId: string, level = 0) => {
     if (level) {
-      return this.get(`/verification/${blockId}?level=${level}`)
+      return this.get(`/verifications/${blockId}?level=${level}`)
     }
-    return this.get(`/verification/${blockId}`)
+    return this.get(`/verifications/${blockId}`)
   }
 
   public getSmartContractHeap = async (key: string, scName: string) => {
