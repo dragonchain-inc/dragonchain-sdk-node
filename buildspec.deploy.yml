@@ -5,13 +5,12 @@ phases:
     commands:
       - npm install -g yarn
       - yarn install
-      - wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-1.5.tar.gz && tar xzf jq-1.5.tar.gz && cd jq-1.5 && ./configure && make && make install && cd ..
+      - wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-1.5.tar.gz && tar xzf jq-1.5.tar.gz && cd jq-1.5 && ./configure && make && make install && cd .. && rm -rf jq-1.5.tar.gz jq-1.5
   build:
     commands:
       - VERSION=$(node -e "console.log(require('./package.json').version)")
       - yarn build
       - npm config set '//registry.npmjs.org/:_authToken' $(aws ssm get-parameter --name npm-publish-token --with-decryption | jq '.Parameter.Value')
-      - apt-get remove jq
       - npm publish --access restricted
       - yarn docs
       - aws s3 rm --recursive s3://dragonchain-sdk-node-docs/latest/*
