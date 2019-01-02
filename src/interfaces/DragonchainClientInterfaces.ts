@@ -230,7 +230,7 @@ export interface L1BlockAtRest {
     'dc_id': string,
     'block_id': string,
     'level': 1
-    'timestamp'?: string,
+    'timestamp': string,
     'prev_id': string,
     'prev_proof': string
   },
@@ -249,7 +249,7 @@ export interface L2BlockAtRest {
     'dc_id': string,
     'level': 2,
     'block_id': string,
-    'timestamp'?: string,
+    'timestamp': string,
     'prev_proof': string
   }
   'validation': {
