@@ -168,13 +168,6 @@ export interface L1DragonchainTransactionQueryResult {
   total: number
 }
 
-export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4BlockAtRest | L5BlockAtRest
-
-export interface DragonchainBlockQueryResult {
-  results: BlockSchemaType[]
-  total: number
-}
-
 /**
  * ContractCreationSchema
  * Input verification schema
@@ -223,6 +216,31 @@ export interface Verifications {
 }
 
 export type levelVerifications = L2BlockAtRest[] | L3BlockAtRest[] | L4BlockAtRest[] | L5BlockAtRest[]
+export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4BlockAtRest | L5BlockAtRest
+
+export interface DragonchainBlockQueryResult {
+  results: BlockSchemaType[]
+  total: number
+}
+
+export interface L1BlockAtRest {
+  'version': '2',
+  'dcrn': 'Block::L1::AtRest',
+  'header': {
+    'dc_id': string,
+    'block_id': string,
+    'level': 1
+    'timestamp'?: string,
+    'prev_id': string,
+    'prev_proof': string
+  },
+  'transactions': string[],
+  'proof': {
+    'scheme': string,
+    'proof': string,
+    'nonce'?: number
+  }
+}
 
 export interface L2BlockAtRest {
   'version': '2'
