@@ -8,12 +8,14 @@ These docs are auto-generated.
 
 * [constructor](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#constructor)
 * [clearOverriddenCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#clearOverriddenCredentials)
-* [createContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcontract)
 * [createCustomContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcustomcontract)
 * [createLibraryContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createlibrarycontract)
 * [createTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createtransaction)
+* [createBulkTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createbulktransaction)
 * [getBlock](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getblock)
-* [getSmartcontract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getsmartcontract)
+* [getSmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getsmartcontract)
+* [getSmartContractHeap](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getsmartcontractheap)
+* [listSmartcontractHeap](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#listsmartcontractheap)
 * [getStatus](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getstatus)
 * [getTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getTransaction)
 * [overrideCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#overridecredentials)
@@ -30,6 +32,8 @@ These docs are auto-generated.
 
 ### Versions
 * [0.1.0](https://node-sdk-docs.dragonchain.com/0.1.0)
+* [0.1.1](https://node-sdk-docs.dragonchain.com/0.1.1)
+* [0.1.2](https://node-sdk-docs.dragonchain.com/0.1.2)
 * [latest](https://node-sdk-docs.dragonchain.com/latest)
 
 ### Installation
@@ -54,7 +58,7 @@ try {
 
 #### QueryTransactions
 ```javascript
-const searchResult = await dragonchain.queryTransactions('tag:"MyAwesomeTransactionTag"')
+const searchResult = await dragonchain.queryTransactions('tag=MyAwesomeTransactionTag')
 ```
 
 #### OverrideCredentials
@@ -69,7 +73,7 @@ In order to use this SDK, you need to have an Auth Key as well as an Auth Key ID
 This can be loaded into the sdk in various ways, and are checked in the following order of precedence:
 
 1. The environment variables `AUTH_KEY` and `AUTH_KEY_ID` can be set with the appropriate values
-1. Write an ini-style credentials file at `~/.dragonchain/credentials` (or on Windows: `%LOCALAPPDATA%\dragonchain\credentials`) where the section name is the dragonchain id, with values for `auth_key` and `auth_key_id` like so:
+2. Write an ini-style credentials file at `~/.dragonchain/credentials` (or on Windows: `%LOCALAPPDATA%\dragonchain\credentials`) where the section name is the dragonchain id, with values for `auth_key` and `auth_key_id` like so:
 
 ```ini
 [35a7371c-a20a-4830-9a59-5d654fcd0a4a]

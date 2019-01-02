@@ -168,13 +168,6 @@ export interface L1DragonchainTransactionQueryResult {
   total: number
 }
 
-export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4BlockAtRest | L5BlockAtRest
-
-export interface DragonchainBlockQueryResult {
-  results: BlockSchemaType[]
-  total: number
-}
-
 /**
  * ContractCreationSchema
  * Input verification schema
@@ -215,23 +208,37 @@ export interface L1DragonchainStatusResult {
   cloudformationLastUpdatedTime: string
 }
 
+export interface Verifications {
+  '2': L2BlockAtRest[],
+  '3': L3BlockAtRest[],
+  '4': L4BlockAtRest[],
+  '5': L5BlockAtRest[]
+}
+
+export type levelVerifications = L2BlockAtRest[] | L3BlockAtRest[] | L4BlockAtRest[] | L5BlockAtRest[]
+export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4BlockAtRest | L5BlockAtRest
+
+export interface DragonchainBlockQueryResult {
+  results: BlockSchemaType[]
+  total: number
+}
+
 export interface L1BlockAtRest {
-  'version': '2'
-  'dcrn': 'Block::L1::AtRest'
+  'version': '2',
+  'dcrn': 'Block::L1::AtRest',
   'header': {
-    'dc_id': string
-    'block_id': string
+    'dc_id': string,
+    'block_id': string,
     'level': 1
-    'timestamp': string
-    'prev_id': string
+    'timestamp': string,
+    'prev_id': string,
     'prev_proof': string
-  }
-  'transaction': {
-    'items': string
-  }
+  },
+  'transactions': string[],
   'proof': {
-    'scheme': string
-    'proof': string
+    'scheme': string,
+    'proof': string,
+    'nonce'?: number
   }
 }
 
@@ -239,67 +246,22 @@ export interface L2BlockAtRest {
   'version': '2'
   'dcrn': 'Block::L2::AtRest'
   'header': {
-    'dc_id': string
-    'block_id': string
-    'level': 2
-    'timestamp': string
-    'prev_id': string
+    'dc_id': string,
+    'level': 2,
+    'block_id': string,
+    'timestamp': string,
     'prev_proof': string
   }
   'validation': {
-    'dc_id': string
-    'block_id': string
-    'stripped_proof': string
-    'transactions': {
-    }
+    'dc_id': string,
+    'block_id': string,
+    'stripped_proof': string,
+    'transactions': string
   }
   'proof': {
     'scheme': string
     'proof': string
-  }
-}
-
-export interface L1BlockAtRest {
-  'version': '2'
-  'dcrn': 'Block::L1::AtRest'
-  'header': {
-    'dc_id': string
-    'block_id': string
-    'level': 1
-    'timestamp': string
-    'prev_id': string
-    'prev_proof': string
-  }
-  'transaction': {
-    'items': string
-  }
-  'proof': {
-    'scheme': string
-    'proof': string
-  }
-}
-
-export interface L2BlockAtRest {
-  'version': '2'
-  'dcrn': 'Block::L2::AtRest'
-  'header': {
-    'dc_id': string
-    'block_id': string
-    'level': 2
-    'timestamp': string
-    'prev_id': string
-    'prev_proof': string
-  }
-  'validation': {
-    'dc_id': string
-    'block_id': string
-    'stripped_proof': string
-    'transactions': {
-    }
-  }
-  'proof': {
-    'scheme': string
-    'proof': string
+    'nonce'?: number
   }
 }
 
@@ -307,46 +269,52 @@ export interface L3BlockAtRest {
   'version': '2'
   'dcrn': 'Block::L3::AtRest'
   'header': {
-    'dc_id': string
-    'level': 3
-    'block_id': string
-    'timestamp': string
+    'dc_id': string,
+    'level': 3,
+    'block_id': string,
+    'timestamp': string,
     'prev_proof': string
-  }
+  },
   'l2-Validations': {
-    'l1_dc_id': string
-    'l1_block_id': string
-    'l1_proof': string
-    'ddss': string
-    'count': string
-    'regions': string
-    'clouds': string
-  }
+    'l1_dc_id': string,
+    'l1_block_id': string,
+    'l1_proof': string,
+    'ddss': string,
+    'count': string,
+    'regions': [],
+    'clouds': []
+  },
   'proof': {
-    'scheme': string
-    'proof': string
+    'scheme': string,
+    'proof': string,
+    'nonce'?: number
   }
 }
 
+export interface L4Validations {
+  'l3_dc_id': string,
+  'l3_block_id': string,
+  'l3_proof': string,
+  'valid': boolean
+}
 export interface L4BlockAtRest {
   'version': '2'
   'dcrn': 'Block::L4::AtRest'
   'header': {
-    'type': object
-    'dc_id': string
-    'level': 4
-    'block_id': string
-    'timestamp': string
-    'l1_dc_id': string
-    'l1_block_id': string
-    'l1_proof': string
+    'dc_id': string,
+    'level': 4,
+    'block_id': string,
+    'timestamp': string,
+    'l1_dc_id': string,
+    'l1_block_id': string,
+    'l1_proof': string,
     'prev_proof': string
   }
-  'l3-Validations': {
-  }
+  'l3-Validations': L4Validations[]
   'proof': {
     'scheme': string
     'proof': string
+    'nonce'?: number
   }
 }
 
@@ -360,13 +328,11 @@ export interface L5BlockAtRest {
     'timestamp': string
     'prev_proof': string
   }
-  'l4-blocks': {
-
-  }
+  'l4-blocks': string[]
   'proof': {
     'scheme': string
     'proof': string
-    'nonce': number | null
+    'nonce'?: number
   }
 }
 
@@ -479,4 +445,8 @@ export interface ContractCreateBtcPublisher {
   'runtime':	'nodejs8.10',
   'sc_type':	'transaction',
   'version':	'2'
+}
+
+export interface UpdateDataResponse {
+  'success': string
 }
