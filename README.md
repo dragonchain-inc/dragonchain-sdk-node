@@ -32,7 +32,7 @@ These docs are auto-generated.
 
 ### Versions
 * [0.1.0](https://node-sdk-docs.dragonchain.com/0.1.0)
-* [0.1.1](https://node-sdk-docs.dragonchain.com/0.1.0)
+* [0.1.1](https://node-sdk-docs.dragonchain.com/0.1.1)
 * [0.1.2](https://node-sdk-docs.dragonchain.com/0.1.2)
 * [latest](https://node-sdk-docs.dragonchain.com/latest)
 
