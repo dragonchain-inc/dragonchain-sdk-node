@@ -31,7 +31,10 @@ import {
   DragonchainBlockQueryResult,
   validContractLibraries,
   DragonchainBulkTransactions,
-  Response
+  Response,
+  Verifications,
+  levelVerifications,
+  UpdateDataResponse
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
@@ -254,7 +257,7 @@ export class DragonchainClient {
     if (envVars) {
       body['custom_environment_variables'] = envVars
     }
-    return await this.put(`/contract/${body.name}`, body) as Response<any> // TODO: Properly type this!!
+    return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
   }
   /**
    * Update the status of a library contract
@@ -267,7 +270,7 @@ export class DragonchainClient {
       'name': name,
       'status': status
     }
-    return await this.put(`/contract/${body.name}`, body) as Response<any> // TODO: Properly type this!!
+    return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
   }
 
   /**
@@ -282,7 +285,7 @@ export class DragonchainClient {
         'askingPrice': askingPrice
       }
     }
-    return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<any> // TODO: Properly type this!!
+    return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<UpdateDataResponse>
   }
   /**
    * Update your maximum price for each level of verification.
@@ -298,7 +301,7 @@ export class DragonchainClient {
     if (level! > 0) {
       dragonnet[`l${Math.round(level!)}`] = { maximumPrice }
     }
-    return await this.put(`/update-matchmaking-data`, { dragonnet }) as Response<any> // TODO: Properly type this
+    return await this.put(`/update-matchmaking-data`, { dragonnet }) as Response<UpdateDataResponse>
   }
 
   /**
@@ -347,9 +350,9 @@ export class DragonchainClient {
    */
   public getVerifications = async (blockId: string, level = 0) => {
     if (level) {
-      return await this.get(`/verifications/${blockId}?level=${level}`) as Response<any> // TODO: Properly type this!
+      return await this.get(`/verifications/${blockId}?level=${level}`) as Response<levelVerifications>
     }
-    return await this.get(`/verifications/${blockId}`) as Response<any> // TODO: Properly type this!
+    return await this.get(`/verifications/${blockId}`) as Response<Verifications>
   }
 
   /**
