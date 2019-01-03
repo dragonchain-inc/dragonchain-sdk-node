@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Dragonchain, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2019 Dragonchain, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,22 +182,17 @@ export interface DragonchainContractCreateResponse {
   success: 'Contract creation in progress.',
 }
 
+export type SupportedHTTP = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
 export interface FetchOptions {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method: SupportedHTTP
   headers: {
     'Content-Type': string
     dragonchain: string
-    timestamp: null | string
+    timestamp: string
     Authorization: string
   }
-  body: string,
-  hmacAlgo: string,
-  overriddenCredentials?: OverriddenCredentials
-}
-
-export interface OverriddenCredentials {
-  authKeyId: string
-  authKey: string
+  body: string | undefined
 }
 
 export interface L1DragonchainStatusResult {

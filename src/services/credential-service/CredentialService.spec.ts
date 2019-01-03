@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Dragonchain, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2019 Dragonchain, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,58 +17,75 @@
 import { expect } from 'chai'
 import { CredentialService } from './CredentialService'
 import { createSandbox } from 'sinon'
-import { DragonchainRequestObject } from '../dragonchain-client/DragonchainRequestObject'
 
 describe('CredentialService', () => {
-  let dro: any
   const testBed = createSandbox()
+  let credentialService: CredentialService
 
   afterEach(() => {
     testBed.restore()
   })
 
-  before(() => {
-    dro = {
-      method: 'GET', // get
-      path: '/chain/transaction',
-      dragonchainId: 'a dragonchain id',
-      timestamp: '12345',
-      headers: {},
-      body: '',
-      contentType: '',
-      url: 'http.fake.org',
-      hmacAlgo: 'sha256',
-      version: '1',
-      asFetchOptions: () => (
-        {
-          method: dro.method,
-          body: dro.body,
-          headers: {
-            'Content-Type': dro.contentType,
-            dragonchain: dro.dragonchainId,
-            Authorization: 'whocares',
-            timestamp: dro.timestamp
-          }
-        }
-      ) as any
-    } as DragonchainRequestObject
+  beforeEach(() => {
+    credentialService = new CredentialService('testId', 'key', 'keyId')
   })
-  describe('.getAuthorizationHeader', () => {
 
-    it('should use overridden creds', async () => {
-      dro.overriddenCredentials = { authKey: 'banana1', authKeyId: 'banana2' }
-      const spy = testBed.stub(CredentialService, 'getDragonchainCredentials')
-      await CredentialService.getAuthorizationHeader(dro)
-      spy.neverCalledWith(dro.dragonchainId)
-      dro.overriddenCredentials = undefined
+  describe('#constructor', () => {
+    it('initializes with correct variables', () => {
+      const dcid = 'dcid'
+      const key = 'key'
+      const keyId = 'keyId'
+      const algo = 'SHA256'
+      const service = new CredentialService(dcid, key, keyId, algo)
+      expect(service.dragonchainId).to.equal(dcid)
+      expect(service.credentials.authKey).to.equal(key)
+      expect(service.credentials.authKeyId).to.equal(keyId)
+      expect(service.hmacAlgo).to.equal(algo)
     })
-    it('returns expected hmac', async () => {
-      const authKey = 'key'
-      const authKeyId = 'id'
-      testBed.stub(CredentialService, 'getDragonchainCredentials').onFirstCall().returns(Promise.resolve({ authKey, authKeyId }))
+  })
 
-      const result = await CredentialService.getAuthorizationHeader(dro)
-      expect(result).to.equal('DC1-HMAC-SHA256 id:XBzopP+FZkSKZezdNzF0WW1I8E98Fp+q/8AicSk9FqY=')
+  describe('#getIdFromEnvVars', () => {
+    it('returns the environment variable when set', () => {
+      process.env.DRAGONCHAIN_ID = 'something'
+      expect(CredentialService.getIdFromEnvVars()).to.equal('something')
+    })
+
+    it('returns an empty string when the variable is not set', () => {
+      delete process.env.DRAGONCHAIN_ID
+      expect(CredentialService.getIdFromEnvVars()).to.equal('')
+    })
+  })
+
+  describe('#getCredsFromEnvVars', () => {
+    it('returns the creds from environment when set', () => {
+      process.env.AUTH_KEY = 'aKey'
+      process.env.AUTH_KEY_ID = 'aKeyId'
+      expect(CredentialService.getCredsFromEnvVars()).to.deep.equal({ authKey: 'aKey', authKeyId: 'aKeyId' })
+    })
+
+    it('returns an false when environment is not set', () => {
+      delete process.env.AUTH_KEY
+      delete process.env.AUTH_KEY_ID
+      expect(CredentialService.getCredsFromEnvVars()).to.equal(false)
+    })
+  })
+
+  describe('.overrideCredentials', () => {
+    it('sets new credentials correctly', () => {
+      const newKey = 'some value'
+      const newKeyId = 'another value'
+      credentialService.overrideCredentials(newKeyId, newKey)
+      expect(credentialService.credentials.authKey).to.equal(newKey)
+      expect(credentialService.credentials.authKeyId).to.equal(newKeyId)
+    })
+  })
+
+  describe('.getAuthorizationHeader', () => {
+    it('returns expected hmac', () => {
+      const result = credentialService.getAuthorizationHeader('GET', '/path', 'timestamp', 'application/json', '')
+      expect(result).to.equal('DC1-HMAC-SHA256 keyId:8Bc+h0parZxGeMB9rYzzRUuNxxHSIjGqSD4W/635A9k=')
+      const result2 = credentialService.getAuthorizationHeader('POST', '/new_path', 'timestamp', 'application/json', '"body"')
+      expect(result2).to.equal('DC1-HMAC-SHA256 keyId:PkVjUxWZr6ST4xh+JxYFZresaFhQbk8sggWqyWv/XkU=')
     })
   })
 })

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Dragonchain, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2019 Dragonchain, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import * as chai from 'chai'
 import * as sinonChai from 'sinon-chai'
-import { stub, assert, useFakeTimers } from 'sinon'
+import { stub, assert, useFakeTimers, match } from 'sinon'
 import { DragonchainClient } from './DragonchainClient'
 import { ContractRuntime, SmartContractType, CustomContractCreationSchema, ContractCreateCurrencyContract } from 'src/interfaces/DragonchainClientInterfaces'
 
@@ -26,7 +26,7 @@ let fakeTimeStamp
 let fakeTime: string
 
 describe('DragonchainClient', () => {
-  describe('constructor', () => {
+  describe('#constructor', () => {
     it('returns instance of DragonchainClient', () => {
       const client = new DragonchainClient('banana')
       expect(client instanceof DragonchainClient).to.equal(true)
@@ -73,7 +73,7 @@ describe('DragonchainClient', () => {
       fakeResponseObj = { body: 'fakeResponseBody' }
       fakeResponseText = 'fakeString'
       fetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
-      CredentialService = { getAuthorizationHeader: stub().resolves('fakeCreds') }
+      CredentialService = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
       logger = { log: stub(), debug: stub() }
       const injected = { logger, CredentialService, fetch }
 
@@ -110,11 +110,19 @@ describe('DragonchainClient', () => {
 
     describe('.setDragonchainId', () => {
       it('allows resetting the dragonchainId', async () => {
-        const id = 'goo-transaction-id'
         client.setDragonchainId('hotBanana')
-        await client.getTransaction(id)
+        await client.getStatus()
         expectedFetchOptions.headers.dragonchain = 'hotBanana'
-        assert.calledWith(fetch, `https://hotBanana.api.dragonchain.com/transaction/${id}`, expectedFetchOptions)
+        assert.calledWith(fetch, 'https://hotBanana.api.dragonchain.com/status', match({ headers: { dragonchain: 'hotBanana' } }))
+      })
+    })
+
+    describe('.setEndpoint', () => {
+      it('allows setting the endpoint manually', async () => {
+        const endpoint = 'https://some.domain.com'
+        client.setEndpoint(endpoint)
+        await client.getStatus()
+        assert.calledWith(fetch, `${endpoint}/status`, expectedFetchOptions)
       })
     })
 
@@ -163,7 +171,7 @@ describe('DragonchainClient', () => {
     const fakeResponseObj = { body: 'fakeResponseBody' }
     const fakeResponseText = 'fakeString'
     const fetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
-    const CredentialService = { getAuthorizationHeader: stub().resolves('fakeCreds') }
+    const CredentialService = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
     const logger = { log: stub(), debug: stub() }
     const injected = { logger, CredentialService, fetch }
 
@@ -244,7 +252,7 @@ describe('DragonchainClient', () => {
     const fakeResponseObj = { body: 'fakeResponseBody' }
     const fakeResponseText = 'fakeString'
     const fetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
-    const CredentialService = { getAuthorizationHeader: stub().resolves('fakeCreds') }
+    const CredentialService = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
     const logger = { log: stub(), debug: stub() }
     const injected = { logger, CredentialService, fetch }
 
