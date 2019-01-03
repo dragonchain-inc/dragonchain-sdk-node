@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Dragonchain, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2019 Dragonchain, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { readFile } from 'fs'
+import { readFileSync } from 'fs'
 const path = require('path') // import does not work
 const os = require('os') // import does not work
 import * as crypto from 'crypto'
 import * as ini from 'ini'
-import { DragonchainRequestObject } from '../dragonchain-client/DragonchainRequestObject'
 import { DragonchainCredentials } from './DragonchainCredentials'
 import { FailureByDesign } from '../../errors/FailureByDesign'
-import { promisify } from 'util'
-import { getLogger } from '../../Logger'
+
+export type HmacAlgorithm = 'SHA256' | 'SHA3-256' | 'BLAKE2b512'
 
 /**
  * @class CredentialService
@@ -33,37 +32,97 @@ export class CredentialService {
   /**
    * @hidden
    */
-  private static iPromiseToReadThisFile = promisify(readFile)
+  public dragonchainId: string
+  /**
+   * @hidden
+   */
+  public credentials: DragonchainCredentials
+  /**
+   * @hidden
+   */
+  public hmacAlgo: HmacAlgorithm
+
+  /**
+   * Create an Instance of a CredentialService
+   * @param dragonchainId dragonchainId associated with these credentials
+   * @param authKey authKey to use with these credentials
+   * @param authKeyId authKeyId to use with these credentials
+   * @param hmacAlgo hmac algorithm to use
+   */
+  constructor (
+    dragonchainId: string,
+    authKey: string = '',
+    authKeyId: string = '',
+    hmacAlgo: HmacAlgorithm = 'SHA256'
+  ) {
+    this.dragonchainId = dragonchainId
+    if (authKey && authKeyId) {
+      this.credentials = { authKey, authKeyId }
+    } else {
+      try {
+        this.credentials = CredentialService.getDragonchainCredentials(this.dragonchainId)
+      } catch {  // don't require credentials to be present on construction
+        this.credentials = { authKey: '', authKeyId: '' }
+      }
+    }
+    this.hmacAlgo = hmacAlgo
+  }
+
+  /**
+   * Manually override the credentials for this instance
+   * @public
+   */
+  public overrideCredentials = (authKeyId: string, authKey: string) => {
+    this.credentials = { authKey, authKeyId }
+  }
 
   /**
    * Return the HMAC signature used as the Authorization Header on REST requests to your dragonchain.
-   * By default, this function searches for credentials on your hard-drive for the requested dragonchainId.
-   * If you do not have matching dragonchain credentials in your home directory, you must directly override
-   * the credentials using the `DragonchainRequestObject#overridenCredentials` member.
-   *
-   * An easy way to achieve this is to use the `DragonchainClient#overrideCredentials` method.
    * @public
    */
-  public static getAuthorizationHeader = async (dro: DragonchainRequestObject) => {
-    const { version, hmacAlgo, dragonchainId, overriddenCredentials } = dro
-    const dcCreds = overriddenCredentials || await CredentialService.getDragonchainCredentials(dragonchainId)
-    const { authKey, authKeyId } = dcCreds
-    const message = CredentialService.getHmacMessageString(dro)
-    const hmac = crypto.createHmac(hmacAlgo, authKey)
+  public getAuthorizationHeader = (method: string, path: string, timestamp: string, contentType: string, body: string) => {
+    const message = CredentialService.getHmacMessageString(method, path, this.dragonchainId, timestamp, contentType, body, this.hmacAlgo)
+    const hmac = crypto.createHmac(this.hmacAlgo, this.credentials.authKey)
     const signature = hmac.update(message).digest('base64')
-    return `DC${version}-HMAC-${hmacAlgo.toUpperCase()} ${authKeyId}:${signature}`
+    return `DC1-HMAC-${this.hmacAlgo} ${this.credentials.authKeyId}:${signature}`
   }
 
   /**
    * @hidden
-   * @private
+   * @name getDragonchainId
+   * @description Get a dragonchainId from environment/config file
+   * @returns {string}
+   * @throws {FailureByDesign<NOT_FOUND|UNEXPECTED_ERROR>}
+   */
+  public static getDragonchainId = (): string => {
+    // check env vars first
+    const id = CredentialService.getIdFromEnvVars()
+    if (id) return id
+
+    // check credential file on disk.
+    const credentialFilePath = CredentialService.getCredentialFilePath()
+    try {
+      const config = ini.parse(readFileSync(credentialFilePath, 'utf-8'))
+      const dragonchainCredentials = config['default']
+      if (dragonchainCredentials === undefined) { throw Error('MISCONFIGURED_CRED_FILE') } // caught below
+      const { dragonchain_id } = config['default']
+      return dragonchain_id
+    } catch (e) {
+      if (e.message === 'MISCONFIGURED_CRED_FILE') { throw new FailureByDesign('NOT_FOUND', 'credential file is missing a default id') }
+      if (e.code === 'ENOENT') { throw new FailureByDesign('NOT_FOUND', `credential file not found at "${credentialFilePath}"`) }
+      throw new FailureByDesign('UNEXPECTED_ERROR', `Something unexpected happened while looking for credentials at "${credentialFilePath}"`)
+    }
+  }
+
+  /**
+   * @hidden
    * @name getDragonchainCredentials
    * @description Get an authKey/authKeyId pair
    * @param {string} DragonchainId (optional) dragonchainId to get keys for (default pulling from config files)
    * @returns {DragonchainCredentials}
    * @throws {FailureByDesign<NOT_FOUND|UNEXPECTED_ERROR>}
    */
-  static getDragonchainCredentials = async (dragonchainId: string): Promise<DragonchainCredentials> => {
+  public static getDragonchainCredentials = (dragonchainId: string): DragonchainCredentials => {
     // check env vars first
     const creds = CredentialService.getCredsFromEnvVars()
     if (creds) return creds
@@ -74,14 +133,12 @@ export class CredentialService {
     // check credential file on disk.
     const credentialFilePath = CredentialService.getCredentialFilePath()
     try {
-      const file = await CredentialService.iPromiseToReadThisFile(credentialFilePath, 'utf-8')
-      const config = ini.parse(file)
+      const config = ini.parse(readFileSync(credentialFilePath, 'utf-8'))
       const dragonchainCredentials = config[dragonchainId]
       if (dragonchainCredentials === undefined) { throw Error('MISCONFIGURED_CRED_FILE') } // caught below
       const { auth_key_id, auth_key } = config[dragonchainId]
       return { authKey: auth_key, authKeyId: auth_key_id } as DragonchainCredentials
     } catch (e) {
-      getLogger().error(e)
       if (e.message === 'MISCONFIGURED_CRED_FILE') { throw new FailureByDesign('NOT_FOUND', `credential file is missing a config for ${dragonchainId}`) }
       if (e.code === 'ENOENT') { throw new FailureByDesign('NOT_FOUND', `credential file not found at "${credentialFilePath}"`) }
       throw new FailureByDesign('UNEXPECTED_ERROR', `Something unexpected happened while looking for credentials at "${credentialFilePath}"`)
@@ -95,15 +152,15 @@ export class CredentialService {
    * @static
    * @description transform a DragonchainRequestObject into a compliant hmac message string
    */
-  private static getHmacMessageString = (dro: DragonchainRequestObject) => {
-    const binaryBody = Buffer.from(dro.body || '' as string, 'UTF-8')
-    const hashedBase64Content = crypto.createHash(dro.hmacAlgo).update(binaryBody).digest('base64')
+  private static getHmacMessageString = (method: string, path: string, dragonchainId: string, timestamp: string, contentType: string, body: string, hmacAlgo: HmacAlgorithm) => {
+    const binaryBody = Buffer.from(body || '', 'UTF-8')
+    const hashedBase64Content = crypto.createHash(hmacAlgo).update(binaryBody).digest('base64')
     return [
-      dro.method.toUpperCase(),
-      dro.path,
-      dro.dragonchainId,
-      dro.timestamp,
-      dro.contentType,
+      method.toUpperCase(),
+      path,
+      dragonchainId,
+      timestamp,
+      contentType,
       hashedBase64Content
     ].join('\n')
   }
@@ -114,8 +171,8 @@ export class CredentialService {
    * @name getCredentialFilePath
    * @description Get the path for the credential file depending on the OS
    * @returns string of the credential file path
-   * @returns {string} dragonchain credential file path from system root.
-   * @example e.g.: "/Users/Sally/.dragonchain/credentials"
+   * @returns {string} dragonchain credential file path
+   * @example e.g.: "~/.dragonchain/credentials" or "%LOCALAPPDATA%\dragonchain\credentials" on Windows
    */
   private static getCredentialFilePath = () => {
     if (os.platform() === 'win32') {
@@ -128,14 +185,27 @@ export class CredentialService {
    * @hidden
    * @static
    * @name getCredsFromEnvVars
-   * @description create a DragonchainCredentials object from creds found in environment variables.
-   * @returns {DragonchainCredentials} dragonchain credential file path from system root.
+   * @description create a DragonchainCredentials object from creds found in environment variables
+   * @returns {DragonchainCredentials} dragonchain credentials if provided in the environment
    */
-  private static getCredsFromEnvVars = () => {
+  static getCredsFromEnvVars = () => {
     const authKey = process.env['AUTH_KEY']
     const authKeyId = process.env['AUTH_KEY_ID']
     if (authKey && authKeyId) return { authKey, authKeyId } as DragonchainCredentials
     return false
+  }
+
+  /**
+   * @hidden
+   * @static
+   * @name getIdFromEnvVars
+   * @description get the dragonchainId from the environment
+   * @returns {string} dragonchain id if found in env, empty string if not
+   */
+  static getIdFromEnvVars = () => {
+    const dragonchainId = process.env['DRAGONCHAIN_ID']
+    if (dragonchainId) return dragonchainId
+    return ''
   }
 }
 

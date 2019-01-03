@@ -1,9 +1,11 @@
 # Dragonchain JS SDK
+
 ![code-build status](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiUFpHWHVOTHpQSHo4T3ZHSjBUT3JZQ0kzRHBybUFvbCt4WjB6MHFhY2F1dmxPTU1mUUZUYXk4d0QzTXpUMzhRek9sZ2dLclkwcTVjTEpJaElUN3cxQUdjPSIsIml2UGFyYW1ldGVyU3BlYyI6Ik56K0RLUFUxVnhpUHNCNWoiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 
 Talk to your dragonchain.
 
-# Method Quicklinks
+## Method Quicklinks
+
 These docs are auto-generated.
 
 * [constructor](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#constructor)
@@ -31,18 +33,23 @@ These docs are auto-generated.
 * [updateDragonnetConfig](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatedragonnetconfig)
 
 ### Versions
+
 * [0.1.0](https://node-sdk-docs.dragonchain.com/0.1.0)
 * [0.1.1](https://node-sdk-docs.dragonchain.com/0.1.1)
 * [0.1.2](https://node-sdk-docs.dragonchain.com/0.1.2)
+* [0.1.3](https://node-sdk-docs.dragonchain.com/0.1.3)
 * [latest](https://node-sdk-docs.dragonchain.com/latest)
 
 ### Installation
-```bash
+
+```sh
 npm i dragonchain-sdk --save
 ```
 
 ### Examples
+
 #### GetBlock
+
 ```javascript
 const myDcId = '3f2fef78-0000-0000-0000-9f2971607130';
 const dragonchain = new DragonchainClient(myDcId);
@@ -57,16 +64,20 @@ try {
 ```
 
 #### QueryTransactions
+
 ```javascript
 const searchResult = await dragonchain.queryTransactions('tag=MyAwesomeTransactionTag')
 ```
 
 #### OverrideCredentials
+
 This is fine for quick tests. For actual production use, you should use the [credential ini file](#configuration)
+
 ```javascript
 dragonchain.overrideCredentials('AUTH_KEY_ID','AUTH_KEY')
 dragonchain.clearOverriddenCredentials() // unset credentials
 ```
+
 ## Configuration
 
 In order to use this SDK, you need to have an Auth Key as well as an Auth Key ID for a given dragonchain.

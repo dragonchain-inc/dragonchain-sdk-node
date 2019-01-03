@@ -104,25 +104,29 @@ describe('DragonchainClient', () => {
 
     it('calls getVerifications successfully', async () => {
       const response = {
-        2: [],
-        3: [],
-        4: [],
-        5: []
+        ok: true,
+        response: {
+          2: [],
+          3: [],
+          4: [],
+          5: []
+        },
+        status: 200
       }
       const result = await client.getVerifications(getTransaction.header.block_id)
       expect(result).to.eql(response)
     })
 
     it('calls getVerifications successfully for one level', async () => {
-      const response: any = []
+      const response: any = { ok: true, response: [], status: 200 }
       const result = await client.getVerifications(getTransaction.header.block_id, 2)
       expect(result).to.eql(response)
     })
   })
 
   describe('PUT', () => {
-    it('updates metadata in matchmaking config file', async () => {
-      const result = (await client.updateDragonnetConfig(10.0005)).response
+    it('updates metadata in matchmaking config', async () => {
+      const result = (await client.updateDragonnetConfig({ l2: 10.123 })).response
       expect(result.success).to.not.equal(undefined)
     })
     // --------------------------------------------------------------------------------------

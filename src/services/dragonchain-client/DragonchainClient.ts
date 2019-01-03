@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Dragonchain, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2019 Dragonchain, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { DragonchainRequestObject } from './DragonchainRequestObject'
 import fetch from 'node-fetch'
 import {
   DragonchainTransactionCreatePayload,
@@ -25,6 +24,7 @@ import {
   CustomContractCreationSchema,
   L1DragonchainTransactionQueryResult,
   DragonchainContractCreateResponse,
+  SupportedHTTP,
   FetchOptions,
   L1DragonchainStatusResult,
   SmartContractType,
@@ -33,6 +33,7 @@ import {
   DragonchainBulkTransactions,
   Response,
   Verifications,
+  DragonnetConfigSchema,
   levelVerifications,
   UpdateDataResponse
 } from 'src/interfaces/DragonchainClientInterfaces'
@@ -66,7 +67,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private dragonchainId: string
+  private endpoint: string
   /**
    * @hidden
    */
@@ -78,10 +79,6 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private overriddenCredentials?: { authKey: string, authKeyId: string }
-  /**
-   * @hidden
-   */
   private fetch: any
   /**
    * @hidden
@@ -90,21 +87,23 @@ export class DragonchainClient {
 
   /**
    * Create an Instance of a DragonchainClient.
-   * @param dragonchainId uuid of a target dragonchain
+   * @param dragonchainId id of a target dragonchain
    * @param verify verify SSL Certs when talking to local dragonchains
    * @param injected used only for testing
    */
   constructor (
-    dragonchainId: string,
+    dragonchainId: string = '',
     verify = true,
     injected: any = {}
     ) {
-    this.dragonchainId = dragonchainId
+    if (!dragonchainId) {
+      dragonchainId = CredentialService.getDragonchainId()
+    }
     this.verify = verify
+    this.endpoint = `https://${dragonchainId}.api.dragonchain.com`
     this.logger = injected.logger || getLogger()
     this.fetch = injected.fetch || fetch
-    this.credentialService = injected.CredentialService || CredentialService
-    this.overriddenCredentials = undefined
+    this.credentialService = injected.CredentialService || new CredentialService(dragonchainId)
   }
 
   /**
@@ -128,33 +127,42 @@ export class DragonchainClient {
   static isValidSmartContractType = (smartContractType: SmartContractType) => validSmartContractTypes.includes(smartContractType)
 
   /**
-   * This method is used to override this SDK's attempt to look-up your credentials in your home directory.
-   * After using this method, subsequent requests to your dragonchain will not attempt to look for your credentials.
+   * set the log level of the Dragonchain client
+   * @param LogLevel default='error'
+   */
+  public setLogLevel = (level: LogLevel) => {
+    this.logger = getLogger(level)
+  }
+
+  /**
+   * This method is used to override this SDK's attempt to automatically fetch credentials automatically with manually specified creds
    *
-   * To undo this on an instantiated DragonchainClient, simply call `#clearOverriddenCredentials`
    * @param {string} authKeyId Auth Key ID used in HMAC
    * @param {string} authKey Auth Key used in HMAC
    */
   public overrideCredentials = (authKeyId: string, authKey: string) => {
-    this.overriddenCredentials = { authKey, authKeyId }
+    this.credentialService.overrideCredentials(authKeyId, authKey)
   }
-
-  /**
-   * Remove any overridden credentials and fall-back to using the env vars, or credentials file.
-   * @name clearOverriddenCredentials
-   */
-  public clearOverriddenCredentials = () => { this.overriddenCredentials = undefined }
 
   /**
    * Change the dragonchainId for this DragonchainClient instance.
    *
-   * After using this command, subsequent requests to your dragonchain will attempt to locate credentials in your home directory for the new dragonchainId.
-   * If unable to locate your credentials for the new chain, requests may throw a `FailureByDesign('NOT_FOUND')` error.
-   * If credentials were previously forcefully overridden and mismatch the ID you have set, your requests to dragonchain's api will 403 due to an unverifiable HMAC signature.
-   * @param dragonchainId The id of the dragonchain you want to talk to.
+   * After using this command, subsequent requests to your dragonchain will attempt to re-locate credentials for the new dragonchain
+   * @param dragonchainId The id of the dragonchain you want to set
+   * @param setEndpoint Whether or not to set a new endpoint automatically (for managed chains at .api.dragonchain.com)
    */
-  public setDragonchainId = (dragonchainId: string) => {
-    this.dragonchainId = dragonchainId
+  public setDragonchainId = (dragonchainId: string, setEndpoint: boolean = true) => {
+    this.credentialService = new CredentialService(dragonchainId)
+    if (setEndpoint) this.setEndpoint(`https://${dragonchainId}.api.dragonchain.com`)
+  }
+
+  /**
+   * Change the endpoint for this DragonchainClient instance.
+   *
+   * @param endpoint The endpoint of the dragonchain you want to set
+   */
+  public setEndpoint = (endpoint: string) => {
+    this.endpoint = endpoint
   }
 
   /**
@@ -163,14 +171,6 @@ export class DragonchainClient {
    */
   public getTransaction = async (transactionId: string) => {
     return await this.get(`/transaction/${transactionId}`) as Response<L1DragonchainTransactionFull>
-  }
-
-  /**
-   * set the log level of the Dragonchain client
-   * @param LogLevel default='error'
-   */
-  public setLogLevel = (level: LogLevel) => {
-    this.logger = getLogger(level)
   }
 
   /**
@@ -259,6 +259,7 @@ export class DragonchainClient {
     }
     return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
   }
+
   /**
    * Update the status of a library contract
    * @param {string} name the name of the existing library contract that you want to update
@@ -275,32 +276,38 @@ export class DragonchainClient {
 
   /**
    * Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
-   * If you are a level 5 you're required to update your asking price and broadcast interval
    * @param {number} askingPrice (0.0001-1000.0000) the price in DRGN to charge L1 nodes for your verification of their data. Setting this number too high will cause L1's to ignore you more often.
+   * @param {number} broadcastInterval Broadcast Interval is only for level 5 chains
    */
-  public updateMatchmakingConfig = async (askingPrice: number) => {
-    if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
+  public updateMatchmakingConfig = async (askingPrice?: number, broadcastInterval?: number) => {
+    if (askingPrice) {
+      if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
+    }
     const matchmakingUpdate: any = {
       'matchmaking': {
-        'askingPrice': askingPrice
+        'askingPrice': askingPrice,
+        'broadcastInterval': broadcastInterval
       }
     }
     return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<UpdateDataResponse>
   }
+
   /**
    * Update your maximum price for each level of verification.
    * This method is only relevant for L1 nodes.
-   * @param {number} maximumPrice (0-1000) maximum price in DRGN you are willing to pay for verifications. If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
+   * @param {DragonnetConfigSchema} maximumPrices maximum prices (0-1000) to set for each level (in DRGNs) If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
    */
-  public updateDragonnetConfig = async (maximumPrice: number, level?: number) => {
-    if (isNaN(maximumPrice) || maximumPrice < 0 || maximumPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `maxPrice must be between 0 and 1000.`) }
-
+  public updateDragonnetConfig = async (maximumPrices: DragonnetConfigSchema) => {
     const dragonnet = {} as any
-    if (!level)[2,3,4,5].forEach(i => { dragonnet[`l${i}`] = { maximumPrice } })
-    if (isNaN(level!) || level! > 5 || level! < 0) throw new FailureByDesign('BAD_REQUEST', `Invalid verification level "${level}" requested. Must be between 1-5`)
-    if (level! > 0) {
-      dragonnet[`l${Math.round(level!)}`] = { maximumPrice }
-    }
+    [2,3,4,5].forEach(i => {
+      const item = maximumPrices[`l${i}`]
+      if (item) {
+        if (isNaN(item) || item < 0 || item > 1000) { throw new FailureByDesign('BAD_REQUEST', 'maxPrice must be between 0 and 1000.') }
+        dragonnet[`l${i}`] = { maximumPrice: item }
+      }
+    })
+    // Make sure SOME valid levels were provided by checking if dragonnet is an empty object
+    if (Object.keys(dragonnet).length === 0) throw new FailureByDesign('BAD_REQUEST', 'No valid levels provided')
     return await this.put(`/update-matchmaking-data`, { dragonnet }) as Response<UpdateDataResponse>
   }
 
@@ -371,15 +378,14 @@ export class DragonchainClient {
 
   /**
    * listSmartcontractHeap
-   * List from the smart contract heap
-   * This function, (unlike other SDK methods) returns an array of raw utf-8 text by design. (not a js object)
-   * If you expect the result to be parsed json pass `true` as the jsonParse parameter.
-   * @param {string} key the key under which data has been stored in heap
+   * List objects from a smart contract heap
    * @param {string} scName the name of smart contract
-   * @param {boolean} jsonParse attempt to parse heap data as JSON. Throws JSONParse error if it fails.
+   * @param {string} key the sub-key ('folder') to list in the SC heap (optional. Defaults to root of SC heap)
    */
-  public listSmartcontractHeap = async (scName: string, jsonParse: boolean = false) => {
-    return await this.get(`/list/${scName}/`, jsonParse) as Response<string[]>
+  public listSmartcontractHeap = async (scName: string, key: string = '') => {
+    let path = `/list/${scName}/`
+    if (key) path += key
+    return await this.get(path) as Response<string[]>
   }
 
   /**
@@ -408,36 +414,53 @@ export class DragonchainClient {
     const queryString = `${query}${params}`
 
     return queryString
-
   }
+
   /**
    * @hidden
    */
   private async get (path: string, jsonParse: boolean = true) {
-    const options = { method: 'GET' } as FetchOptions
-    return this.makeRequest(path, options, jsonParse)
+    return this.makeRequest(path, 'GET', '', jsonParse)
   }
 
   /**
    * @hidden
    */
-  private async post (path: string, body: object) {
-    const options = { method: 'POST', body: JSON.stringify(body) } as FetchOptions
-    return this.makeRequest(path, options)
+  private async post (path: string, body: string | object) {
+    const bodyString = typeof body === 'string' ? body : JSON.stringify(body)
+    return this.makeRequest(path, 'POST', bodyString)
   }
+
   /**
    * @hidden
    */
-  private async put (path: string, body: object) {
-    const options = { method: 'PUT', body: JSON.stringify(body) } as FetchOptions
-    return this.makeRequest(path, options)
+  private async put (path: string, body: string | object) {
+    const bodyString = typeof body === 'string' ? body : JSON.stringify(body)
+    return this.makeRequest(path, 'PUT', bodyString)
   }
 
-  // DELETE => NOT IMPLEMENTED
-  // private delete (path: string) {
-  //   const options = { method: 'DELETE' } as FetchOptions
-  //   return this.makeRequest(path, options)
-  // }
+  /**
+   * @hidden
+   */
+  private getFetchOptions (method: SupportedHTTP, path: string, body: string, contentType: string = 'application/json'): FetchOptions {
+    const timestamp = new Date().toISOString()
+    return {
+      method: method,
+      body: body || undefined,
+      headers: {
+        'Content-Type': contentType,
+        dragonchain: this.credentialService.dragonchainId,
+        Authorization: this.credentialService.getAuthorizationHeader(
+          method,
+          path,
+          timestamp,
+          contentType,
+          body || ''
+        ),
+        timestamp
+      }
+    }
+  }
 
   /**
    * @hidden
@@ -455,21 +478,17 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private async makeRequest (path: string, fetchOptions: FetchOptions, jsonParse: boolean = true) {
-    const dro = new DragonchainRequestObject(path, this.dragonchainId, fetchOptions)
-
-    dro.overriddenCredentials = this.overriddenCredentials
-    dro.dragonchainId = this.dragonchainId
-    dro.contentType = 'application/json'
-    dro.timestamp = new Date().toISOString()
-
-    this.logger.debug(`[DragonchainClient][${dro.method}][HEADER] ==> ${JSON.stringify(dro.headers)}`)
-    this.logger.debug(`[DragonchainClient][${dro.method}] ==> ${dro.url}`)
-    const res = await this.toggleSslCertVerification(async () => this.fetch(dro.url, await dro.asFetchOptions(this.credentialService)))
+  private async makeRequest (path: string, method: SupportedHTTP, body: string = '', jsonParse: boolean = true) {
+    const fetchData = this.getFetchOptions(method, path, body)
+    const url = `${this.endpoint}${path}`
+    this.logger.debug(`[DragonchainClient][FETCH][URL] ==> ${url}`)
+    this.logger.debug(`[DragonchainClient][FETCH][DATA] ==> ${JSON.stringify(fetchData)}`)
+    // TODO: Use a custom https agent with fetch to properly ignore invalid HTTPS certs without an env var race condition
+    const res = await this.toggleSslCertVerification(async () => this.fetch(url, fetchData))
     const { status, ok, statusText } = res
-    this.logger.debug(`[DragonchainClient][${dro.method}] <== ${dro.url} ${status} ${statusText}`)
+    this.logger.debug(`[DragonchainClient][${method}] <== ${url} ${status} ${statusText}`)
     const response = await (jsonParse ? res.json() : res.text())
-    this.logger.debug(`[DragonchainClient][${dro.method}] <== ${JSON.stringify(response)}`)
+    this.logger.debug(`[DragonchainClient][${method}] <== ${JSON.stringify(response)}`)
     return { status, response, ok } as Response<any>
   }
 }
