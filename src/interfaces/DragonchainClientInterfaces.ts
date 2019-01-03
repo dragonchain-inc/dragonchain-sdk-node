@@ -168,6 +168,14 @@ export interface L1DragonchainTransactionQueryResult {
   total: number
 }
 
+export interface DragonnetConfigSchema {
+  l2?: number,
+  l3?: number,
+  l4?: number,
+  l5?: number,
+  [index: string]: number | undefined
+}
+
 /**
  * ContractCreationSchema
  * Input verification schema

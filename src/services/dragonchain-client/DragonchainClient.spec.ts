@@ -310,7 +310,7 @@ describe('DragonchainClient', () => {
             }
           }
         }
-        await client.updateDragonnetConfig(maximumPrice, 2)
+        await client.updateDragonnetConfig({ l2: maximumPrice })
         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
         assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/update-matchmaking-data`, obj)
       })

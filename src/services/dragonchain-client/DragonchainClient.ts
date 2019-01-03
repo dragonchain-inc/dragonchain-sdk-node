@@ -33,6 +33,7 @@ import {
   DragonchainBulkTransactions,
   Response,
   Verifications,
+  DragonnetConfigSchema,
   levelVerifications,
   UpdateDataResponse
 } from 'src/interfaces/DragonchainClientInterfaces'
@@ -291,21 +292,19 @@ export class DragonchainClient {
   /**
    * Update your maximum price for each level of verification.
    * This method is only relevant for L1 nodes.
-   * @param {number} maximumPrice (0-1000) maximum price in DRGN you are willing to pay for verifications. If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
-   * @param {integer} level The level to set maximum price for. If not specified, it will change all level prices
+   * @param {DragonnetConfigSchema} maximumPrices maximum prices (0-1000) to set for each level (in DRGNs) If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
    */
-  public updateDragonnetConfig = async (maximumPrice: number, level?: number) => {
-    if (isNaN(maximumPrice) || maximumPrice < 0 || maximumPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', 'maxPrice must be between 0 and 1000.') }
-
+  public updateDragonnetConfig = async (maximumPrices: DragonnetConfigSchema) => {
     const dragonnet = {} as any
-    if (!level) {
-      [2,3,4,5].forEach(i => { dragonnet[`l${i}`] = { maximumPrice } })
-    } else {
-      if (isNaN(level!) || level! > 5 || level! < 1) throw new FailureByDesign('BAD_REQUEST', `Invalid verification level "${level}" requested. Must be between 2-5`)
-      if (level! > 0) {
-        dragonnet[`l${Math.round(level!)}`] = { maximumPrice }
+    [2,3,4,5].forEach(i => {
+      const item = maximumPrices[`l${i}`]
+      if (item) {
+        if (isNaN(item) || item < 0 || item > 1000) { throw new FailureByDesign('BAD_REQUEST', 'maxPrice must be between 0 and 1000.') }
+        dragonnet[`l${i}`] = { maximumPrice: item }
       }
-    }
+    })
+    // Make sure SOME valid levels were provided by checking if dragonnet is an empty object
+    if (Object.keys(dragonnet).length === 0) throw new FailureByDesign('BAD_REQUEST', 'No valid levels provided')
     return await this.put(`/update-matchmaking-data`, { dragonnet }) as Response<UpdateDataResponse>
   }
 

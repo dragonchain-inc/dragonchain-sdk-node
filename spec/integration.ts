@@ -126,7 +126,7 @@ describe('DragonchainClient', () => {
 
   describe('PUT', () => {
     it('updates metadata in matchmaking config', async () => {
-      const result = (await client.updateDragonnetConfig(10.0005)).response
+      const result = (await client.updateDragonnetConfig({ l2: 10.123 })).response
       expect(result.success).to.not.equal(undefined)
     })
     // --------------------------------------------------------------------------------------
