@@ -276,14 +276,17 @@ export class DragonchainClient {
 
   /**
    * Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
-   * If you are a level 5 you're required to update your asking price and broadcast interval
    * @param {number} askingPrice (0.0001-1000.0000) the price in DRGN to charge L1 nodes for your verification of their data. Setting this number too high will cause L1's to ignore you more often.
+   * @param {number} broadcastInterval Broadcast Interval is only for level 5 chains
    */
-  public updateMatchmakingConfig = async (askingPrice: number) => {
-    if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
+  public updateMatchmakingConfig = async (askingPrice?: number, broadcastInterval?: number) => {
+    if (askingPrice) {
+      if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
+    }
     const matchmakingUpdate: any = {
       'matchmaking': {
-        'askingPrice': askingPrice
+        'askingPrice': askingPrice,
+        'broadcastInterval': broadcastInterval
       }
     }
     return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<UpdateDataResponse>
