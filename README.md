@@ -49,21 +49,24 @@ npm i dragonchain-sdk --save
 const Dragonchain = require('dragonchain-sdk');
 
 const myDcId = '3f2fef78-0000-0000-0000-9f2971607130';
-const dragonchain = new Dragonchain.DragonchainClient(myDcId);
-try {
-  const blockAtRest = dragonchain.getBlock('block-id-here');
-  // ... do stuff ...
-} catch(e) {
-  if (e.code === 'NOT_FOUND') {
-    console.log('Oops! That Block does not exist!')
-  }
+const client = new Dragonchain.DragonchainClient(myDcId);
+
+const call = await client.getBlock('block-id-here');
+
+if (call.ok) {
+  console.log('Successful call!');
+  console.log(`Block: ${call.response}`);
+} else {
+  console.error('Something went wrong!');
+  console.error(`HTTP status code from chain: ${call.status}`);
+  console.error(`Error response from chain: ${call.response}`);
 }
 ```
 
 #### QueryTransactions
 
 ```javascript
-const searchResult = await dragonchain.queryTransactions('tag=MyAwesomeTransactionTag')
+const searchResult = await client.queryTransactions('tag=MyAwesomeTransactionTag')
 ```
 
 #### OverrideCredentials

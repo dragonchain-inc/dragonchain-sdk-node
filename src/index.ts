@@ -20,6 +20,6 @@ import { DragonchainClient } from './services/dragonchain-client/DragonchainClie
 const nullLog = (msg: any) => {}
 
 // default logger will do nothing
-const logger = { log: nullLog, info: nullLog, warn: nullLog, error: nullLog, debug: nullLog }
+let logger = { log: nullLog, info: nullLog, warn: nullLog, error: nullLog, debug: nullLog }
 
 export { DragonchainClient, logger }
