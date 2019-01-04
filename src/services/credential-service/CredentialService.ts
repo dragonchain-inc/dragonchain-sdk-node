@@ -75,7 +75,6 @@ export class CredentialService {
    * @public
    */
   public overrideCredentials = (authKeyId: string, authKey: string) => {
-    logger.log('we are doing stuff')
     this.credentials = { authKey, authKeyId }
   }
 
