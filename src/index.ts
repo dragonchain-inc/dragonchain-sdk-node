@@ -19,7 +19,13 @@ import { DragonchainClient } from './services/dragonchain-client/DragonchainClie
 // tslint:disable-next-line:no-empty
 const nullLog = (msg: any) => {}
 
-// default logger will do nothing
-let logger = { log: nullLog, info: nullLog, warn: nullLog, error: nullLog, debug: nullLog }
+let logger: any // singleton logger
 
-export { DragonchainClient, logger }
+// default logger will do nothing
+const setLogger = (newLogger: any = { log: nullLog, info: nullLog, warn: nullLog, error: nullLog, debug: nullLog }) => {
+  logger = newLogger
+}
+
+setLogger() // actually initialize the singleton on initial import
+
+export { DragonchainClient, setLogger, logger }

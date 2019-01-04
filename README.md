@@ -95,11 +95,13 @@ auth_key = n3hlldsFxFdP2De0yMu6A4MFRh1HGzFvn6rJ0ICZzkE
 
 In order to get the logging output of the sdk, a logger must be set (by default all logging is thrown away).
 
-In order to set the logger, simply set the `.logger` on the root of the require/import. For example, if you just wanted to log with `console` (i.e. stdout, stderr, etc), you can set the logger like the following:
+In order to set the logger, simply call `.setLogger` on the root of the require/import. For example, if you just wanted to log with `console` (i.e. stdout, stderr, etc), you can set the logger like the following:
 
 ```javascript
 const SDK = require('dragonchain-sdk');
-SDK.logger = console;
+SDK.setLogger(console);
 ```
 
 In that example, `console` can be replaced with any custom logger as long as it implements `log`, `info`, `warn`, `debug`, and `error` functions.
+
+To reset the logger back to default (so it doesn't output anymore), simply called `setLogger()` with no params.
