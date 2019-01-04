@@ -50,7 +50,7 @@ describe('DragonchainClient', () => {
           'is_serial': true,
           'custom_environment_variables': {},
           'runtime': 'nodejs6.10',
-          'origin': 'Custom',
+          'origin': 'custom',
           'code': encoded64bit
         }
         const result = (await client.createCustomContract(customContractPayload)).response
