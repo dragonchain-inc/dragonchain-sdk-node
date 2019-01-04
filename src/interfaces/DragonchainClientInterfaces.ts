@@ -159,7 +159,7 @@ export interface CustomContractCreationSchema {
   'is_serial': boolean,
   'custom_environment_variables': {},
   'runtime': ContractRuntime,
-  'origin': 'Custom',
+  'origin': 'custom',
   'code': string,
 }
 
