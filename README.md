@@ -1,7 +1,5 @@
 # Dragonchain JS SDK
 
-![code-build status](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiUFpHWHVOTHpQSHo4T3ZHSjBUT3JZQ0kzRHBybUFvbCt4WjB6MHFhY2F1dmxPTU1mUUZUYXk4d0QzTXpUMzhRek9sZ2dLclkwcTVjTEpJaElUN3cxQUdjPSIsIml2UGFyYW1ldGVyU3BlYyI6Ik56K0RLUFUxVnhpUHNCNWoiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
-
 Talk to your dragonchain.
 
 ## Method Quicklinks
@@ -34,10 +32,7 @@ These docs are auto-generated.
 
 ### Versions
 
-* [0.1.0](https://node-sdk-docs.dragonchain.com/0.1.0)
-* [0.1.1](https://node-sdk-docs.dragonchain.com/0.1.1)
-* [0.1.2](https://node-sdk-docs.dragonchain.com/0.1.2)
-* [0.1.3](https://node-sdk-docs.dragonchain.com/0.1.3)
+* [0.1.4](https://node-sdk-docs.dragonchain.com/0.1.4)
 * [latest](https://node-sdk-docs.dragonchain.com/latest)
 
 ### Installation
@@ -51,8 +46,10 @@ npm i dragonchain-sdk --save
 #### GetBlock
 
 ```javascript
+const Dragonchain = require('dragonchain-sdk');
+
 const myDcId = '3f2fef78-0000-0000-0000-9f2971607130';
-const dragonchain = new DragonchainClient(myDcId);
+const dragonchain = new Dragonchain.DragonchainClient(myDcId);
 try {
   const blockAtRest = dragonchain.getBlock('block-id-here');
   // ... do stuff ...
@@ -71,11 +68,10 @@ const searchResult = await dragonchain.queryTransactions('tag=MyAwesomeTransacti
 
 #### OverrideCredentials
 
-This is fine for quick tests. For actual production use, you should use the [credential ini file](#configuration)
+This is fine for quick tests. For actual production use, you should use the [credential ini file or environment variables](#configuration)
 
 ```javascript
 dragonchain.overrideCredentials('AUTH_KEY_ID','AUTH_KEY')
-dragonchain.clearOverriddenCredentials() // unset credentials
 ```
 
 ## Configuration
@@ -91,3 +87,16 @@ This can be loaded into the sdk in various ways, and are checked in the followin
 auth_key_id = JSDMWFUJDVTC
 auth_key = n3hlldsFxFdP2De0yMu6A4MFRh1HGzFvn6rJ0ICZzkE
 ```
+
+## Logging
+
+In order to get the logging output of the sdk, a logger must be set (by default all logging is thrown away).
+
+In order to set the logger, simply set the `.logger` on the root of the require/import. For example, if you just wanted to log with `console` (i.e. stdout, stderr, etc), you can set the logger like the following:
+
+```javascript
+const SDK = require('dragonchain-sdk');
+SDK.logger = console;
+```
+
+In that example, `console` can be replaced with any custom logger as long as it implements `log`, `info`, `warn`, `debug`, and `error` functions.

@@ -21,6 +21,7 @@ import * as crypto from 'crypto'
 import * as ini from 'ini'
 import { DragonchainCredentials } from './DragonchainCredentials'
 import { FailureByDesign } from '../../errors/FailureByDesign'
+import { logger } from '../../index'
 
 export type HmacAlgorithm = 'SHA256' | 'SHA3-256' | 'BLAKE2b512'
 
@@ -57,6 +58,7 @@ export class CredentialService {
   ) {
     this.dragonchainId = dragonchainId
     if (authKey && authKeyId) {
+      logger.debug('Auth Key/Id provided explicitly, will not search env/disk')
       this.credentials = { authKey, authKeyId }
     } else {
       try {
@@ -73,6 +75,7 @@ export class CredentialService {
    * @public
    */
   public overrideCredentials = (authKeyId: string, authKey: string) => {
+    logger.log('we are doing stuff')
     this.credentials = { authKey, authKeyId }
   }
 
@@ -98,9 +101,11 @@ export class CredentialService {
     // check env vars first
     const id = CredentialService.getIdFromEnvVars()
     if (id) return id
+    logger.debug('Dragonchain ID not provided in environment, will search on disk')
 
     // check credential file on disk.
     const credentialFilePath = CredentialService.getCredentialFilePath()
+    logger.debug(`Will look for Dragonchain ID in file at ${credentialFilePath}`)
     try {
       const config = ini.parse(readFileSync(credentialFilePath, 'utf-8'))
       const dragonchainCredentials = config['default']
@@ -126,12 +131,14 @@ export class CredentialService {
     // check env vars first
     const creds = CredentialService.getCredsFromEnvVars()
     if (creds) return creds
+    logger.debug('Credentials not provided in environment, will search on disk')
 
     // make sure dragonchainId is passed so we can look on disk
     if (dragonchainId === '') { throw new FailureByDesign('VALIDATION_ERROR', '"dragonchainId" can not be undefined when checking Dragonchain credential file.') }
 
     // check credential file on disk.
     const credentialFilePath = CredentialService.getCredentialFilePath()
+    logger.debug(`Will look for credentials in file at ${credentialFilePath}`)
     try {
       const config = ini.parse(readFileSync(credentialFilePath, 'utf-8'))
       const dragonchainCredentials = config[dragonchainId]
