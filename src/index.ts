@@ -16,4 +16,10 @@
 
 import { DragonchainClient } from './services/dragonchain-client/DragonchainClient'
 
-export { DragonchainClient }
+// tslint:disable-next-line:no-empty
+const nullLog = (msg: any) => {}
+
+// default logger will do nothing
+const logger = { log: nullLog, info: nullLog, warn: nullLog, error: nullLog, debug: nullLog }
+
+export { DragonchainClient, logger }

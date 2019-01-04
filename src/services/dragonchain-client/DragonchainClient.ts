@@ -39,7 +39,7 @@ import {
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
-import { getLogger, LogLevel } from '../../Logger'
+import { logger } from '../../index'
 import { FailureByDesign } from '../../errors/FailureByDesign'
 
 const validRuntimes = [
@@ -80,10 +80,6 @@ export class DragonchainClient {
    * @hidden
    */
   private fetch: any
-  /**
-   * @hidden
-   */
-  private logger: any
 
   /**
    * Create an Instance of a DragonchainClient.
@@ -95,13 +91,13 @@ export class DragonchainClient {
     dragonchainId: string = '',
     verify = true,
     injected: any = {}
-    ) {
+  ) {
     if (!dragonchainId) {
+      logger.debug('Dragonchain ID explicitly provided, will not search env/disk')
       dragonchainId = CredentialService.getDragonchainId()
     }
     this.verify = verify
     this.endpoint = `https://${dragonchainId}.api.dragonchain.com`
-    this.logger = injected.logger || getLogger()
     this.fetch = injected.fetch || fetch
     this.credentialService = injected.CredentialService || new CredentialService(dragonchainId)
   }
@@ -125,14 +121,6 @@ export class DragonchainClient {
    * @returns {boolean} true if smart contract type is valid, false if not
    */
   static isValidSmartContractType = (smartContractType: SmartContractType) => validSmartContractTypes.includes(smartContractType)
-
-  /**
-   * set the log level of the Dragonchain client
-   * @param LogLevel default='error'
-   */
-  public setLogLevel = (level: LogLevel) => {
-    this.logger = getLogger(level)
-  }
 
   /**
    * This method is used to override this SDK's attempt to automatically fetch credentials automatically with manually specified creds
@@ -481,14 +469,14 @@ export class DragonchainClient {
   private async makeRequest (path: string, method: SupportedHTTP, body: string = '', jsonParse: boolean = true) {
     const fetchData = this.getFetchOptions(method, path, body)
     const url = `${this.endpoint}${path}`
-    this.logger.debug(`[DragonchainClient][FETCH][URL] ==> ${url}`)
-    this.logger.debug(`[DragonchainClient][FETCH][DATA] ==> ${JSON.stringify(fetchData)}`)
+    logger.debug(`[DragonchainClient][FETCH][URL] ==> ${url}`)
+    logger.debug(`[DragonchainClient][FETCH][DATA] ==> ${JSON.stringify(fetchData)}`)
     // TODO: Use a custom https agent with fetch to properly ignore invalid HTTPS certs without an env var race condition
     const res = await this.toggleSslCertVerification(async () => this.fetch(url, fetchData))
     const { status, ok, statusText } = res
-    this.logger.debug(`[DragonchainClient][${method}] <== ${url} ${status} ${statusText}`)
+    logger.debug(`[DragonchainClient][${method}] <== ${url} ${status} ${statusText}`)
     const response = await (jsonParse ? res.json() : res.text())
-    this.logger.debug(`[DragonchainClient][${method}] <== ${JSON.stringify(response)}`)
+    logger.debug(`[DragonchainClient][${method}] <== ${JSON.stringify(response)}`)
     return { status, response, ok } as Response<any>
   }
 }

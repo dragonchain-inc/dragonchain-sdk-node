@@ -6,3 +6,4 @@
 /docs
 yarn-error.log
 .coverage
+package-lock.json
