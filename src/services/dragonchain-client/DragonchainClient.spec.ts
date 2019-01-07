@@ -19,10 +19,18 @@ import * as sinonChai from 'sinon-chai'
 import { stub, assert, useFakeTimers, match } from 'sinon'
 import { DragonchainClient } from './DragonchainClient'
 import { ContractRuntime, SmartContractType, CustomContractCreationSchema, ContractCreateCurrencyContract } from 'src/interfaces/DragonchainClientInterfaces'
-
-const { expect } = chai
+/**
+ * @hidden
+ */
+const expect = chai.expect
 chai.use(sinonChai)
+/**
+ * @hidden
+ */
 let fakeTimeStamp
+/**
+ * @hidden
+ */
 let fakeTime: string
 
 describe('DragonchainClient', () => {

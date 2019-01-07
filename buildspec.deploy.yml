@@ -12,7 +12,7 @@ phases:
       - VERSION=$(node -e "console.log(require('./package.json').version)")
       - yarn build
       - npm config set '//registry.npmjs.org/:_authToken' $(aws ssm get-parameter --name npm-publish-token --with-decryption | jq '.Parameter.Value')
-      - npm publish --access restricted
+      - npm publish --access public
       - yarn docs
       - aws s3 rm --recursive s3://dragonchain-sdk-node-docs/latest/*
       - aws s3 cp --recursive ./docs s3://dragonchain-sdk-node-docs/latest
