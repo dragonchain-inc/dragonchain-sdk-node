@@ -16,9 +16,14 @@
 
 import { DragonchainClient } from './services/dragonchain-client/DragonchainClient'
 
+/**
+ * @hidden
+ */
 // tslint:disable-next-line:no-empty
 const nullLog = (msg: any) => {}
-
+/**
+ * @hidden
+ */
 let logger: any // singleton logger
 
 // default logger will do nothing

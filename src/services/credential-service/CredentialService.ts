@@ -15,7 +15,13 @@
  */
 
 import { readFileSync } from 'fs'
+/**
+ * @hidden
+ */
 const path = require('path') // import does not work
+/**
+ * @hidden
+ */
 const os = require('os') // import does not work
 import * as crypto from 'crypto'
 import * as ini from 'ini'
