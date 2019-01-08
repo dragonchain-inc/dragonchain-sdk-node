@@ -1,5 +1,5 @@
 {
-  "name": "@dragonchain-inc/dragonchain-sdk",
+  "name": "dragonchain-sdk",
   "version": "1.0.0",
   "description": "Dragonchain SDK for Node",
   "license": "Apache-2.0",
