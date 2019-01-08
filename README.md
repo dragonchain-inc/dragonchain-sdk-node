@@ -37,7 +37,7 @@ These docs are auto-generated.
 ### Installation
 
 ```sh
-npm i @dragonchain-inc/dragonchain-sdk --save
+npm i dragonchain-sdk --save
 ```
 
 ### Examples
@@ -45,7 +45,7 @@ npm i @dragonchain-inc/dragonchain-sdk --save
 #### GetBlock
 
 ```javascript
-const Dragonchain = require('@dragonchain-inc/dragonchain-sdk');
+const Dragonchain = require('dragonchain-sdk');
 
 const myDcId = '3f2fef78-0000-0000-0000-9f2971607130';
 const client = new Dragonchain.DragonchainClient(myDcId);
@@ -97,7 +97,7 @@ In order to get the logging output of the sdk, a logger must be set (by default 
 In order to set the logger, simply call `.setLogger` on the root of the require/import. For example, if you just wanted to log with `console` (i.e. stdout, stderr, etc), you can set the logger like the following:
 
 ```javascript
-const SDK = require('@dragonchain-inc/dragonchain-sdk');
+const SDK = require('dragonchain-sdk');
 SDK.setLogger(console);
 ```
 
