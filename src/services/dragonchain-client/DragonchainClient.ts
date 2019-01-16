@@ -431,7 +431,7 @@ export class DragonchainClient {
    * @hidden
    */
   private getFetchOptions (method: SupportedHTTP, path: string, body: string, contentType: string = 'application/json'): FetchOptions {
-    const timestamp = new Date().toISOString().replace(/[0-9]+Z/,process.hrtime()[1]+'Z'); // high resolution timestamp 
+    const timestamp = new Date().toISOString().replace(/[0-9]+Z/,process.hrtime()[1] + 'Z') // high resolution timestamp
     return {
       method: method,
       body: body || undefined,

@@ -88,7 +88,7 @@ describe('DragonchainClient', () => {
       client = new DragonchainClient('fakeDragonchainId', true, injected)
       fakeTimeStamp = Date.now()
       useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
-      fakeTime = new Date(fakeTimeStamp).toISOString()
+      fakeTime = new Date(fakeTimeStamp).toISOString().replace(/[0-9]+Z/,process.hrtime()[1] + 'Z')
       expectedFetchOptions = {
         method: 'GET',
         body: undefined,
@@ -186,7 +186,7 @@ describe('DragonchainClient', () => {
     const client = new DragonchainClient('fakeDragonchainId', true, injected)
     fakeTimeStamp = Date.now()
     useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
-    fakeTime = new Date(fakeTimeStamp).toISOString()
+    fakeTime = new Date(fakeTimeStamp).toISOString().replace(/[0-9]+Z/,process.hrtime()[1] + 'Z')
     const expectedFetchOptions = {
       method: 'POST',
       headers: {
@@ -267,7 +267,7 @@ describe('DragonchainClient', () => {
     const client = new DragonchainClient('fakeDragonchainId', true, injected)
     fakeTimeStamp = Date.now()
     useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
-    fakeTime = new Date(fakeTimeStamp).toISOString()
+    fakeTime = new Date(fakeTimeStamp).toISOString().replace(/[0-9]+Z/,process.hrtime()[1] + 'Z')
     const expectedFetchOptions = {
       method: 'PUT',
       headers: {
