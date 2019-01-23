@@ -453,3 +453,21 @@ export interface ContractCreateBtcPublisher {
 export interface UpdateDataResponse {
   'success': string
 }
+
+export interface CustomIndexStructure {
+  'key': string,
+  'path': string,
+}
+
+export interface TransactionTypeStructure {
+  'version'?: string,
+  'txn_type'?: string,
+  'custom_indexes'?: CustomIndexStructure[],
+}
+
+export interface TransactionTypeResponse {
+  'version': string,
+  'txn_type': string,
+  'custom_indexes': CustomIndexStructure[],
+  'is_contract': boolean,
+}

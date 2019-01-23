@@ -35,7 +35,10 @@ import {
   Verifications,
   DragonnetConfigSchema,
   levelVerifications,
-  UpdateDataResponse
+  UpdateDataResponse,
+  TransactionTypeStructure,
+  TransactionTypeResponse,
+  CustomIndexStructure
 } from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
@@ -377,6 +380,53 @@ export class DragonchainClient {
   }
 
   /**
+   * registerTransactionType
+   * Registers a new transaction type
+   * @param {TransactionTypeStructure} txnTypeStructure
+   */
+  public registerTransactionType = async (txnTypeStructure: TransactionTypeStructure) => {
+    return await this.post('/transaction-type', txnTypeStructure) as Response<UpdateDataResponse>
+  }
+
+  /**
+   * deleteTransactionType
+   * Deletes existing registered transaction type
+   * @param {string} transactionType
+   */
+  public deleteTransactionType = async (transactionType: string) => {
+    return await this.delete(`/transaction-type/${transactionType}`) as Response<UpdateDataResponse>
+  }
+
+  /**
+   * listTransactionTypes
+   * Lists current accepted transaction types for a chain
+   */
+  public listTransactionTypes = async () => {
+    return await this.get('/transaction-types') as Response<TransactionTypeResponse[]>
+  }
+
+  /**
+   * updateTransactionType
+   * Updates a given transaction type structure
+   * @param {string} transactionType
+   * @param {CustomIndexStructure} customIndexes
+   */
+  public updateTransactionType = async (transactionType: string, customIndexes: CustomIndexStructure[]) => {
+    const params = { version: '1', custom_indexes: customIndexes }
+    return await this.put(`/transaction-type/${transactionType}`, params) as Response<UpdateDataResponse>
+  }
+
+  /**
+   * @hidden
+   * getTransactionType
+   * Gets a specific transaction type
+   * @param {string} transactionType
+   */
+  public getTransactionType = async (transactionType: string) => {
+    return await this.get(`/transaction-type/${transactionType}`) as Response<TransactionTypeResponse>
+  }
+
+  /**
    * @hidden
    */
   private getLuceneParams = (query?: string, sort?: string, offset = 0, limit = 10) => {
@@ -425,6 +475,13 @@ export class DragonchainClient {
   private async put (path: string, body: string | object) {
     const bodyString = typeof body === 'string' ? body : JSON.stringify(body)
     return this.makeRequest(path, 'PUT', bodyString)
+  }
+
+  /**
+   * @hidden
+   */
+  private async delete (path: string) {
+    return this.makeRequest(path, 'DELETE')
   }
 
   /**
