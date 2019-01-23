@@ -26,6 +26,12 @@ describe('DragonchainClient', () => {
   })
 
   describe('POST', () => {
+    it('registers transaction type', async () => {
+      const txnTypeStructure = { 'version': '1', 'txn_type': 'apple' }
+      const result = (await client.registerTransactionType(txnTypeStructure)).response
+      expect(result.success).to.not.equal(undefined)
+    })
+
     it('POST transaction successfully', async () => {
       const payload: any = {
         'version': '1',
