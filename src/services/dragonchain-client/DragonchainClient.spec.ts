@@ -218,6 +218,7 @@ describe('DragonchainClient', () => {
           'dcrn': 'SmartContract::L1::Create',
           'name': 'name',
           'sc_type': 'transaction',
+          'interval': {},
           'is_serial': true,
           'custom_environment_variables': { 'banana': 'banana', 'apple': 'banana' },
           'runtime': 'nodejs6.10',
@@ -285,7 +286,8 @@ describe('DragonchainClient', () => {
         const fakeBodyResponse: any = {
           'version': '1',
           'name': name,
-          'status': status
+          'status': status,
+          'interval': {}
         }
         await client.updateCustomSmartContract(name, status)
         const id = 'smartContractName'

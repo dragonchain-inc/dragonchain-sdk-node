@@ -5,6 +5,8 @@
     "outDir": "../lib/module/commonjs",
     "rootDir": "../src",
     "module": "commonjs",
+    "declaration": true,
+    "declarationDir": "../lib/types",
     "inlineSourceMap": false
   },
   "include": [

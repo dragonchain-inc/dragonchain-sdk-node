@@ -235,7 +235,7 @@ export class DragonchainClient {
    * @param {boolean} serial update whether or not the contract runs serial
    * @param {object} envVars update the envrionment variables on a contract
    */
-  public updateCustomSmartContract = async (name: string, status?: string, scType?: string, code?: string, runtime?: string, serial?: boolean, envVars?: {}) => {
+  public updateCustomSmartContract = async (name: string, status?: string, scType?: string, code?: string, runtime?: string, serial?: boolean, cron?: string, seconds?: string, envVars?: {}) => {
     const body: any = {
       'version': '1',
       'name': name,
@@ -243,7 +243,14 @@ export class DragonchainClient {
       'sc_type': scType,
       'code': code,
       'runtime': runtime,
-      'is_serial': serial
+      'is_serial': serial,
+      'interval': {}
+    }
+    if (cron) {
+      body['interval']['cron'] = cron
+    }
+    if (seconds) {
+      body['interval']['seconds'] = seconds
     }
     if (envVars) {
       body['custom_environment_variables'] = envVars
@@ -256,11 +263,18 @@ export class DragonchainClient {
    * @param {string} name the name of the existing library contract that you want to update
    * @param {string} status update the status
    */
-  public updateLibrarySmartContract = async (name: string, status?: string) => {
+  public updateLibrarySmartContract = async (name: string, status?: string, cron?: string, seconds?: string) => {
     const body: any = {
       'version': '1',
       'name': name,
-      'status': status
+      'status': status,
+      'interval': {}
+    }
+    if (cron) {
+      body['interval']['cron'] = cron
+    }
+    if (seconds) {
+      body['interval']['seconds'] = seconds
     }
     return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
   }
