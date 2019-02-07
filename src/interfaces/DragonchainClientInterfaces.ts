@@ -143,10 +143,8 @@ export interface SmartContractAtRest {
   'origin': 'library' | 'custom',
   'runtime': ContractRuntime,
   'sc_type': string,
-  'interval'?: {
-    'cron'?: string,
-    'seconds'?: string
-  },
+  'cron'?: string,
+  'seconds'?: string
   'code': string | null,
   's3_bucket': string | null,
   's3_path': string | null,
@@ -160,10 +158,8 @@ export interface CustomContractCreationSchema {
   'dcrn': 'SmartContract::L1::Create',
   'name': string,
   'sc_type': SmartContractType,
-  'interval'?: {
-    'cron'?: string,
-    'seconds'?: string
-  },
+  'cron'?: string,
+  'seconds'?: string
   'is_serial': boolean,
   'custom_environment_variables': {},
   'runtime': ContractRuntime,
@@ -382,10 +378,8 @@ export interface ContractCreateEthereumInterchainWatcher {
   'origin': 'library',
   'runtime': 'nodejs8.10',
   'sc_type': 'cron',
-  'interval': {
-    'cron': string,
-    'seconds': string
-  }
+  'cron'?: string,
+  'seconds'?: string
   'version':	'2'
 }
 
@@ -401,10 +395,8 @@ export interface ContractCreateNeoInterchainWatcher {
   'origin':	'library'
   'runtime': 'nodejs8.10'
   'sc_type': 'cron'
-  'interval': {
-    'cron': string,
-    'seconds': string
-  },
+  'cron'?: string,
+  'seconds'?: string
   'version': '2'
 }
 
@@ -421,10 +413,8 @@ export interface ContractCreateBtcInterchainWatcher {
   'origin':	'library',
   'runtime': 'nodejs8.10',
   'sc_type': 'cron',
-  'interval': {
-    'cron': string,
-    'seconds': string
-  },
+  'cron'?: string,
+  'seconds'?: string
   'version': '2'
 }
 

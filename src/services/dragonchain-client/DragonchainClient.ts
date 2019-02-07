@@ -243,14 +243,13 @@ export class DragonchainClient {
       'sc_type': scType,
       'code': code,
       'runtime': runtime,
-      'is_serial': serial,
-      'interval': {}
+      'is_serial': serial
     }
     if (cron) {
-      body['interval']['cron'] = cron
+      body['cron'] = cron
     }
     if (seconds) {
-      body['interval']['seconds'] = seconds
+      body['seconds'] = seconds
     }
     if (envVars) {
       body['custom_environment_variables'] = envVars
@@ -267,14 +266,13 @@ export class DragonchainClient {
     const body: any = {
       'version': '1',
       'name': name,
-      'status': status,
-      'interval': {}
+      'status': status
     }
     if (cron) {
-      body['interval']['cron'] = cron
+      body['cron'] = cron
     }
     if (seconds) {
-      body['interval']['seconds'] = seconds
+      body['seconds'] = seconds
     }
     return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
   }
@@ -341,6 +339,7 @@ export class DragonchainClient {
   /**
    * Create a new Smart Contract on your Dragonchain.
    * Create a new custom smart contract on your dragonchain
+   * If no cron interval is provided it defaults to 60 seconds
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
   public createCustomContract = async (body: CustomContractCreationSchema) => {
