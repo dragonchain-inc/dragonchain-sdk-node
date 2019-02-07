@@ -348,6 +348,7 @@ export class DragonchainClient {
 
   /**
    * Create a preconfigure contract from our library, using the provided interfaces
+   * If no cron interval is provided for contract watchers it defaults to 60 seconds
    * @param {validContractLibraries} body the preconfigured interfaces for smart contract libraries
    */
   public createLibraryContract = async (body: validContractLibraries) => {
