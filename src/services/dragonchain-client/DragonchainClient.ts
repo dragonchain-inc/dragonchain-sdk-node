@@ -339,7 +339,7 @@ export class DragonchainClient {
   /**
    * Create a new Smart Contract on your Dragonchain.
    * Create a new custom smart contract on your dragonchain
-   * If no cron interval is provided it defaults to 60 seconds
+   * If no cron interval is provided from cron contracts it defaults to 60 seconds
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
   public createCustomContract = async (body: CustomContractCreationSchema) => {
