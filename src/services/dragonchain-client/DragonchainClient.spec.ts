@@ -254,6 +254,26 @@ describe('DragonchainClient', () => {
 
     })
 
+    describe('.createCustomContractV2', () => {
+      it('create custom contract successfully', async () => {
+        const customContractPayload: CustomContractCreationSchema = {
+          'version': '2',
+          'dcrn': 'SmartContract::L1::Create',
+          'name': 'name',
+          'sc_type': 'transaction',
+          'is_serial': true,
+          'custom_environment_variables': { 'banana': 'banana', 'apple': 'banana' },
+          'runtime': 'nodejs6.10',
+          'code': 'code',
+          'origin': 'custom'
+        }
+        await client.createCustomContractV2('name', false, 'nodejs8.10', 'code', 'transaction', {}, 'banana.main')
+        const obj = { ...expectedFetchOptions, body: JSON.stringify(customContractPayload) }
+        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/contract/name`, obj)
+      })
+
+    })
+
   })
 
   describe('PUT', () => {

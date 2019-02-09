@@ -330,7 +330,36 @@ export class DragonchainClient {
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
   public createCustomContract = async (body: CustomContractCreationSchema) => {
+    console.warn('Deprecation Notice. Support for createCustomContract will be phased out in v1.1.0. Please use "createCustomContractV2"')
     return await this.post(`/contract/${body.name}`, body) as Response<DragonchainContractCreateResponse>
+  }
+
+  /**
+   * Create a new Smart Contract on your Dragonchain.
+   * Create a new custom smart contract on your dragonchain
+   * @returns {Promise<DragonchainContractCreateResponse>}
+   */
+  public createCustomContractV2 = async (
+    name: string,
+    isSerial: boolean,
+    runtime: ContractRuntime,
+    code: string,
+    scType: SmartContractType = 'transaction',
+    customEnvironmentVariables: object = {},
+    handler: string = 'handler.main'
+  ) => {
+    return await this.post(`/contract/${name}`, {
+      'version': '2',
+      'dcrn': 'SmartContract::L1::Create',
+      'name': name,
+      'sc_type': scType,
+      'is_serial': isSerial,
+      'custom_environment_variables': customEnvironmentVariables,
+      'runtime': runtime,
+      'origin': 'custom',
+      'code': code,
+      'handler': handler
+    }) as Response<DragonchainContractCreateResponse>
   }
 
   /**

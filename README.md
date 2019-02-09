@@ -8,7 +8,7 @@ These docs are auto-generated.
 
 * [constructor](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#constructor)
 * [clearOverriddenCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#clearOverriddenCredentials)
-* [createCustomContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcustomcontract)
+* [createCustomContractV2](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcustomcontractv2)
 * [createLibraryContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createlibrarycontract)
 * [createTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createtransaction)
 * [createBulkTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createbulktransaction)
