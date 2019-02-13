@@ -51,7 +51,8 @@ describe('DragonchainClient', () => {
           'custom_environment_variables': {},
           'runtime': 'nodejs6.10',
           'origin': 'custom',
-          'code': encoded64bit
+          'code': encoded64bit,
+          'handler': 'banana.main'
         }
         const result = (await client.createCustomContract(customContractPayload)).response
         expect(result.success).to.not.equal(undefined)
