@@ -161,6 +161,7 @@ export interface CustomContractCreationSchema {
   'runtime': ContractRuntime,
   'origin': 'custom',
   'code': string,
+  'handler': string,
 }
 
 export interface L1DragonchainTransactionQueryResult {
