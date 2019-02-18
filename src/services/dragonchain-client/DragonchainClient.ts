@@ -326,7 +326,8 @@ export class DragonchainClient {
 
   /**
    * Create a new Smart Contract on your Dragonchain.
-   * Create a new custom smart contract on your dragonchain
+   * Create a new custom smart contract on your dragonchain.
+   * The code for the contract must be a 64 bit encoded string.
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
   public createCustomContract = async (body: CustomContractCreationSchema) => {
