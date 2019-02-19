@@ -6,6 +6,7 @@ env:
     CC_TEST_REPORTER_ID=30cf4a3860372ab26d2224ff059197fe514a9685872ebf9a697afedf55cbbf49
 install:
   - yarn install
+  - yarn build
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
