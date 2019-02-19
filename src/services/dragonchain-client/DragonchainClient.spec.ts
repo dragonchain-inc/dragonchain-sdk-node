@@ -222,7 +222,8 @@ describe('DragonchainClient', () => {
           'custom_environment_variables': { 'banana': 'banana', 'apple': 'banana' },
           'runtime': 'nodejs6.10',
           'code': 'code',
-          'origin': 'custom'
+          'origin': 'custom',
+          'handler': 'banana'
         }
         await client.createCustomContract(customContractPayload)
         const obj = { ...expectedFetchOptions, body: JSON.stringify(customContractPayload) }
