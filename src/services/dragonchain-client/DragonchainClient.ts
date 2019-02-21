@@ -33,7 +33,6 @@ import {
   DragonchainBulkTransactions,
   Response,
   Verifications,
-  DragonnetConfigSchema,
   levelVerifications,
   UpdateDataResponse,
   TransactionTypeStructure,
@@ -43,7 +42,6 @@ import {
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
 import { logger } from '../../index'
-import { FailureByDesign } from '../../errors/FailureByDesign'
 
 const validRuntimes = [
   'nodejs6.10',
@@ -265,42 +263,6 @@ export class DragonchainClient {
     return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
   }
 
-  /**
-   * Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
-   * @param {number} askingPrice (0.0001-1000.0000) the price in DRGN to charge L1 nodes for your verification of their data. Setting this number too high will cause L1's to ignore you more often.
-   * @param {number} broadcastInterval Broadcast Interval is only for level 5 chains
-   */
-  public updateMatchmakingConfig = async (askingPrice?: number, broadcastInterval?: number) => {
-    if (askingPrice) {
-      if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
-    }
-    const matchmakingUpdate: any = {
-      'matchmaking': {
-        'askingPrice': askingPrice,
-        'broadcastInterval': broadcastInterval
-      }
-    }
-    return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<UpdateDataResponse>
-  }
-
-  /**
-   * Update your maximum price for each level of verification.
-   * This method is only relevant for L1 nodes.
-   * @param {DragonnetConfigSchema} maximumPrices maximum prices (0-1000) to set for each level (in DRGNs) If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
-   */
-  public updateDragonnetConfig = async (maximumPrices: DragonnetConfigSchema) => {
-    const dragonnet = {} as any
-    [2,3,4,5].forEach(i => {
-      const item = maximumPrices[`l${i}`]
-      if (item) {
-        if (isNaN(item) || item < 0 || item > 1000) { throw new FailureByDesign('BAD_REQUEST', 'maxPrice must be between 0 and 1000.') }
-        dragonnet[`l${i}`] = { maximumPrice: item }
-      }
-    })
-    // Make sure SOME valid levels were provided by checking if dragonnet is an empty object
-    if (Object.keys(dragonnet).length === 0) throw new FailureByDesign('BAD_REQUEST', 'No valid levels provided')
-    return await this.put(`/update-matchmaking-data`, { dragonnet }) as Response<UpdateDataResponse>
-  }
 
   /**
    * Create a new Transaction on your Dragonchain.

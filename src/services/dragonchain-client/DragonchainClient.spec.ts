@@ -295,36 +295,6 @@ describe('DragonchainClient', () => {
       })
     })
 
-    describe('.updateMatchmakingConfig', () => {
-      it('calls #fetch() with correct params', async () => {
-        const askingPrice = 10
-        const fakeBodyResponse: any = {
-          'matchmaking': {
-            'askingPrice': askingPrice
-          }
-        }
-        await client.updateMatchmakingConfig(askingPrice)
-        const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/update-matchmaking-data`, obj)
-      })
-    })
-
-    describe('.updateDragonnetConfig', () => {
-      it('calls #fetch() with correct params', async () => {
-        const maximumPrice = 10
-        const fakeBodyResponse = {
-          'dragonnet': {
-            'l2': {
-              'maximumPrice': maximumPrice
-            }
-          }
-        }
-        await client.updateDragonnetConfig({ l2: maximumPrice })
-        const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/update-matchmaking-data`, obj)
-      })
-    })
-
   })
 
 })

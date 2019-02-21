@@ -124,27 +124,4 @@ describe('DragonchainClient', () => {
       expect(result).to.eql(response)
     })
   })
-
-  describe('PUT', () => {
-    it('updates metadata in matchmaking config', async () => {
-      const result = (await client.updateDragonnetConfig({ l2: 10.123 })).response
-      expect(result.success).to.not.equal(undefined)
-    })
-    // --------------------------------------------------------------------------------------
-    // Chain stays in upate state for an inconsistent amount of time
-    // --------------------------------------------------------------------------------------
-    // it.only('updates SmartContract successfully', async () => {
-    //   const result = await client.updateCustomSmartContract('baconPoolParty469380', 'enabled')
-    //   assert.isOk(result)
-    // })
-    // --------------------------------------------------------------------------------------
-    // Currently tests are using an L1 chain. This test requires an L2 or higher
-    // --------------------------------------------------------------------------------------
-    // it('updates metadata in dragonnet config file', async () => {
-    //   const result = await client.updateDragonnetConfig(10)
-    //   expect(result.success).to.equal('Matchmaking metadata successfully updated')
-    // })
-
-  })
-
 })
