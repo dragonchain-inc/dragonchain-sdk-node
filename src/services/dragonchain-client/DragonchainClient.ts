@@ -263,7 +263,6 @@ export class DragonchainClient {
     return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
   }
 
-
   /**
    * Create a new Transaction on your Dragonchain.
    * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
