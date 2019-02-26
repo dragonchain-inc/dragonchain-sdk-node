@@ -27,8 +27,6 @@ These docs are auto-generated.
 * [querySmartContracts](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querysmartcontracts)
 * [updateCustomSmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatesmartcontract)
 * [updateLibrarySmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatelibrarysmartcontract)
-* [updateMatchmakingConfig](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatematchmakingconfig)
-* [updateDragonnetConfig](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatedragonnetconfig)
 
 ### Versions
 
