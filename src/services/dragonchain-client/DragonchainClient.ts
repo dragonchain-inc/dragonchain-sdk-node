@@ -38,7 +38,7 @@ import {
   TransactionTypeStructure,
   TransactionTypeResponse,
   CustomIndexStructure
-} from 'src/interfaces/DragonchainClientInterfaces'
+} from '../../interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
 import { logger } from '../../index'
