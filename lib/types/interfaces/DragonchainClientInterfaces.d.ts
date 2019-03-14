@@ -145,19 +145,19 @@ export declare type SmartContractType = 'transaction' | 'cron';
 export declare type SmartContractExecutionOrder = 'parallel' | 'serial';
 export declare type SmartContractDesiredState = 'active' | 'inactive';
 export interface ContractCreationSchema {
-  'version': '3';
-  'dcrn': 'SmartContract::L1::Create';
-  'txn_type': string;
-  'image'?: string;
-  'cmd'?: string;
-  'execution_order'?: SmartContractExecutionOrder;
-  'desired_state'?: SmartContractDesiredState;
-  'args'?: string[];
-  'env'?: object;
-  'secrets'?: object;
-  'seconds'?: number;
-  'cron'?: string;
-  'auth'?: string;
+    'version': '3';
+    'dcrn': 'SmartContract::L1::Create';
+    'txn_type': string;
+    'image'?: string;
+    'cmd'?: string;
+    'execution_order'?: SmartContractExecutionOrder;
+    'desired_state'?: SmartContractDesiredState;
+    'args'?: string[];
+    'env'?: object;
+    'secrets'?: object;
+    'seconds'?: number;
+    'cron'?: string;
+    'auth'?: string;
 }
 export interface L1DragonchainTransactionQueryResult {
     results: L1DragonchainTransactionFull[];

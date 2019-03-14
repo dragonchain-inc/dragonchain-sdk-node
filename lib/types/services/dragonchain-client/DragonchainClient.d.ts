@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DragonchainTransactionCreatePayload, L1DragonchainTransactionFull, DragonchainTransactionCreateResponse, SmartContractAtRest, ContractRuntime, ContractCreationSchema, L1DragonchainTransactionQueryResult, DragonchainContractCreateResponse, L1DragonchainStatusResult, SmartContractType, DragonchainBlockQueryResult, DragonchainBulkTransactions, Response, Verifications, DragonnetConfigSchema, levelVerifications, UpdateResponse, TransactionTypeStructure, TransactionTypeResponse, CustomIndexStructure } from 'src/interfaces/DragonchainClientInterfaces';
+import { DragonchainTransactionCreatePayload, L1DragonchainTransactionFull, DragonchainTransactionCreateResponse, SmartContractAtRest, ContractCreationSchema, L1DragonchainTransactionQueryResult, DragonchainContractCreateResponse, L1DragonchainStatusResult, SmartContractType, DragonchainBlockQueryResult, DragonchainBulkTransactions, Response, Verifications, levelVerifications, DragonnetConfigSchema, UpdateResponse, TransactionTypeStructure, TransactionTypeResponse, CustomIndexStructure } from 'src/interfaces/DragonchainClientInterfaces';
 /**
  * HTTP Client that interfaces with the dragonchain api, using credentials stored on your machine.
  * @class DragonchainClient
@@ -46,15 +46,6 @@ export declare class DragonchainClient {
      * @param injected used only for testing
      */
     constructor(dragonchainId?: string, verify?: boolean, injected?: any);
-    /**
-     * Checks if a runtime string is valid
-     * @hidden
-     * @static
-     * @name isValidRuntime
-     * @param {ContractRuntime} runtime runtime to validate
-     * @returns {boolean} true if runtime is valid, false if not.
-     */
-    static isValidRuntime: (runtime: ContractRuntime) => boolean;
     /**
      * Checks if a smart contract type string is valid
      * @hidden
@@ -155,7 +146,7 @@ export declare class DragonchainClient {
     updateSmartContract: (contractId: string, image?: string | undefined, cmd?: string | undefined, executionOrder?: "parallel" | "serial" | undefined, desiredState?: "active" | "inactive" | undefined, args?: string[] | undefined, env?: {} | undefined, secrets?: {} | undefined, seconds?: number | undefined, cron?: string | undefined, auth?: string | undefined) => Promise<Response<UpdateResponse>>;
     /**
      * Deletes a smart contract
-     * @param {string} contractId
+     * @param {string} txnType
      * @returns {Promise<UpdateResponse>} success message upon successful update
      */
     deleteSmartContract: (txnType: string) => Promise<Response<UpdateResponse>>;
