@@ -151,17 +151,24 @@ export interface SmartContractAtRest {
 
 export type SmartContractType = 'transaction' | 'cron'
 
-export interface CustomContractCreationSchema {
-  'version': '2',
+export type SmartContractExecutionOrder = 'parallel' | 'serial'
+
+export type SmartContractDesiredState = 'active' | 'inactive'
+
+export interface ContractCreationSchema {
+  'version': '3',
   'dcrn': 'SmartContract::L1::Create',
-  'name': string,
-  'sc_type': SmartContractType,
-  'is_serial': boolean,
-  'custom_environment_variables': {},
-  'runtime': ContractRuntime,
-  'origin': 'custom',
-  'code': string,
-  'handler': string,
+  'txn_type': string,
+  'image'?: string,
+  'cmd'?: string,
+  'execution_order'?: SmartContractExecutionOrder,
+  'desired_state'?: SmartContractDesiredState,
+  'args'?: string[],
+  'env'?: object,
+  'secrets'?: object,
+  'seconds'?: number,
+  'cron'?: string,
+  'auth'?: string,
 }
 
 export interface L1DragonchainTransactionQueryResult {
@@ -175,16 +182,6 @@ export interface DragonnetConfigSchema {
   l4?: number,
   l5?: number,
   [index: string]: number | undefined
-}
-
-/**
- * ContractCreationSchema
- * Input verification schema
- */
-export interface ContractCreationSchema {
-  title: string,
-  type: object,
-  properties: object
 }
 
 export interface DragonchainContractCreateResponse {
@@ -341,7 +338,6 @@ export interface L5BlockAtRest {
 }
 
 export type precisionRange = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18
-export type validContractLibraries = ContractCreateCurrencyContract | ContractCreateEthereumInterchainWatcher | ContractCreateNeoInterchainWatcher | ContractCreateBtcInterchainWatcher | ContractCreateEthereumPublisher | ContractCreateNeoPublisher | ContractCreateBtcPublisher
 export interface ContractCreateCurrencyContract {
   'custom_environment_variables': {
     'addressScheme'?: 'ethereum' | 'bitcoin' | 'dragon' | 'custom',
@@ -451,7 +447,7 @@ export interface ContractCreateBtcPublisher {
   'version':	'2'
 }
 
-export interface UpdateDataResponse {
+export interface UpdateResponse {
   'success': string
 }
 

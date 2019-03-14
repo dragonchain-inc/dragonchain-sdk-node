@@ -8,7 +8,7 @@ These docs are auto-generated.
 
 * [constructor](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#constructor)
 * [clearOverriddenCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#clearOverriddenCredentials)
-* [createCustomContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createcustomcontract)
+* [createContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createContract)
 * [createLibraryContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createlibrarycontract)
 * [createTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createtransaction)
 * [createBulkTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createbulktransaction)
@@ -25,7 +25,7 @@ These docs are auto-generated.
 * [queryTransactions](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querytransactions)
 * [queryBlocks](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#queryblocks)
 * [querySmartContracts](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querysmartcontracts)
-* [updateCustomSmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatesmartcontract)
+* [updateSmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatesmartcontract)
 * [updateLibrarySmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatelibrarysmartcontract)
 
 ### Versions
