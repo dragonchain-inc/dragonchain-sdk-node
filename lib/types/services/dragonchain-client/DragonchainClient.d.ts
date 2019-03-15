@@ -116,9 +116,9 @@ export declare class DragonchainClient {
      */
     queryBlocks: (luceneQuery?: string | undefined, sort?: string | undefined, offset?: number, limit?: number) => Promise<Response<DragonchainBlockQueryResult>>;
     /**
-     * Get a single smart contract by name
+     * Get a single smart contract by id
      */
-    getSmartContract: (contractName: string) => Promise<Response<SmartContractAtRest>>;
+    getSmartContract: (contractId: string) => Promise<Response<SmartContractAtRest>>;
     /**
      * Query smart contracts using ElasticSearch query-string syntax
      * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
@@ -146,10 +146,10 @@ export declare class DragonchainClient {
     updateSmartContract: (contractId: string, image?: string | undefined, cmd?: string | undefined, executionOrder?: "parallel" | "serial" | undefined, desiredState?: "active" | "inactive" | undefined, args?: string[] | undefined, env?: {} | undefined, secrets?: {} | undefined, seconds?: number | undefined, cron?: string | undefined, auth?: string | undefined) => Promise<Response<UpdateResponse>>;
     /**
      * Deletes a smart contract
-     * @param {string} txnType
+     * @param {string} contractId
      * @returns {Promise<UpdateResponse>} success message upon successful update
      */
-    deleteSmartContract: (txnType: string) => Promise<Response<UpdateResponse>>;
+    deleteSmartContract: (contractId: string) => Promise<Response<UpdateResponse>>;
     /**
      * Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
      * @param {number} askingPrice (0.0001-1000.0000) the price in DRGN to charge L1 nodes for your verification of their data. Setting this number too high will cause L1's to ignore you more often.

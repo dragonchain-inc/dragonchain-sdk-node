@@ -196,10 +196,10 @@ export class DragonchainClient {
   }
 
   /**
-   * Get a single smart contract by name
+   * Get a single smart contract by id
    */
-  public getSmartContract = async (contractName: string) => {
-    return await this.get(`/contract/${contractName}`) as Response<SmartContractAtRest>
+  public getSmartContract = async (contractId: string) => {
+    return await this.get(`/contract/${contractId}`) as Response<SmartContractAtRest>
   }
 
   /**
@@ -252,11 +252,11 @@ export class DragonchainClient {
 
   /**
    * Deletes a smart contract
-   * @param {string} txnType
+   * @param {string} contractId
    * @returns {Promise<UpdateResponse>} success message upon successful update
    */
-  public deleteSmartContract = async (txnType: string) => {
-    return await this.delete(`/contract/${txnType}`) as Response<UpdateResponse>
+  public deleteSmartContract = async (contractId: string) => {
+    return await this.delete(`/contract/${contractId}`) as Response<UpdateResponse>
   }
 
   /**
