@@ -37,7 +37,8 @@ import {
   UpdateDataResponse,
   TransactionTypeStructure,
   TransactionTypeResponse,
-  CustomIndexStructure
+  CustomIndexStructure,
+  DragonchainBulkTransactionResponse
 } from '../../interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
@@ -282,7 +283,7 @@ export class DragonchainClient {
    * @return {Promise<DragonchainTransactionCreateResponse>}
    */
   public createBulkTransaction = async (transactionBulkObject: DragonchainBulkTransactions) => {
-    return await this.post(`/transaction_bulk`, transactionBulkObject) as Response<DragonchainTransactionCreateResponse>
+    return await this.post(`/transaction_bulk`, transactionBulkObject) as Response<DragonchainBulkTransactionResponse>
   }
 
   /**
