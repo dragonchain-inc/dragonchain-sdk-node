@@ -145,7 +145,7 @@ export class DragonchainClient {
    *
    * @param secretName the name of the secret to retrieve for smart contract
    */
-  public getSecret = (secretName: string): string => this.readFileSync(`/var/openfaas/secret/sc-${process.env.SMART_CONTRACT_ID}-${secretName}`, 'utf-8')
+  public getSecret = (secretName: string): string => this.readFileSync(`/var/openfaas/secrets/sc-${process.env.SMART_CONTRACT_ID}-${secretName}`, 'utf-8')
 
   /**
    * Get a transaction by Id.
