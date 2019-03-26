@@ -15,13 +15,13 @@
  */
 
 import fetch from 'node-fetch'
+import { readFileSync } from 'fs'
 import {
   DragonchainTransactionCreatePayload,
   L1DragonchainTransactionFull,
   DragonchainTransactionCreateResponse,
   SmartContractAtRest,
-  ContractRuntime,
-  CustomContractCreationSchema,
+  ContractCreationSchema,
   L1DragonchainTransactionQueryResult,
   DragonchainContractCreateResponse,
   SupportedHTTP,
@@ -29,31 +29,22 @@ import {
   L1DragonchainStatusResult,
   SmartContractType,
   DragonchainBlockQueryResult,
-  validContractLibraries,
   DragonchainBulkTransactions,
   Response,
   Verifications,
   levelVerifications,
-  UpdateDataResponse,
+  DragonnetConfigSchema,
+  UpdateResponse,
   TransactionTypeStructure,
   TransactionTypeResponse,
-  CustomIndexStructure
-} from '../../interfaces/DragonchainClientInterfaces'
+  CustomIndexStructure,
+  SmartContractExecutionOrder,
+  SmartContractDesiredState
+} from 'src/interfaces/DragonchainClientInterfaces'
 import { CredentialService } from '../credential-service/CredentialService'
 import { URLSearchParams } from 'url'
 import { logger } from '../../index'
-
-const validRuntimes = [
-  'nodejs6.10',
-  'nodejs8.10',
-  'java8',
-  'python2.7',
-  'python3.6',
-  'dotnetcore1.0',
-  'dotnetcore2.0',
-  'dotnetcore2.1',
-  'go1.x'
-]
+import { FailureByDesign } from '../../errors/FailureByDesign'
 
 const validSmartContractTypes = [
   'transaction',
@@ -81,6 +72,10 @@ export class DragonchainClient {
    * @hidden
    */
   private fetch: any
+  /**
+   * @hidden
+   */
+  private readFileSync: any
 
   /**
    * Create an Instance of a DragonchainClient.
@@ -100,18 +95,9 @@ export class DragonchainClient {
     this.verify = verify
     this.endpoint = `https://${dragonchainId}.api.dragonchain.com`
     this.fetch = injected.fetch || fetch
+    this.readFileSync = injected.readFileSync || readFileSync
     this.credentialService = injected.CredentialService || new CredentialService(dragonchainId)
   }
-
-  /**
-   * Checks if a runtime string is valid
-   * @hidden
-   * @static
-   * @name isValidRuntime
-   * @param {ContractRuntime} runtime runtime to validate
-   * @returns {boolean} true if runtime is valid, false if not.
-   */
-  static isValidRuntime = (runtime: ContractRuntime) => validRuntimes.includes(runtime)
 
   /**
    * Checks if a smart contract type string is valid
@@ -153,6 +139,13 @@ export class DragonchainClient {
   public setEndpoint = (endpoint: string) => {
     this.endpoint = endpoint
   }
+
+  /**
+   * Reads secrets given to a smart contract
+   *
+   * @param secretName the name of the secret to retrieve for smart contract
+   */
+  public getSecret = (secretName: string): string => this.readFileSync(`/var/openfaas/secrets/sc-${process.env.SMART_CONTRACT_ID}-${secretName}`, 'utf-8')
 
   /**
    * Get a transaction by Id.
@@ -203,10 +196,10 @@ export class DragonchainClient {
   }
 
   /**
-   * Get a single smart contract by name
+   * Get a single smart contract by id
    */
-  public getSmartContract = async (contractName: string) => {
-    return await this.get(`/contract/${contractName}`) as Response<SmartContractAtRest>
+  public getSmartContract = async (contractId: string) => {
+    return await this.get(`/contract/${contractId}`) as Response<SmartContractAtRest>
   }
 
   /**
@@ -224,43 +217,83 @@ export class DragonchainClient {
   }
 
   /**
-   * Updates existing contract fields in a custom contract
-   * @param {string} name The name of the existing contract you want to update
-   * @param {string} status update the status of the contract
-   * @param {string} scType update the smart contract type
-   * @param {string} code update the code on the contract
-   * @param {string} runtime update the runtime of the contract
-   * @param {boolean} serial update whether or not the contract runs serial
-   * @param {object} envVars update the envrionment variables on a contract
+   * Updates existing contract fields
+   * @param {string} txnType The name of the existing contract you want to update
+   * @param {string} image The docker image containing the smart contract logic
+   * @param {string} cmd Entrypoint command to run in the docker container
+   * @param {SmartContractExecutionOrder} executionOrder Order of execution. Valid values 'parallel' or 'serial'
+   * @param {SmartContractDesiredState} desiredState Change the state of a contract. Valid values are "active" and "inactive". You may only change the state of an active or inactive contract.
+   * @param {string[]} args List of arguments to the cmd field
+   * @param {object} env mapping of environment variables for your contract
+   * @param {object} secrets mapping of secrets for your contract
+   * @param {number} seconds The seconds of scheduled execution
+   * @param {string} cron The rate of scheduled execution specified as a cron
+   * @param {string} auth basic-auth for pulling docker images, base64 encoded (e.g. username:password)
    */
-  public updateCustomSmartContract = async (name: string, status?: string, scType?: string, code?: string, runtime?: string, serial?: boolean, envVars?: {}) => {
+  public updateSmartContract = async (contractId: string, image?: string, cmd?: string, executionOrder?: SmartContractExecutionOrder, desiredState?: SmartContractDesiredState, args?: string[], env?: {}, secrets?: {}, seconds?: number, cron?: string, auth?: string) => {
     const body: any = {
-      'version': '1',
-      'name': name,
-      'status': status,
-      'sc_type': scType,
-      'code': code,
-      'runtime': runtime,
-      'is_serial': serial
+      version: '3',
+      dcrn: 'SmartContract::L1::Update'
     }
-    if (envVars) {
-      body['custom_environment_variables'] = envVars
-    }
-    return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
+
+    if (image) body['image'] = image
+    if (cmd) body['cmd'] = cmd
+    if (executionOrder) body['execution_order'] = executionOrder
+    if (desiredState) body['desired_state'] = desiredState
+    if (args) body['args'] = args
+    if (env) body['env'] = env
+    if (secrets) body['secrets'] = secrets
+    if (seconds) body['seconds'] = seconds
+    if (cron) body['cron'] = cron
+    if (auth) body['auth'] = auth
+
+    return await this.put(`/contract/${contractId}`, body) as Response<UpdateResponse>
   }
 
   /**
-   * Update the status of a library contract
-   * @param {string} name the name of the existing library contract that you want to update
-   * @param {string} status update the status
+   * Deletes a smart contract
+   * @param {string} contractId
+   * @returns {Promise<UpdateResponse>} success message upon successful update
    */
-  public updateLibrarySmartContract = async (name: string, status?: string) => {
-    const body: any = {
-      'version': '1',
-      'name': name,
-      'status': status
+  public deleteSmartContract = async (contractId: string) => {
+    return await this.delete(`/contract/${contractId}`) as Response<UpdateResponse>
+  }
+
+  /**
+   * Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
+   * @param {number} askingPrice (0.0001-1000.0000) the price in DRGN to charge L1 nodes for your verification of their data. Setting this number too high will cause L1's to ignore you more often.
+   * @param {number} broadcastInterval Broadcast Interval is only for level 5 chains
+   */
+  public updateMatchmakingConfig = async (askingPrice?: number, broadcastInterval?: number) => {
+    if (askingPrice) {
+      if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
     }
-    return await this.put(`/contract/${body.name}`, body) as Response<UpdateDataResponse>
+    const matchmakingUpdate: any = {
+      'matchmaking': {
+        'askingPrice': askingPrice,
+        'broadcastInterval': broadcastInterval
+      }
+    }
+    return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<UpdateResponse>
+  }
+
+  /**
+   * Update your maximum price for each level of verification.
+   * This method is only relevant for L1 nodes.
+   * @param {DragonnetConfigSchema} maximumPrices maximum prices (0-1000) to set for each level (in DRGNs) If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
+   */
+  public updateDragonnetConfig = async (maximumPrices: DragonnetConfigSchema) => {
+    const dragonnet = {} as any
+    [2,3,4,5].forEach(i => {
+      const item = maximumPrices[`l${i}`]
+      if (item) {
+        if (isNaN(item) || item < 0 || item > 1000) { throw new FailureByDesign('BAD_REQUEST', 'maxPrice must be between 0 and 1000.') }
+        dragonnet[`l${i}`] = { maximumPrice: item }
+      }
+    })
+    // Make sure SOME valid levels were provided by checking if dragonnet is an empty object
+    if (Object.keys(dragonnet).length === 0) throw new FailureByDesign('BAD_REQUEST', 'No valid levels provided')
+    return await this.put(`/update-matchmaking-data`, { dragonnet }) as Response<UpdateResponse>
   }
 
   /**
@@ -287,20 +320,10 @@ export class DragonchainClient {
 
   /**
    * Create a new Smart Contract on your Dragonchain.
-   * Create a new custom smart contract on your dragonchain
-   * Code must be a base64 encoded string
    * @returns {Promise<DragonchainContractCreateResponse>}
    */
-  public createCustomContract = async (body: CustomContractCreationSchema) => {
-    return await this.post(`/contract/${body.name}`, body) as Response<DragonchainContractCreateResponse>
-  }
-
-  /**
-   * Create a preconfigure contract from our library, using the provided interfaces
-   * @param {validContractLibraries} body the preconfigured interfaces for smart contract libraries
-   */
-  public createLibraryContract = async (body: validContractLibraries) => {
-    return await this.post(`/contract/${body.name}`, body) as Response<DragonchainContractCreateResponse>
+  public createContract = async (body: ContractCreationSchema) => {
+    return await this.post(`/contract`, body) as Response<DragonchainContractCreateResponse>
   }
 
   /**
@@ -347,7 +370,7 @@ export class DragonchainClient {
    * @param {TransactionTypeStructure} txnTypeStructure
    */
   public registerTransactionType = async (txnTypeStructure: TransactionTypeStructure) => {
-    return await this.post('/transaction-type', txnTypeStructure) as Response<UpdateDataResponse>
+    return await this.post('/transaction-type', txnTypeStructure) as Response<UpdateResponse>
   }
 
   /**
@@ -356,7 +379,7 @@ export class DragonchainClient {
    * @param {string} transactionType
    */
   public deleteTransactionType = async (transactionType: string) => {
-    return await this.delete(`/transaction-type/${transactionType}`) as Response<UpdateDataResponse>
+    return await this.delete(`/transaction-type/${transactionType}`) as Response<UpdateResponse>
   }
 
   /**
@@ -375,7 +398,7 @@ export class DragonchainClient {
    */
   public updateTransactionType = async (transactionType: string, customIndexes: CustomIndexStructure[]) => {
     const params = { version: '1', custom_indexes: customIndexes }
-    return await this.put(`/transaction-type/${transactionType}`, params) as Response<UpdateDataResponse>
+    return await this.put(`/transaction-type/${transactionType}`, params) as Response<UpdateResponse>
   }
 
   /**
