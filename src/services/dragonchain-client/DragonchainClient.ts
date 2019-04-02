@@ -303,10 +303,11 @@ export class DragonchainClient {
    * Most importantly; the block in which it has been fixated.
    *
    * @param {DragonchainTransactionCreatePayload} transactionObject
+   * @param {string} callbackURL
    * @returns {Promise<DragonchainTransactionCreateResponse>}
    */
-  public createTransaction = async (transactionObject: DragonchainTransactionCreatePayload) => {
-    return await this.post(`/transaction`, transactionObject) as Response<DragonchainTransactionCreateResponse>
+  public createTransaction = async (transactionObject: DragonchainTransactionCreatePayload, callbackURL?: string) => {
+    return await this.post(`/transaction`, transactionObject, callbackURL) as Response<DragonchainTransactionCreateResponse>
   }
 
   /**
@@ -472,7 +473,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private getFetchOptions (method: SupportedHTTP, path: string, body: string, callbackURL?: string, contentType: string = 'application/json'): FetchOptions {
+  private getFetchOptions (path: string, method: SupportedHTTP, callbackURL: string = '', body: string, contentType: string = 'application/json'): FetchOptions {
     const timestamp = new Date().toISOString()
     return {
       method: method,
@@ -509,8 +510,8 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private async makeRequest (path: string, method: SupportedHTTP, callbackURL?: string, body: string = '', jsonParse: boolean = true) {
-    const fetchData = this.getFetchOptions(method, path, body, callbackURL)
+  private async makeRequest (path: string, method: SupportedHTTP, callbackURL: string = '', body: string = '', jsonParse: boolean = true) {
+    const fetchData = this.getFetchOptions(path, method, callbackURL, body)
     const url = `${this.endpoint}${path}`
     logger.debug(`[DragonchainClient][FETCH][URL] ==> ${url}`)
     logger.debug(`[DragonchainClient][FETCH][DATA] ==> ${JSON.stringify(fetchData)}`)
