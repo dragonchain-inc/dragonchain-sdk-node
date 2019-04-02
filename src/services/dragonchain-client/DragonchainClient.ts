@@ -443,15 +443,15 @@ export class DragonchainClient {
    * @hidden
    */
   private async get (path: string, jsonParse: boolean = true) {
-    return this.makeRequest(path, 'GET', '', jsonParse)
+    return this.makeRequest(path, 'GET', undefined, undefined, jsonParse)
   }
 
   /**
    * @hidden
    */
-  private async post (path: string, body: string | object) {
+  private async post (path: string, body: string | object, callbackURL?: string) {
     const bodyString = typeof body === 'string' ? body : JSON.stringify(body)
-    return this.makeRequest(path, 'POST', bodyString)
+    return this.makeRequest(path, 'POST', callbackURL, bodyString)
   }
 
   /**
@@ -459,7 +459,7 @@ export class DragonchainClient {
    */
   private async put (path: string, body: string | object) {
     const bodyString = typeof body === 'string' ? body : JSON.stringify(body)
-    return this.makeRequest(path, 'PUT', bodyString)
+    return this.makeRequest(path, 'PUT', undefined, bodyString)
   }
 
   /**
@@ -472,7 +472,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private getFetchOptions (method: SupportedHTTP, path: string, body: string, contentType: string = 'application/json'): FetchOptions {
+  private getFetchOptions (method: SupportedHTTP, path: string, body: string, contentType: string = 'application/json', callbackURL?: string): FetchOptions {
     const timestamp = new Date().toISOString()
     return {
       method: method,
@@ -480,6 +480,7 @@ export class DragonchainClient {
       headers: {
         'Content-Type': contentType,
         dragonchain: this.credentialService.dragonchainId,
+        'X-Callback-URL': callbackURL,
         Authorization: this.credentialService.getAuthorizationHeader(
           method,
           path,
@@ -508,8 +509,8 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private async makeRequest (path: string, method: SupportedHTTP, body: string = '', jsonParse: boolean = true) {
-    const fetchData = this.getFetchOptions(method, path, body)
+  private async makeRequest (path: string, method: SupportedHTTP, callbackURL?: string, body: string = '', jsonParse: boolean = true) {
+    const fetchData = this.getFetchOptions(method, path, body, callbackURL)
     const url = `${this.endpoint}${path}`
     logger.debug(`[DragonchainClient][FETCH][URL] ==> ${url}`)
     logger.debug(`[DragonchainClient][FETCH][DATA] ==> ${JSON.stringify(fetchData)}`)

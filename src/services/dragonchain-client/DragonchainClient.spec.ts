@@ -82,9 +82,10 @@ describe('DragonchainClient', () => {
         body: undefined,
         headers: {
           'Content-Type': 'application/json',
-          dragonchain: 'fakeDragonchainId',
-          Authorization: 'fakeCreds',
-          timestamp: fakeTime
+          'X-Callback-URL': undefined,
+          'dragonchain': 'fakeDragonchainId',
+          'Authorization': 'fakeCreds',
+          'timestamp': fakeTime
         }
       }
     })
@@ -186,6 +187,7 @@ describe('DragonchainClient', () => {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
+        'X-Callback-URL': undefined,
         dragonchain: 'fakeDragonchainId',
         Authorization: 'fakeCreds',
         timestamp: fakeTime
@@ -216,9 +218,10 @@ describe('DragonchainClient', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        dragonchain: 'fakeDragonchainId',
-        Authorization: 'fakeCreds',
-        timestamp: fakeTime
+        'X-Callback-URL': undefined,
+        'dragonchain': 'fakeDragonchainId',
+        'Authorization': 'fakeCreds',
+        'timestamp': fakeTime
       }
     }
 
@@ -271,9 +274,10 @@ describe('DragonchainClient', () => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        dragonchain: 'fakeDragonchainId',
-        Authorization: 'fakeCreds',
-        timestamp: fakeTime
+        'X-Callback-URL': undefined,
+        'dragonchain': 'fakeDragonchainId',
+        'Authorization': 'fakeCreds',
+        'timestamp': fakeTime
       }
     }
 
