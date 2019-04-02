@@ -472,7 +472,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private getFetchOptions (method: SupportedHTTP, path: string, body: string, contentType: string = 'application/json', callbackURL?: string): FetchOptions {
+  private getFetchOptions (method: SupportedHTTP, path: string, body: string, callbackURL?: string, contentType: string = 'application/json'): FetchOptions {
     const timestamp = new Date().toISOString()
     return {
       method: method,
