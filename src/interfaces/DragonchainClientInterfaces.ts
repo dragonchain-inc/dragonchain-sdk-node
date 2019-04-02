@@ -194,6 +194,7 @@ export interface FetchOptions {
   method: SupportedHTTP
   headers: {
     'Content-Type': string
+    'X-Callback-URL'?: string
     dragonchain: string
     timestamp: string
     Authorization: string
