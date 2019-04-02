@@ -299,6 +299,8 @@ export class DragonchainClient {
   /**
    * Create a new Transaction on your Dragonchain.
    * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
+   * A POST request is made to the callback URL when the transaction has settled into a block on the Blockchain.
+   * The body of this POST request is the schema of an L1DragonchainTransactionFull.
    * The `transaction_id` returned from this function can be used for checking the status of this transaction.
    * Most importantly; the block in which it has been fixated.
    *
