@@ -104,4 +104,4 @@ In that example, `console` can be replaced with any custom logger as long as it 
 To reset the logger back to default (so it doesn't output anymore), simply called `setLogger()` with no params.
 
 ## Contributing
-Dragonchain is happy to welcome contributions from the community. You can get started [here](CONTRIBUTING.md)
+Dragonchain is happy to welcome contributions from the community. You can get started [here](CONTRIBUTING.md).
