@@ -34,7 +34,7 @@
     "fix": "tslint -p tsconfig.json --fix",
     "test:ci": "yarn lint && NODE_ENV=test nyc -x **/*spec.ts --reporter=lcov mocha --opts ./spec/mocha-unit.opts",
     "test": "yarn lint && NODE_ENV=test nyc -x **/*spec.ts --reporter=html --reporter=text mocha --opts ./spec/mocha-unit.opts",
-    "integration": "INTEGRATION_CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq '.SecretString' | jq fromjson) NODE_ENV=test nyc -x ./spec/integration.ts --reporter=html --reporter=text mocha --opts ./spec/mocha-integration.opts ",
+    "integration": "INTEGRATION_CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq '.SecretString' | jq fromjson) NODE_ENV=test mocha --opts ./spec/mocha-integration.opts ",
     "test:watch": "NODE_ENV=test mocha --require ts-node/register ./src/**/*.spec.ts --watch --watch-dirs ./src/ --watch-extensions ts",
     "coverage": "yarn test && yarn coverage:show",
     "coverage:show": "opn coverage/index.html",

@@ -102,3 +102,7 @@ SDK.setLogger(console);
 In that example, `console` can be replaced with any custom logger as long as it implements `log`, `info`, `warn`, `debug`, and `error` functions.
 
 To reset the logger back to default (so it doesn't output anymore), simply called `setLogger()` with no params.
+
+## Contributing
+
+Dragonchain is happy to welcome contributions from the community. You can get started [here](https://github.com/dragonchain-inc/dragonchain-sdk-node/blob/master/CONTRIBUTING.md).
