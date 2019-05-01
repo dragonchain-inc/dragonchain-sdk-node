@@ -133,6 +133,18 @@ export interface DragonchainTransactionCreateResponse {
   transaction_id: string
 }
 
+export interface TransactionID {
+  transaction_id: string
+}
+
+export interface DragonchainBulkTransactionCreateResponse {
+  status: number,
+  response: {
+    201: [TransactionID],
+    400: [DragonchainTransactionCreatePayload]
+  }
+}
+
 export interface SmartContractAtRest {
   'dcrn': 'SmartContract::L1::AtRest',
   'version': '1' | '2',

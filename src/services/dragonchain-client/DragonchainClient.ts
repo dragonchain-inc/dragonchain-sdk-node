@@ -20,6 +20,7 @@ import {
   DragonchainTransactionCreatePayload,
   L1DragonchainTransactionFull,
   DragonchainTransactionCreateResponse,
+  DragonchainBulkTransactionCreateResponse,
   SmartContractAtRest,
   ContractCreationSchema,
   L1DragonchainTransactionQueryResult,
@@ -29,7 +30,6 @@ import {
   L1DragonchainStatusResult,
   SmartContractType,
   DragonchainBlockQueryResult,
-  DragonchainBulkTransactions,
   Response,
   Verifications,
   levelVerifications,
@@ -314,11 +314,11 @@ export class DragonchainClient {
 
   /**
    * Create a bulk transaction by string together a bunch of transactions as JSON objects into an array
-   * @param {DragonchainBulkTransactions} transactionBulkObject array of transactions
+   * @param {DragonchainTransactionCreatePayload} transactionBulkObject array of transactions
    * @return {Promise<DragonchainTransactionCreateResponse>}
    */
-  public createBulkTransaction = async (transactionBulkObject: DragonchainBulkTransactions) => {
-    return await this.post(`/transaction_bulk`, transactionBulkObject) as Response<DragonchainTransactionCreateResponse>
+  public createBulkTransaction = async (transactionBulkObject: DragonchainTransactionCreatePayload[]) => {
+    return await this.post(`/transaction_bulk`, transactionBulkObject) as Response<DragonchainBulkTransactionCreateResponse>
   }
 
   /**
