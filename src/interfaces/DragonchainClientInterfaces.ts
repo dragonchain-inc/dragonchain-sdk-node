@@ -143,7 +143,7 @@ export interface DragonchainBulkTransactionCreateResponse {
     201: [TransactionID],
     400: [DragonchainBulkTransactions],
    }
-  }
+}
 
 export interface SmartContractAtRest {
   'dcrn': 'SmartContract::L1::AtRest',
