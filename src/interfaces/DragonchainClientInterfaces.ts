@@ -141,7 +141,7 @@ export interface DragonchainBulkTransactionCreateResponse {
   status: number,
   response: {
     201: [TransactionID],
-    400: [DragonchainBulkTransactions],
+    400: [DragonchainBulkTransactions]
   }
 }
 
