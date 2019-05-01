@@ -20,6 +20,7 @@ import {
   DragonchainTransactionCreatePayload,
   L1DragonchainTransactionFull,
   DragonchainTransactionCreateResponse,
+  DragonchainBulkTransactionCreateResponse,
   SmartContractAtRest,
   ContractCreationSchema,
   L1DragonchainTransactionQueryResult,
@@ -318,7 +319,7 @@ export class DragonchainClient {
    * @return {Promise<DragonchainTransactionCreateResponse>}
    */
   public createBulkTransaction = async (transactionBulkObject: DragonchainBulkTransactions) => {
-    return await this.post(`/transaction_bulk`, transactionBulkObject) as Response<DragonchainTransactionCreateResponse>
+    return await this.post(`/transaction_bulk`, transactionBulkObject) as Response<DragonchainBulkTransactionCreateResponse>
   }
 
   /**
