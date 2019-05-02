@@ -1,7 +1,7 @@
-# Dragonchain JS SDK
+# Dragonchain JS SDK 
+[![Build Status](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node.svg?branch=master)](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node)
 
 Talk to your dragonchain.
-
 ## Method Quicklinks
 
 These docs are auto-generated.
