@@ -428,8 +428,7 @@ export class DragonchainClient {
    * createPublicBlockchainTransaction
    * Creates and signs a transaction for a public blockchain using the chain's private keys
    * Returns the signed raw transaction
-   * @param {string} network
-   * @param {BitcoinTransactionStructure | EthereumTransactionStructure} transaction
+   * @param {PublicBlockchainTransaction} transaction
    */
   public createPublicBlockchainTransaction = async (transaction: PublicBlockchainTransaction) => {
     return await this.post('/public-blockchain-transaction', transaction) as Response<PublicBlockchainTransactionResponse>
