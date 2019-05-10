@@ -145,6 +145,44 @@ export interface DragonchainBulkTransactionCreateResponse {
   }
 }
 
+export interface BitcoinTransactionOutput {
+  to: string,
+  value: number
+}
+
+export interface PublicBlockchainTransaction {
+  network: string,
+  transaction: BitcoinTransactionStructure | EthereumTransactionStructure
+}
+
+export interface BitcoinTransactionStructure {
+  outputs?: Array<BitcoinTransactionOutput>,
+  fee?: number,
+  data?: string,
+  change?: string,
+}
+
+export interface EthereumTransactionStructure {
+  to: string,
+  value: string,
+  data?: string,
+  gasPrice?: string,
+  gas?: string,
+}
+
+export interface PublicBlockchainTransactionResponse {
+  signed: string
+}
+
+export interface PublicBlockchainAddressListResponse {
+  eth_mainnet?: string,
+  etc_mainnet?: string,
+  eth_ropsten?: string,
+  etc_morden?: string,
+  btc_mainnet?: string,
+  btc_testnet3?: string,
+}
+
 export interface SmartContractAtRest {
   'dcrn': 'SmartContract::L1::AtRest',
   'version': '1' | '2',
@@ -479,5 +517,5 @@ export interface TransactionTypeResponse {
   'version': string,
   'txn_type': string,
   'custom_indexes': CustomIndexStructure[],
-  'is_contract': boolean,
+  'contract_id': boolean,
 }
