@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-export type ContractRuntime = 'nodejs6.10' | 'nodejs8.10' | 'java8' | 'python2.7' | 'python3.6' | 'dotnetcore1.0' | 'dotnetcore2.0' | 'dotnetcore2.1' | 'go1.x'
-
 export interface Response<T> {
   /**
    * Boolean result passed from the fetch library.
@@ -147,18 +145,24 @@ export interface DragonchainBulkTransactionCreateResponse {
 
 export interface SmartContractAtRest {
   'dcrn': 'SmartContract::L1::AtRest',
-  'version': '1' | '2',
+  'version': '3',
+  'txn_type': string,
   'id': string,
-  'name': string,
-  'status': 'approved' | 'rejected' | 'pending',
-  'custom_environment_variables': object,
-  'origin': 'library' | 'custom',
-  'runtime': ContractRuntime,
-  'sc_type': string,
-  'code': string | null,
-  's3_bucket': string | null,
-  's3_path': string | null,
-  'is_serial': boolean | null,
+  'status': {
+    'state': SmartContractDesiredState,
+    'msg': string,
+    'timestamp': string
+  },
+  'image': string,
+  'auth_key_id': string,
+  'image_digest': string,
+  'cmd': string,
+  'args': string[],
+  'env': Object,
+  'existing_secrets': string[],
+  'cron': string,
+  'seconds': string,
+  'execution_order': string
 }
 
 export type SmartContractType = 'transaction' | 'cron'
