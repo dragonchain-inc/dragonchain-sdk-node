@@ -413,7 +413,7 @@ export class DragonchainClient {
    * @param {string} transactionType
    */
   public getTransactionType = async (transactionType: string) => {
-    return await this.get(`/transaction-type/${transactionType}`) as Response<PublicBlockchainTransaction>
+    return await this.get(`/transaction-type/${transactionType}`) as Response<TransactionTypeResponse>
   }
 
   /**
