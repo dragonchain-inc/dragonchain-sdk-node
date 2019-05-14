@@ -37,6 +37,9 @@ import {
   UpdateResponse,
   TransactionTypeStructure,
   TransactionTypeResponse,
+  PublicBlockchainTransactionResponse,
+  PublicBlockchainTransaction,
+  PublicBlockchainAddressListResponse,
   CustomIndexStructure,
   SmartContractExecutionOrder,
   SmartContractDesiredState
@@ -405,13 +408,30 @@ export class DragonchainClient {
   }
 
   /**
-   * @hidden
    * getTransactionType
    * Gets a specific transaction type
    * @param {string} transactionType
    */
   public getTransactionType = async (transactionType: string) => {
     return await this.get(`/transaction-type/${transactionType}`) as Response<TransactionTypeResponse>
+  }
+
+  /**
+   * getPublicBlockchainAddresses
+   * Gets a list of your Dragonchain's interchain addresses
+   */
+  public getPublicBlockchainAddresses = async () => {
+    return await this.get('/public-blockchain-address') as Response<PublicBlockchainAddressListResponse>
+  }
+
+  /**
+   * createPublicBlockchainTransaction
+   * Creates and signs a transaction for a public blockchain using the chain's private keys
+   * Returns the signed raw transaction
+   * @param {PublicBlockchainTransaction} transaction
+   */
+  public createPublicBlockchainTransaction = async (transaction: PublicBlockchainTransaction) => {
+    return await this.post('/public-blockchain-transaction', transaction) as Response<PublicBlockchainTransactionResponse>
   }
 
   /**

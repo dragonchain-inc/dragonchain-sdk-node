@@ -101,7 +101,7 @@ describe('DragonchainClient', () => {
     describe('.getStatus', () => {
       it('calls #fetch() with correct params', async () => {
         await client.getStatus()
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/status`, expectedFetchOptions)
+        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/status', expectedFetchOptions)
       })
     })
 
@@ -144,6 +144,13 @@ describe('DragonchainClient', () => {
         const id = 'joker-smartcontract-id'
         await client.getSmartContract(id)
         assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/contract/${id}`, expectedFetchOptions)
+      })
+    })
+
+    describe('.getPublicBlockchainAddresses', () => {
+      it('calls #fetch() with correct params', async () => {
+        await client.getPublicBlockchainAddresses()
+        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/public-blockchain-address', expectedFetchOptions)
       })
     })
 
@@ -235,7 +242,7 @@ describe('DragonchainClient', () => {
         }
         await client.createTransaction(transactionCreatePayload)
         const obj = { ...expectedFetchOptions, body: JSON.stringify(transactionCreatePayload) }
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/transaction`, obj)
+        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/transaction', obj)
       })
     })
 
@@ -253,7 +260,22 @@ describe('DragonchainClient', () => {
         }
         await client.createContract(contractPayload)
         const obj = { ...expectedFetchOptions, body: JSON.stringify(contractPayload) }
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/contract`, obj)
+        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/contract', obj)
+      })
+    })
+
+    describe('.createPublicBlockchainTransaction', () => {
+      it('calls #fetch() with correct params', async () => {
+        const transactionCreatePayload = {
+          network: 'ETH_MAINNET',
+          transaction: {
+            to: '0x0000000000000000000000000000000000000000',
+            value: '0x0'
+          }
+        }
+        await client.createPublicBlockchainTransaction(transactionCreatePayload)
+        const obj = { ...expectedFetchOptions, body: JSON.stringify(transactionCreatePayload) }
+        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/public-blockchain-transaction', obj)
       })
     })
   })
