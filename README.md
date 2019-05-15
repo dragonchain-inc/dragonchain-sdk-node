@@ -2,6 +2,8 @@
 [![Build Status](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node.svg?branch=master)](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node)
 
 Talk to your dragonchain.
+## Tutorial / Examples:
+A tutorial on creating a custom contract can be found here https://github.com/dragonchain-inc/custom-contract-node-sdk. Also worth looking at the integration tests file for a number of examples. https://github.com/dragonchain-inc/dragonchain-sdk-node/blob/master/spec/integration.ts
 ## Method Quicklinks
 
 These docs are auto-generated.
