@@ -92,7 +92,7 @@ export class DragonchainClient {
     injected: any = {}
   ) {
     if (!dragonchainId) {
-      logger.debug('Dragonchain ID explicitly provided, will not search env/disk')
+      logger.debug('Dragonchain ID not explicitly provided, will search env/disk')
       dragonchainId = CredentialService.getDragonchainId()
     }
     this.verify = verify
