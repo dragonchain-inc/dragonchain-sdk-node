@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "outDir": "./",
     "rootDir": "./",
     "moduleResolution": "node",
@@ -26,19 +26,15 @@
     "allowUnreachableCode": false,
     "allowJs": false,
     "lib": [
-      "dom",
-      "es5",
       "es6",
-      "es7",
-      "es2017.object",
-      "esnext",
-      "esnext.asynciterable"
+      "esnext"
     ],
     "typeRoots": [
       "./node_modules/@types"
     ],
     "types": [
-      "node"
+      "node",
+      "mocha"
     ],
     "baseUrl": ".",
     "paths": {

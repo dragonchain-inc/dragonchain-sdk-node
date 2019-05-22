@@ -14,15 +14,38 @@
  * limitations under the License.
  */
 
+ /**
+  * @hidden
+  * Supported HTTP methods for the sdk
+  */
+export type SupportedHTTP = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+/**
+ * @hidden
+ * Fetch options used internally
+ */
+export interface FetchOptions {
+  method: SupportedHTTP
+  headers: {
+    'Content-Type'?: string
+    'X-Callback-URL'?: string
+    dragonchain: string
+    timestamp: string
+    Authorization: string
+  }
+  body: string | undefined
+}
+
+/**
+ * Response returned from a `DragonchainClient` call to a dragonchain
+ */
 export interface Response<T> {
   /**
-   * Boolean result passed from the fetch library.
-   *
-   * This can be used to quickly determine if the status code is 2xx.
+   * Boolean result if the response from the dragonchain was a 2XX status code, indicating a successful call
    */
   ok: boolean,
   /**
-   * HTTP Status Code
+   * HTTP status code returned from this call
    */
   status: number,
   /**
@@ -32,6 +55,24 @@ export interface Response<T> {
    */
   response: T
 }
+
+/**
+ * Data returned from a query against a chain
+ */
+export interface QueryResult<T> {
+  /**
+   * Array of results
+   */
+  results: T[]
+  /**
+   * Total count of results that match the query
+   *
+   * Note this number can be higher than the length of the `results` array,
+   * indicating that pagination was used to shorten the `results` returned
+   */
+  total: number
+}
+
 /**
  * Example Transaction At Rest Object
  * @name Transaction::L1::FullTransaction
@@ -50,122 +91,110 @@ export interface Response<T> {
  *      "tag": "",
  *      "invoker": "37aee185-bd5c-48bc-886e-52c6c9110314"
  *   },
- *   "payload": {},
+ *   "payload": "",
  *   "proof": {
  *     "full": "r9IjV3Mo3Sd9mWh5cAXxQP4h9tjiIec3Z1/+fI9F218=",
  *     "stripped": "MEUCIQCJLaYXAkm7/VkyrulVTxmUVAfVnOQy5hSYJZG2U7fgIgIgHGJWMoHt7/o/hoIGLqgqiGUc4ESiwMbIyKeJs88KHf4="
  *   }
  * }
  * ```
- * @param string `dcrn` string representing this Dragonchain Resource Name
- * @param string `version` representing the version of this DataTransferObject
- * @param string `header.txn_type` name of a smart contract, or 'transaction'
- * @param string `header.dc_id` the dragonchainId which originally received this transaction
- * @param string `header.txn_id` the GUID of this transaction
- * @param string `header.tag` free-form string of search searchable data submitted by the transaction author
- * @param string `header.timestamp` unix timestamp of when this transaction was first processed
- * @param string `header.block_id` the block id to which this transaction was fixated
- * @param string `header.invoker` the optional GUID of a smart-contract transaction which triggered this record. SC invocation requests are null here, their output will contain the transaction ID of their invokation request transaction)
- * @param string `payload` String of JSON representing the data for this transaction
- * @param string `proof.full` signature of this transaction.
- * @param string `proof.stripped` signature of this transaction.
- * @example Order of proof hashes looks like this:
- * ```javascript
- * proof_full_hash_order = [
- *   "txn_id",
- *   "txn_type",
- *   "dc_id",
- *   "block_id",
- *   "tag",
- *   "invoker",
- *   "timestamp",
- *   "payload"
- * ]
- * proof_stripped_hash_order = [
- *   "txn_id",
- *   "txn_type",
- *   "dc_id",
- *   "block_id",
- *   "tag",
- *   "invoker",
- *   "timestamp"
- * ]
- * ```
  */
 export interface L1DragonchainTransactionFull {
+  /**
+   * string representing this Dragonchain Resource Name
+   */
   dcrn: 'Transaction::L1::FullTransaction',
+  /**
+   * string representing the version of this DataTransferObject
+   */
   version: string
   header: {
+    /**
+     * name of a smart contract, or 'transaction'
+     */
     txn_type: string,
+    /**
+     * the dragonchainId which originally received this transaction
+     */
     dc_id: string,
+    /**
+     * the GUID of this transaction
+     */
     txn_id: string,
+    /**
+     * free-form string of search searchable data submitted by the transaction author
+     */
     tag: string,
+    /**
+     * unix timestamp of when this transaction was first processed
+     */
     timestamp: string,
+    /**
+     * the block id to which this transaction was fixated
+     */
     block_id: string,
+    /**
+     * the optional GUID of a smart-contract transaction which triggered this record.
+     * SC invocation requests are null here, their output will contain the transaction ID of their invokation request transaction)
+     */
     invoker: string
   }
+  /**
+   * String of payload data for this transaction
+   */
   payload: string,
   proof: {
+    /**
+     * hash of the full transaction
+     */
     full: string,
+    /**
+     * signature of the stripped transaction
+     */
     stripped: string
   }
-}
-
-export interface DragonchainSearchResult {
-  total: Number
-  results: L1DragonchainTransactionFull[]
-}
-
-export interface DragonchainTransactionCreatePayload {
-  version: string
-  txn_type: string
-  payload: object | string
-  tag: string
-}
-
-export interface DragonchainBulkTransactions {
-  payload: DragonchainTransactionCreatePayload[]
 }
 
 export interface DragonchainTransactionCreateResponse {
   transaction_id: string
 }
 
-export interface TransactionID {
-  transaction_id: string
+export interface BulkTransactionPayload {
+  /**
+   * The transaction type to use for this new transaction. This transaction type must already exist on the chain (via `createTransactionType`)
+   */
+  transactionType: string,
+  /**
+   * Payload of the transaction. Must be a utf-8 encodable string, or any json object
+   */
+  payload: string | object,
+  /**
+   * Tag of the transaction which gets indexed and can be searched on for queries
+   */
+  tag?: string
+}
+
+interface FailedBulkTransactionCreate {
+  version: string
+  txn_type: string
+  payload: string | object
+  tag?: string
 }
 
 export interface DragonchainBulkTransactionCreateResponse {
-  status: number,
-  response: {
-    201: [TransactionID],
-    400: [DragonchainTransactionCreatePayload]
-  }
+  /**
+   * Successfully posted transactions
+   */
+  201: DragonchainTransactionCreateResponse[],
+  /**
+   * Transactions that failed to post
+   */
+  400: FailedBulkTransactionCreate[]
 }
 
-export interface BitcoinTransactionOutput {
-  to: string,
+export interface BitcoinTransactionOutputs {
+  scriptPubKey: string,
   value: number
-}
-
-export interface PublicBlockchainTransaction {
-  network: string,
-  transaction: BitcoinTransactionStructure | EthereumTransactionStructure
-}
-
-export interface BitcoinTransactionStructure {
-  outputs?: Array<BitcoinTransactionOutput>,
-  fee?: number,
-  data?: string,
-  change?: string,
-}
-
-export interface EthereumTransactionStructure {
-  to: string,
-  value: string,
-  data?: string,
-  gasPrice?: string,
-  gas?: string,
 }
 
 export interface PublicBlockchainTransactionResponse {
@@ -181,87 +210,282 @@ export interface PublicBlockchainAddressListResponse {
   btc_testnet3?: string,
 }
 
-export interface SmartContractAtRest {
-  'dcrn': 'SmartContract::L1::AtRest',
-  'version': '3',
-  'txn_type': string,
-  'id': string,
-  'status': {
-    'state': SmartContractDesiredState,
-    'msg': string,
-    'timestamp': string
-  },
-  'image': string,
-  'auth_key_id': string,
-  'image_digest': string,
-  'cmd': string,
-  'args': string[],
-  'env': Object,
-  'existing_secrets': string[],
-  'cron': string,
-  'seconds': string,
-  'execution_order': string
-}
-
-export type SmartContractType = 'transaction' | 'cron'
-
 export type SmartContractExecutionOrder = 'parallel' | 'serial'
 
-export type SmartContractDesiredState = 'active' | 'inactive'
-
-export interface ContractCreationSchema {
-  'version': '3',
-  'dcrn': 'SmartContract::L1::Create',
-  'txn_type': string,
-  'image'?: string,
-  'cmd'?: string,
-  'execution_order'?: SmartContractExecutionOrder,
-  'desired_state'?: SmartContractDesiredState,
-  'args'?: string[],
-  'env'?: object,
-  'secrets'?: object,
-  'seconds'?: number,
-  'cron'?: string,
-  'auth'?: string,
-}
-
-export interface L1DragonchainTransactionQueryResult {
-  results: L1DragonchainTransactionFull[]
-  total: number
-}
-
-export interface DragonnetConfigSchema {
-  l2?: number,
-  l3?: number,
-  l4?: number,
-  l5?: number,
-  [index: string]: number | undefined
+/**
+ * Example SmartContract At Rest Object
+ * @name SmartContract::L1::AtRest
+ * @example
+ * ```json
+ *
+ * {
+ *   "dcrn": "SmartContract::L1::AtRest",
+ *   "version": "1",
+ *   "txn_type": "c1",
+ *   "id": "ec3e6dac-da91-4186-9c21-3f996b4462ab",
+ *   "status": {
+ *     "state": "active",
+ *     "msg": "Creation success",
+ *     "timestamp": "2019-05-21 20:19:10.519848"
+ *   },
+ *   "image": "ubuntu:latest",
+ *   "auth_key_id": "SC_ELDVFTEQWXCW",
+ *   "image_digest": "sha256:9cf55af627c98299a13aac1349936128770bb0ce44b65344779034f52b2a7934",
+ *   "cmd": "cat",
+ *   "args": [
+ *     "-"
+ *   ],
+ *   "env": {
+ *     "STAGE": "dev",
+ *     "DRAGONCHAIN_ID": "ec67bbf5-b41e-4526-95fd-6a7c3abdd058",
+ *     "SMART_CONTRACT_ID": "ec3e6dac-da91-4186-9c21-3f996b4462ab",
+ *     "SMART_CONTRACT_NAME": "c1"
+ *   },
+ *   "existing_secrets": [
+ *     "secret-key",
+ *     "auth-key-id"
+ *   ],
+ *   "cron": null,
+ *   "seconds": null,
+ *   "execution_order": "parallel"
+ * }
+ * ```
+ */
+export interface SmartContractAtRest {
+  /**
+   * string representing this Dragonchain Resource Name
+   */
+  dcrn: 'SmartContract::L1::AtRest',
+  /**
+   * string representing the version of this DataTransferObject
+   */
+  version: '3',
+  /**
+   * the name (and also transaction type to invoke) this smart contract
+   */
+  txn_type: string,
+  /**
+   * The unique guid identifier for this contract
+   */
+  id: string,
+  /**
+   * data about the current status of the smart contract
+   */
+  status: {
+    state: 'active' | 'inactive',
+    msg: string,
+    timestamp: string
+  },
+  /**
+   * docker image of the smart contract
+   */
+  image: string,
+  /**
+   * id of the auth key that is used by the smart contract for communication back with the chain
+   */
+  auth_key_id: string | null,
+  /**
+   * docker image pull digest of the deployed smart contract
+   */
+  image_digest: string | null,
+  /**
+   * command that is run on execution of the smart contract
+   */
+  cmd: string,
+  /**
+   * args passed into the command on execution of the smart contract
+   */
+  args: string[] | null,
+  /**
+   * environment variables given to the smart contract
+   */
+  env: object | null,
+  /**
+   * array of secret names for this smart contract
+   */
+  existing_secrets: string[] | null,
+  /**
+   * cron expression for scheduling automatic execution of the smart contract
+   */
+  cron: string | null,
+  /**
+   * number of seconds between automatic executions of the smart contract
+   */
+  seconds: number | null,
+  /**
+   * execution order of the contract, whether it gets invoked asap (parallel), or in a single queue (serial)
+   */
+  execution_order: SmartContractExecutionOrder
 }
 
 export interface DragonchainContractCreateResponse {
-  success: 'Contract creation in progress.',
-}
-
-export type SupportedHTTP = 'GET' | 'POST' | 'PUT' | 'DELETE'
-
-export interface FetchOptions {
-  method: SupportedHTTP
-  headers: {
-    'Content-Type': string
-    'X-Callback-URL'?: string
-    dragonchain: string
-    timestamp: string
-    Authorization: string
-  }
-  body: string | undefined
+  success: SmartContractAtRest,
 }
 
 export interface L1DragonchainStatusResult {
-  dragonchainVersion: string
-  level: string,
-  isUpdateLocked: boolean,
-  cloudformationStatus: string,
-  cloudformationLastUpdatedTime: string
+  /**
+   * Level of this dragonchain
+   */
+  level: string
+  /**
+   * Cloud that this chain is running in
+   */
+  cloud: string
+  /**
+   * URL of the chain
+   */
+  url: string
+  /**
+   * Region that this chain is operating in
+   */
+  region: string
+  /**
+   * Proof scheme that this chain uses
+   */
+  scheme: string
+  /**
+   * Ethereum wallet assigned to this chain
+   */
+  wallet: string
+  /**
+   * Hashing algorithm used for blocks on this chain
+   */
+  hashAlgo: string
+  /**
+   * Dragonchain version of this chain
+   */
+  version: string
+  /**
+   * Encryption algorithm used for blocks on this chain
+   */
+  encryptionAlgo: string
+}
+
+export interface L1BlockAtRest {
+  version: '1',
+  dcrn: 'Block::L1::AtRest',
+  header: {
+    dc_id: string,
+    block_id: string,
+    level: 1
+    timestamp: string,
+    prev_id: string,
+    prev_proof: string
+  },
+  transactions: string[],
+  proof: {
+    scheme: string,
+    proof: string,
+    nonce?: number
+  }
+}
+
+export interface L2BlockAtRest {
+  version: '1'
+  dcrn: 'Block::L2::AtRest'
+  header: {
+    dc_id: string,
+    level: 2,
+    block_id: string,
+    timestamp: string,
+    prev_proof: string
+  }
+  validation: {
+    dc_id: string,
+    block_id: string,
+    stripped_proof: string,
+    transactions: string
+  }
+  proof: {
+    scheme: string
+    proof: string
+    nonce?: number
+  }
+}
+
+interface L2Proofs {
+  dc_id: string
+  block_id: string
+  proof: string
+}
+
+export interface L3BlockAtRest {
+  version: '2'
+  dcrn: 'Block::L3::AtRest'
+  header: {
+    dc_id: string,
+    current_ddss: string | null
+    level: 3,
+    block_id: string,
+    timestamp: string,
+    prev_proof: string
+  },
+  'l2-Validations': {
+    l1_dc_id: string,
+    l1_block_id: string,
+    l1_proof: string,
+    l2_proofs: L2Proofs[]
+    ddss: string,
+    count: string,
+    regions: string[],
+    clouds: string[]
+  },
+  proof: {
+    scheme: string,
+    proof: string,
+    nonce?: number
+  }
+}
+
+interface L3Validations {
+  l3_dc_id: string
+  l3_block_id: string
+  l3_proof: string
+  valid: boolean
+}
+
+export interface L4BlockAtRest {
+  version: '2'
+  dcrn: 'Block::L4::AtRest'
+  header: {
+    dc_id: string
+    current_ddss: string | null
+    level: 4
+    block_id: string
+    timestamp: string
+    l1_dc_id: string
+    l1_block_id: string
+    l1_proof: string
+    prev_proof: string
+  }
+  'l3-Validations': L3Validations[]
+  proof: {
+    scheme: string
+    proof: string
+    nonce?: number
+  }
+}
+
+export interface L5BlockAtRest {
+  version: '1'
+  dcrn: 'Block::L5::AtRest'
+  header: {
+    dc_id: string
+    current_ddss: string | null
+    level: 5
+    block_id: string
+    timestamp: string
+    prev_proof: string
+  }
+  'l4-blocks': string[]
+  proof: {
+    scheme: string
+    transaction_hash: string[]
+    block_last_sent_at: number
+    network: string
+    proof: string
+    nonce?: number
+  }
 }
 
 export interface Verifications {
@@ -274,252 +498,22 @@ export interface Verifications {
 export type levelVerifications = L2BlockAtRest[] | L3BlockAtRest[] | L4BlockAtRest[] | L5BlockAtRest[]
 export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4BlockAtRest | L5BlockAtRest
 
-export interface DragonchainBlockQueryResult {
-  results: BlockSchemaType[]
-  total: number
+export interface TransactionTypeSimpleResponse {
+  success: boolean
 }
 
-export interface L1BlockAtRest {
-  'version': '2',
-  'dcrn': 'Block::L1::AtRest',
-  'header': {
-    'dc_id': string,
-    'block_id': string,
-    'level': 1
-    'timestamp': string,
-    'prev_id': string,
-    'prev_proof': string
-  },
-  'transactions': string[],
-  'proof': {
-    'scheme': string,
-    'proof': string,
-    'nonce'?: number
-  }
+export interface TransactionTypeListResponse {
+  transaction_types: TransactionTypeResponse[]
 }
 
-export interface L2BlockAtRest {
-  'version': '2'
-  'dcrn': 'Block::L2::AtRest'
-  'header': {
-    'dc_id': string,
-    'level': 2,
-    'block_id': string,
-    'timestamp': string,
-    'prev_proof': string
-  }
-  'validation': {
-    'dc_id': string,
-    'block_id': string,
-    'stripped_proof': string,
-    'transactions': string
-  }
-  'proof': {
-    'scheme': string
-    'proof': string
-    'nonce'?: number
-  }
-}
-
-export interface L3BlockAtRest {
-  'version': '2'
-  'dcrn': 'Block::L3::AtRest'
-  'header': {
-    'dc_id': string,
-    'level': 3,
-    'block_id': string,
-    'timestamp': string,
-    'prev_proof': string
-  },
-  'l2-Validations': {
-    'l1_dc_id': string,
-    'l1_block_id': string,
-    'l1_proof': string,
-    'ddss': string,
-    'count': string,
-    'regions': [],
-    'clouds': []
-  },
-  'proof': {
-    'scheme': string,
-    'proof': string,
-    'nonce'?: number
-  }
-}
-
-export interface L4Validations {
-  'l3_dc_id': string,
-  'l3_block_id': string,
-  'l3_proof': string,
-  'valid': boolean
-}
-export interface L4BlockAtRest {
-  'version': '2'
-  'dcrn': 'Block::L4::AtRest'
-  'header': {
-    'dc_id': string,
-    'level': 4,
-    'block_id': string,
-    'timestamp': string,
-    'l1_dc_id': string,
-    'l1_block_id': string,
-    'l1_proof': string,
-    'prev_proof': string
-  }
-  'l3-Validations': L4Validations[]
-  'proof': {
-    'scheme': string
-    'proof': string
-    'nonce'?: number
-  }
-}
-
-export interface L5BlockAtRest {
-  'version': '2'
-  'dcrn': 'Block::L4::AtRest'
-  'header': {
-    'dc_id': string
-    'level': 5
-    'block_id': string
-    'timestamp': string
-    'prev_proof': string
-  }
-  'l4-blocks': string[]
-  'proof': {
-    'scheme': string
-    'proof': string
-    'nonce'?: number
-  }
-}
-
-export type precisionRange = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18
-export interface ContractCreateCurrencyContract {
-  'custom_environment_variables': {
-    'addressScheme'?: 'ethereum' | 'bitcoin' | 'dragon' | 'custom',
-    'governance'?: 'ethereum' | 'bitcoin' | 'dragon' | 'custom',
-    'originWalletAddress': string,
-    'precision'?: precisionRange,
-    'totalAmount': number
-  }
-  'dcrn': 'SmartContract::L1::Create',
-  'is_serial': true,
-  'libraryContractName': 'currency',
-  'name': string,
-  'origin': 'library',
-  'runtime': 'nodejs8.10',
-  'sc_type': 'transaction',
-  'version': '2'
-}
-
-export interface ContractCreateEthereumInterchainWatcher {
-  'custom_environment_variables': {
-    'address': string,
-    'url': string,
-    'contract'?: string,
-    'tokenContractAddress'?: string,
-    'apiKey'?: string,
-    'ethereumNetwork': 'classic' | 'ropsten' | 'mainnet' | 'ropsten-infura'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'interchainWatcher',
-  'name':	string,
-  'origin': 'library',
-  'runtime': 'nodejs8.10',
-  'sc_type': 'cron',
-  'version':	'2'
-}
-
-export interface ContractCreateNeoInterchainWatcher {
-  'custom_environment_variables': {
-    'address': string,
-    'apiKey'?: string,
-    'network': 'neo' | 'testnet'
-  }
-  'dcrn':	'SmartContract::L1::Create'
-  'libraryContractName': 'neoWatcher'
-  'name':	string
-  'origin':	'library'
-  'runtime': 'nodejs8.10'
-  'sc_type': 'cron'
-  'version': '2'
-}
-
-export interface ContractCreateBtcInterchainWatcher {
-  'custom_environment_variables': {
-    'address': string,
-    'apiKey'?: string,
-    'network': 'BTC' | 'testnet3'
-    'url': string
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName': 'btcWatcher',
-  'name':	string,
-  'origin':	'library',
-  'runtime': 'nodejs8.10',
-  'sc_type': 'cron',
-  'version': '2'
-}
-
-export interface ContractCreateEthereumPublisher {
-  'custom_environment_variables': {
-    'authorizationHeader'?: string,
-    'network': 'ETH' | 'Ropsten' | 'ETC' | 'Morden' | 'ropsten-infura'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'ethereumPublisher',
-  'name':	string,
-  'origin':	'library',
-  'runtime':	'nodejs8.10',
-  'sc_type':	'transaction',
-  'version':	'2'
-}
-
-export interface ContractCreateNeoPublisher {
-  'custom_environment_variables': {
-    'authorizationHeader'?: string,
-    'network': 'NEO' | 'NEOtestnet'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'neoPublisher',
-  'name':	string,
-  'origin':	'library',
-  'runtime':	'nodejs8.10',
-  'sc_type':	'transaction',
-  'version':	'2'
-}
-
-export interface ContractCreateBtcPublisher {
-  'custom_environment_variables': {
-    'authorizationHeader'?: string,
-    'network': 'BTC' | 'testnet3'
-  }
-  'dcrn':	'SmartContract::L1::Create',
-  'libraryContractName':	'btcPublisher',
-  'name':	string,
-  'origin':	'library',
-  'runtime':	'nodejs8.10',
-  'sc_type':	'transaction',
-  'version':	'2'
-}
-
-export interface UpdateResponse {
-  'success': string
-}
-
-export interface CustomIndexStructure {
-  'key': string,
-  'path': string,
-}
-
-export interface TransactionTypeStructure {
-  'version'?: string,
-  'txn_type'?: string,
-  'custom_indexes'?: CustomIndexStructure[],
+export interface TransactionTypeCustomIndexes {
+  key: string,
+  path: string
 }
 
 export interface TransactionTypeResponse {
-  'version': string,
-  'txn_type': string,
-  'custom_indexes': CustomIndexStructure[],
-  'contract_id': boolean,
+  version: '1',
+  txn_type: string,
+  custom_indexes: TransactionTypeCustomIndexes[],
+  contract_id: boolean,
 }

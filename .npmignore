@@ -14,5 +14,7 @@
 .travis.yml
 tsconfig.json
 tslint.json
+package-lock.json
 yarn.lock
 yarn-error.log
+*buildspec*

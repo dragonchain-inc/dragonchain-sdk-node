@@ -4,9 +4,9 @@ phases:
   install:
     commands:
       - npm install -g yarn
-      - yarn install
-      - yarn build
-  pre_build:
+      - yarn
+  build:
     commands:
+      - yarn lint
       - yarn test
 

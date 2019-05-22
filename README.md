@@ -1,36 +1,10 @@
-# Dragonchain JS SDK 
+# Dragonchain JS SDK
+
 [![Build Status](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node.svg?branch=master)](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node)
 
 Talk to your dragonchain.
-## Tutorial / Examples:
-A tutorial on creating a custom contract can be found here https://github.com/dragonchain-inc/custom-contract-node-sdk. Also worth looking at the integration tests file for a number of examples. https://github.com/dragonchain-inc/dragonchain-sdk-node/blob/master/spec/integration.ts
-## Method Quicklinks
 
-These docs are auto-generated.
-
-* [constructor](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#constructor)
-* [clearOverriddenCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#clearOverriddenCredentials)
-* [createContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createContract)
-* [createLibraryContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createlibrarycontract)
-* [createTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createtransaction)
-* [createBulkTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#createbulktransaction)
-* [getBlock](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getblock)
-* [getSmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getsmartcontract)
-* [getSmartContractHeap](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getsmartcontractheap)
-* [listSmartcontractHeap](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#listsmartcontractheap)
-* [getStatus](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getstatus)
-* [getTransaction](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getTransaction)
-* [overrideCredentials](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#overridecredentials)
-* [setDragonchainId](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#setdragonchainId)
-* [getVerifications](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#getverifications)
-* [setLogLevel](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#setloglevel)
-* [queryTransactions](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querytransactions)
-* [queryBlocks](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#queryblocks)
-* [querySmartContracts](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#querysmartcontracts)
-* [updateSmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatesmartcontract)
-* [updateLibrarySmartContract](https://node-sdk-docs.dragonchain.com/latest/classes/dragonchainclient.html#updatelibrarysmartcontract)
-
-### Versions
+## Docs
 
 * [latest](https://node-sdk-docs.dragonchain.com/latest)
 
@@ -40,17 +14,25 @@ These docs are auto-generated.
 npm i dragonchain-sdk --save
 ```
 
-### Examples
+## Tutorial / Examples
 
-#### GetBlock
+A tutorial on creating a custom contract can be [found here](https://github.com/dragonchain-inc/custom-contract-node-sdk).
+It is also worth looking at the [integration tests file](https://github.com/dragonchain-inc/dragonchain-sdk-node/blob/master/spec/integration.ts) for a number of examples.
+
+### Initialize The Client
 
 ```javascript
-const Dragonchain = require('dragonchain-sdk');
+const sdk = require('dragonchain-sdk');
 
-const myDcId = '3f2fef78-0000-0000-0000-9f2971607130';
-const client = new Dragonchain.DragonchainClient(myDcId);
+const client = await sdk.createClient({
+  dragonchainId: 'c2dffKwiGj6AGg4zHkNswgEcyHeQaGr4Cm5SzsFVceVv'
+});
+```
 
-const call = await client.getBlock('block-id-here');
+### GetBlock
+
+```javascript
+const call = await client.getBlock({ blockId: '56841' });
 
 if (call.ok) {
   console.log('Successful call!');
@@ -62,43 +44,69 @@ if (call.ok) {
 }
 ```
 
-#### QueryTransactions
+### QueryTransactions
 
 ```javascript
-const searchResult = await client.queryTransactions('tag=MyAwesomeTransactionTag')
-```
+const searchResult = await client.queryTransactions({ luceneQuery: 'tag=MyAwesomeTransactionTag' })
 
-#### OverrideCredentials
-
-This is fine for quick tests. For actual production use, you should use the [credential ini file or environment variables](#configuration)
-
-```javascript
-dragonchain.overrideCredentials('AUTH_KEY_ID','AUTH_KEY')
+if (call.ok) {
+  console.log('Successful call!');
+  console.log(`Query Result: ${searchResult.response}`);
+} else {
+  console.error('Something went wrong!');
+  console.error(`HTTP status code from chain: ${searchResult.status}`);
+  console.error(`Error response from chain: ${searchResult.response}`);
+}
 ```
 
 ## Configuration
 
-In order to use this SDK, you need to have an Auth Key as well as an Auth Key ID for a given dragonchain.
-This can be loaded into the sdk in various ways, and are checked in the following order of precedence:
+In order to use this SDK, you need to have an Auth Key as well as
+an Auth Key ID for a given Dragonchain ID. It is also strongly suggested that
+you supply an endpoint locally so that a remote service isn't called to
+automatically discover your dragonchain endpoint. These can be loaded into the
+sdk in various ways, and are checked in the following order of precedence:
 
-1. The environment variables `AUTH_KEY` and `AUTH_KEY_ID` can be set with the appropriate values
-2. Write an ini-style credentials file at `~/.dragonchain/credentials` (or on Windows: `%LOCALAPPDATA%\dragonchain\credentials`) where the section name is the dragonchain id, with values for `auth_key` and `auth_key_id` like so:
+1. The `createClient` method can be initialized with an object containing
+   the parameters `dragonchainId: <ID>`, `authKey: <KEY>`,
+   `authKeyId: <KEY_ID>`, and `endpoint: <URL>`
+
+2. The environment variables `DRAGONCHAIN_ID`,
+   `AUTH_KEY`, `AUTH_KEY_ID`, and `DRAGONCHAIN_ENDPOINT`,
+   can be set with the appropriate values
+
+3. An ini-style credentials file can be provided at
+   `~/.dragonchain/credentials` (or on Windows:
+   `%LOCALAPPDATA%\dragonchain\credentials`) where the section name is the
+   dragonchain id, with values for `auth_key`, `auth_key_id`, and `endpoint`.
+   Additionally, you can supply a value for `dragonchain_id` in the
+   `default` section to initialize the client for a specific chain
+   without supplying an ID any other way
 
 ```ini
-[35a7371c-a20a-4830-9a59-5d654fcd0a4a]
+[default]
+dragonchain_id = c2dffKwiGj6AGg4zHkNswgEcyHeQaGr4Cm5SzsFVceVv
+
+[c2dffKwiGj6AGg4zHkNswgEcyHeQaGr4Cm5SzsFVceVv]
 auth_key_id = JSDMWFUJDVTC
 auth_key = n3hlldsFxFdP2De0yMu6A4MFRh1HGzFvn6rJ0ICZzkE
+endpoint = https://35a7371c-a20a-4830-9a59-5d654fcd0a4a.api.dragonchain.com
+
+[28VhSgtPhwkhKBgmQSW6vrsir7quEYHdCjqsW6aAYbfrw]
+auth_key_id = OGNHGLYIFVUA
+auth_key = aS73Si7agvX9gfxnLMh6ack9DEuidKiwQxkqBudXl81
+endpoint = https://28567017-6412-44b6-80b2-12876fb3d4f5.api.dragonchain.com
 ```
 
 ## Logging
 
-In order to get the logging output of the sdk, a logger must be set (by default all logging is thrown away).
+In order to get the logging output of the sdk, a logger must be set (by default all logging is ignored).
 
 In order to set the logger, simply call `.setLogger` on the root of the require/import. For example, if you just wanted to log with `console` (i.e. stdout, stderr, etc), you can set the logger like the following:
 
 ```javascript
-const SDK = require('dragonchain-sdk');
-SDK.setLogger(console);
+const sdk = require('dragonchain-sdk');
+sdk.setLogger(console);
 ```
 
 In that example, `console` can be replaced with any custom logger as long as it implements `log`, `info`, `warn`, `debug`, and `error` functions.
