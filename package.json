@@ -21,7 +21,7 @@
   "jsnext:main": "lib/module/commonjs/index.js",
   "types": "lib/types/index.d.ts",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "scripts": {
     "h": "yarn npm-scripts-info",

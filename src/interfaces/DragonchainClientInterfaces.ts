@@ -155,6 +155,15 @@ export interface L1DragonchainTransactionFull {
   }
 }
 
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "transaction_id": "487d6646-a988-40f0-bfee-3dba013fbc2c"
+ * }
+ * ```
+ */
 export interface DragonchainTransactionCreateResponse {
   transaction_id: string
 }
@@ -361,6 +370,33 @@ export interface L1DragonchainStatusResult {
   encryptionAlgo: string
 }
 
+/**
+ * Example L1 Block At Rest Object
+ * @name Block::L1::AtRest
+ * @example
+ * ```json
+ *
+ * {
+ *   "version": "1",
+ *   "dcrn": "Block::L1::AtRest",
+ *   "header": {
+ *     "dc_id": "28VhSgtPhwkhKBgmQSW6vrsir7quEYHdCjqsW6aAYbfrw",
+ *     "block_id": "25261901",
+ *     "level": 1,
+ *     "timestamp": "1558547725",
+ *     "prev_id": "25261892",
+ *     "prev_proof": "MEUCIQCa8Ps0uV56BnE84hkl3HywSxCmkTIWqWVrMfilryhhjgIgdpwC2s0n5trRXI8yCsYItX173KHiyaSIjczw1pM1w24="
+ *   },
+ *   "transactions": [
+ *     "{\"version\": \"2\", \"dcrn\": \"Transaction::L1::Stripped\", \"header\": {\"txn_type\": \"c1\", \"dc_id\": \"28VhSgtPhwkhKBgmQSW6vrsir7quEYHdCjqsW6aAYbfrw\", \"txn_id\": \"77b902ff-5900-432a-a507-93ba097446fa\", \"block_id\": \"25261901\", \"timestamp\": \"1558547724\", \"tag\": \"\", \"invoker\": \"cron\"}, \"proof\": {\"full\": \"FIF2mF2fS7Ihcq1B/KjU/WcOZQ5vu/9C/SJVnReAsEc=\", \"stripped\": \"MEUCIQDVwWctm4CFiTJdkGkY6fG/rM+B1gBwxavm9ws0OSpLHQIgYp/ucEZUa0Vk/Tw/qyI14HyNTyHzLoKp8XsJLq2GXVY=\"}}"
+ *   ],
+ *   "proof": {
+ *     "scheme": "trust",
+ *     "proof": "MEQCICfhDVHOjVN6aexzimxn18+6IBhYg05/5YXadhm5+9GVAiA+BqW0kVfeJEESiiT4WqEH1vT7K0F6xnnwRcbM7cgasQ=="
+ *   }
+ * }
+ * ```
+ */
 export interface L1BlockAtRest {
   version: '1',
   dcrn: 'Block::L1::AtRest',
@@ -380,11 +416,42 @@ export interface L1BlockAtRest {
   }
 }
 
+/**
+ * Example L2 Block At Rest Object
+ * @name Block::L2::AtRest
+ * @example
+ * ```json
+ *
+ * {
+ *    "version": "1",
+ *    "dcrn": "Block::L2::AtRest",
+ *    "header": {
+ *      "dc_id": "e7rBQ3CP2Q93wmwQcH6VKzTiRUsAHoGh8fRvxnvx7M31",
+ *      "current_ddss": "5484875.54508316",
+ *      "level": 2,
+ *      "block_id": "44192",
+ *      "timestamp": "1555830009",
+ *      "prev_proof": "MEQCIBjCggGtfMbra7RYlmNxiGReGHB7Y+6yM56/s73tRCymAiBlySM+yxwKBvBvNpR3FXucCbQYRdciQPGKEThv2E3Q4Q=="
+ *    },
+ *    "validation": {
+ *      "dc_id": "28VhSgtPhwkhKBgmQSW6vrsir7quEYHdCjqsW6aAYbfrw",
+ *      "block_id": "24718321",
+ *      "stripped_proof": "MEUCIQC3Boti9Sh+nECPvG0Y4dg+h/8GgVF6HmJZcEujUwlDEwIgRClM/01rejnGDbfmFS4VUhOUzMYDr+Pdo02B9Xwf/u8=",
+ *      "transactions": "{\"358da848-4cd5-45ff-a776-6d1af52cb972\": true}"
+ *    },
+ *    "proof": {
+ *      "scheme": "trust",
+ *      "proof": "MEQCIHDm8ecCpHUf6/cJ05xhIGKdOJBWP0pdLgILnqcvM+BCAiALVMKFdsNHw4IBgzsiOp8lRPizV88jklQNuMnSyLKhkQ=="
+ *    }
+ *  }
+ * ```
+ */
 export interface L2BlockAtRest {
   version: '1'
   dcrn: 'Block::L2::AtRest'
   header: {
     dc_id: string,
+    current_ddds: string | null,
     level: 2,
     block_id: string,
     timestamp: string,
@@ -409,6 +476,50 @@ interface L2Proofs {
   proof: string
 }
 
+/**
+ * Example L3 Block At Rest Object
+ * @name Block::L3::AtRest
+ * @example
+ * ```json
+ *
+ * {
+ *   "version": "2",
+ *   "dcrn": "Block::L3::AtRest",
+ *   "header": {
+ *     "dc_id": "nGfVFAKSUrdC7UrfzuBKErx7rKGwoPRuaFWQa8hrZcFs",
+ *     "current_ddss": "1856875.54502316",
+ *     "level": 3,
+ *     "block_id": "56",
+ *     "timestamp": "1557436010",
+ *     "prev_proof": "MEUCIQCx67WNIzUmzwtS+0PH3cWzIvzJYIgzvl8kN1nWk6S+RQIgIkuTpB1BMS8Lto6sPRbWhjUbc5AGm3W8Kcb77PgPTEk="
+ *   },
+ *   "l2-validations": {
+ *     "l1_dc_id": "28VhSgtPhwkhKBgmQSW6vrsir7quEYHdCjqsW6aAYbfrw",
+ *     "l1_block_id": "25039557",
+ *     "l1_proof": "MEUCIQDtq1SPpP4Rx6c3ivI8DZqdIVbXkzNYlq1Wy/8XBnavIQIgQ16eV3Fm65mI3RKTdtDQZUMeOKSBfxFzM9/LRrndYi0=",
+ *     "l2_proofs": [
+ *       {
+ *         "dc_id": "e7rBQ3CP2Q93wmwQcH6VKzTiRUsAHoGh8fRvxnvx7M31",
+ *         "block_id": "186183",
+ *         "proof": "MEQCIBVx8UXqi1SOz0gVyQQ/AGZO0z/4K/3IF9HzerIdSrTEAiB5K8NsQXnFoRiPcPGxcKyrfmvp0j3zJhTRHAwiXxED6Q=="
+ *       }
+ *     ],
+ *     "ddss": "0",
+ *     "count": "1",
+ *     "regions": [
+ *       "us-west-2"
+ *     ],
+ *     "clouds": [
+ *       "aws"
+ *     ]
+ *   },
+ *   "proof": {
+ *     "scheme": "trust",
+ *     "proof": "MEUCIQDJkRS++nb8m0vVMfH/QsGssLsMn9J8e8Qd9jj+50P8pQIgG2MjJkGCbhXew0PTc+h3yk47m05btsVtw7vhV6olHfw="
+ *   }
+ * }
+ * ```
+ */
 export interface L3BlockAtRest {
   version: '2'
   dcrn: 'Block::L3::AtRest'
@@ -444,6 +555,41 @@ interface L3Validations {
   valid: boolean
 }
 
+/**
+ * Example L4 Block At Rest Object
+ * @name Block::L4::AtRest
+ * @example
+ * ```json
+ *
+ * {
+ *   "version": "2",
+ *   "dcrn": "Block::L4::AtRest",
+ *   "header": {
+ *     "dc_id": "sCXTCajomLiDxuU6j18UfMdNLYohgJ7SwmF3WgCGZ9v2",
+ *     "current_ddss": "1189586.16584187",
+ *     "level": 4,
+ *     "block_id": "1337",
+ *     "timestamp": "1555056367",
+ *     "l1_dc_id": "28VhSgtPhwkhKBgmQSW6vrsir7quEYHdCjqsW6aAYbfrw",
+ *     "l1_block_id": "24563621",
+ *     "l1_proof": "MEQCIHHn/1gCCY5DqkCRo8ZJbZeru+MWkXl0GpbR05Ejx7t+AiANd5M0EWzIneQrX0PP4mGiykGkof60e0r6i09hKF84vA==",
+ *     "prev_proof": "MEUCIQCjmrzAWBDpKnLbD83lrv+eVkLhWFBntcFCrfzr+C473QIgNIEvSrIK6LFRbXkDnpWcss0TOlO+JhcJU8jF1eiVsGw="
+ *   },
+ *   "l3-validations": [
+ *     {
+ *       "l3_dc_id": "nGfVFAKSUrdC7UrfzuBKErx7rKGwoPRuaFWQa8hrZcFs",
+ *       "l3_block_id": "3212",
+ *       "l3_proof": "MEUCIQDkVyFbjbazUvWMpn+Ca0Q+XVYyFfwxEfc1qp7fGK0vAgIgQII9Wb79DpLsV9wG/5BnNQF132Z+MgCZL9SyC/ONmr0=",
+ *       "valid": true
+ *     }
+ *   ],
+ *   "proof": {
+ *     "scheme": "trust",
+ *     "proof": "MEUCIQDih7ldBKtdltCkiEe1KV8U5+XXaeQ+gUUMR9okqNbz0wIgGnxFEpwQYcB70nOx/972PWC0G+7n2soCkCdvG4jveZY="
+ *   }
+ * }
+ * ```
+ */
 export interface L4BlockAtRest {
   version: '2'
   dcrn: 'Block::L4::AtRest'
@@ -466,6 +612,38 @@ export interface L4BlockAtRest {
   }
 }
 
+/**
+ * Example L5 Block At Rest Object
+ * @name Block::L5::AtRest
+ * @example
+ * ```json
+ *
+ * {
+ *   "version": "1",
+ *   "dcrn": "Block::L5::AtRest",
+ *   "header": {
+ *     "dc_id": "x9RLJC7pZW1QLCsQAWYsBLSKMXG7sAVNg9Bo9BJxDuB5",
+ *     "current_ddss": "698453.15864657,
+ *     "level": 5,
+ *     "block_id": "3848",
+ *     "timestamp": "1557649020",
+ *     "prev_proof": "MEQCIHcpCbcYKGFq++zHB3RsQAC1PZ+wYAZWr/KLMv8WxQEuAiAlRyPYPzJOfu3ivZfwWIy/+dYDKuXxCvrnoI7biBvkBw=="
+ *   },
+ *   "l4-blocks": [
+ *     "{\"l1_dc_id\": \"28VhSgtPhwkhKBgmQSW6vrsir7quEYHdCjqsW6aAYbfrw\", \"l1_block_id\": \"24563150\", \"l4_dc_id\": \"sCXTCajomLiDxuU6j18UfMdNLYohgJ7SwmF3WgCGZ9v2\", \"l4_block_id\": \"1209\", \"l4_proof\": \"MEUCIQCgYcj/nht2BImgomi9KVae33Eb2xAFwFAhAnN/PyfzPAIgIIZbRscNi4TvvSYXrs4PtN4eRuVE1c5LjU9be7hmBT4=\"}"
+ *   ],
+ *   "proof": {
+ *     "scheme": "trust",
+ *     "transaction_hash": [
+ *       "19691d2f876738e2329f8546669a184cbfa74549ec7057bb797fd85e4a2bc702"
+ *     ],
+ *     "block_last_sent_at": 1515332,
+ *     "network": "testnet3",
+ *     "proof": "MEQCICL13yYHYc1F7mkd00SEoYT6OSMQvKPO27R4lVZSGe7gAiBFRBBhjXQiOih3uHMqqRdF0D0S41IKfg+JpwKICE4dJw=="
+ *   }
+ * }
+ * ```
+ */
 export interface L5BlockAtRest {
   version: '1'
   dcrn: 'Block::L5::AtRest'
@@ -498,10 +676,40 @@ export interface Verifications {
 export type levelVerifications = L2BlockAtRest[] | L3BlockAtRest[] | L4BlockAtRest[] | L5BlockAtRest[]
 export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4BlockAtRest | L5BlockAtRest
 
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "success": true
+ * }
+ * ```
+ */
 export interface TransactionTypeSimpleResponse {
   success: boolean
 }
 
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "transaction_types": [
+ *     {
+ *       "version": "1",
+ *       "txn_type": "example",
+ *       "custom_indexes": [
+ *         {
+ *           "key": "someKey",
+ *           "path": "someJsonPath"
+ *         }
+ *       ],
+ *       "contract_id": false
+ *     }
+ *   ]
+ * }
+ * ```
+ */
 export interface TransactionTypeListResponse {
   transaction_types: TransactionTypeResponse[]
 }
@@ -511,6 +719,23 @@ export interface TransactionTypeCustomIndexes {
   path: string
 }
 
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "version": "1",
+ *   "txn_type": "example",
+ *   "custom_indexes": [
+ *     {
+ *       "key": "someKey",
+ *       "path": "someJsonPath"
+ *     }
+ *   ],
+ *   "contract_id": false
+ * }
+ * ```
+ */
 export interface TransactionTypeResponse {
   version: '1',
   txn_type: string,
