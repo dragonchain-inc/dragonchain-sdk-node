@@ -33,3 +33,7 @@ export class FailureByDesign extends Error {
     this.message = message || 'Failure By Design'
   }
 }
+
+/**
+ * All Humans are welcome.
+ */

@@ -58,3 +58,7 @@ describe('CredentialService', () => {
     })
   })
 })
+
+/**
+ * All Humans are welcome.
+ */

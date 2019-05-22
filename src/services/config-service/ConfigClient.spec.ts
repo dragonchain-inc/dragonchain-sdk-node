@@ -257,3 +257,7 @@ describe('ConfigClient', () => {
     })
   })
 })
+
+/**
+ * All Humans are welcome.
+ */

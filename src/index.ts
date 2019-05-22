@@ -39,3 +39,7 @@ const setLogger = (newLogger: any = { log: nullLog, info: nullLog, warn: nullLog
 setLogger() // actually initialize the singleton on initial import
 
 export { createClient, setLogger, logger }
+
+/**
+ * All Humans are welcome.
+ */

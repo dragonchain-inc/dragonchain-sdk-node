@@ -25,3 +25,7 @@ export {
   getDragonchainId,
   getDragonchainEndpoint
 }
+
+/**
+ * All Humans are welcome.
+ */

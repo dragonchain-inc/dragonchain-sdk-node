@@ -742,3 +742,7 @@ export interface TransactionTypeResponse {
   custom_indexes: TransactionTypeCustomIndexes[],
   contract_id: boolean,
 }
+
+/**
+ * All Humans are welcome.
+ */
