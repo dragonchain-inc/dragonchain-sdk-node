@@ -17,7 +17,7 @@
 /**
  * Type of failure
  */
-type failureCode = 'BAD_REQUEST' | 'NOT_FOUND'
+type failureCode = 'PARAM_ERROR' | 'NOT_FOUND'
 
 /**
  * Error class thrown by the SDK

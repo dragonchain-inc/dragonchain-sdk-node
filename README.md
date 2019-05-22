@@ -17,16 +17,20 @@ npm i dragonchain-sdk --save
 ## Tutorial / Examples
 
 A tutorial on creating a custom contract can be [found here](https://github.com/dragonchain-inc/custom-contract-node-sdk).
-It is also worth looking at the [integration tests file](https://github.com/dragonchain-inc/dragonchain-sdk-node/blob/master/spec/integration.ts) for a number of examples.
 
 ### Initialize The Client
 
 ```javascript
 const sdk = require('dragonchain-sdk');
 
-const client = await sdk.createClient({
-  dragonchainId: 'c2dffKwiGj6AGg4zHkNswgEcyHeQaGr4Cm5SzsFVceVv'
-});
+const main = async () => {
+  const client = await sdk.createClient({
+    dragonchainId: 'c2dffKwiGj6AGg4zHkNswgEcyHeQaGr4Cm5SzsFVceVv'
+  });
+  // Do something with the client here
+}
+
+main().then(console.log).catch(console.error);
 ```
 
 ### GetBlock

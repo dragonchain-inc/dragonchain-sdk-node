@@ -105,7 +105,7 @@ export class DragonchainClient {
      */
     secretName: string
   }) => {
-    if (!options.secretName) throw new FailureByDesign('BAD_REQUEST', 'Parameter `secretName` is required')
+    if (!options.secretName) throw new FailureByDesign('PARAM_ERROR', 'Parameter `secretName` is required')
     const secretPath = path.join('/', 'var', 'openfaas', 'secrets', `sc-${process.env.SMART_CONTRACT_ID}-${options.secretName}`)
     return await this.readFileAsync(secretPath, 'utf-8') as string
   }
@@ -124,7 +124,7 @@ export class DragonchainClient {
      */
     transactionId: string
   }) => {
-    if (!options.transactionId) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionId` is required')
+    if (!options.transactionId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionId` is required')
     return await this.get(`/transaction/${options.transactionId}`) as Response<L1DragonchainTransactionFull>
   }
 
@@ -155,7 +155,7 @@ export class DragonchainClient {
      */
     callbackURL?: string
   }) => {
-    if (!options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionType` is required')
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     if (!options.payload) options.payload = '' // default payload to an empty string if not provided
     const transactionBody = {
       version: '1',
@@ -172,7 +172,7 @@ export class DragonchainClient {
   public createBulkTransaction = async (options: {
     transactionList: BulkTransactionPayload[]
   }) => {
-    if (!options.transactionList) throw new FailureByDesign('BAD_REQUEST', 'parameter `transactionList` is required')
+    if (!options.transactionList) throw new FailureByDesign('PARAM_ERROR', 'parameter `transactionList` is required')
     let bulkTransactionBody: any[] = []
     options.transactionList.forEach(transaction => {
       const singleBody: any = {
@@ -229,7 +229,7 @@ export class DragonchainClient {
      */
     blockId: string
   }) => {
-    if (!options.blockId) throw new FailureByDesign('BAD_REQUEST', 'Parameter `blockId` is required')
+    if (!options.blockId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockId` is required')
     return await this.get(`/block/${options.blockId}`) as Response<BlockSchemaType>
   }
 
@@ -346,10 +346,10 @@ export class DragonchainClient {
      */
     registryCredentials?: string
   }) => {
-    if (!options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionType` is required')
-    if (!options.image) throw new FailureByDesign('BAD_REQUEST', 'Parameter `image` is required')
-    if (!options.cmd) throw new FailureByDesign('BAD_REQUEST', 'Parameter `cmd` is required')
-    if (options.scheduleIntervalInSeconds && options.cronExpression) throw new FailureByDesign('BAD_REQUEST', 'Parameters `scheduleIntervalInSeconds` and `cronExpression` are mutually exclusive')
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    if (!options.image) throw new FailureByDesign('PARAM_ERROR', 'Parameter `image` is required')
+    if (!options.cmd) throw new FailureByDesign('PARAM_ERROR', 'Parameter `cmd` is required')
+    if (options.scheduleIntervalInSeconds && options.cronExpression) throw new FailureByDesign('PARAM_ERROR', 'Parameters `scheduleIntervalInSeconds` and `cronExpression` are mutually exclusive')
     const body: any = {
       version: '3',
       txn_type: options.transactionType,
@@ -452,8 +452,8 @@ export class DragonchainClient {
      */
     registryCredentials?: string
   }) => {
-    if (!options.smartContractId) throw new FailureByDesign('BAD_REQUEST', 'Parameter `smartContractId` is required')
-    if (options.scheduleIntervalInSeconds && options.cronExpression) throw new FailureByDesign('BAD_REQUEST', 'Parameters `scheduleIntervalInSeconds` and `cronExpression` are mutually exclusive')
+    if (!options.smartContractId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required')
+    if (options.scheduleIntervalInSeconds && options.cronExpression) throw new FailureByDesign('PARAM_ERROR', 'Parameters `scheduleIntervalInSeconds` and `cronExpression` are mutually exclusive')
     const body: any = {
       version: '3'
     }
@@ -480,7 +480,7 @@ export class DragonchainClient {
      */
     smartContractId: string
   }) => {
-    if (!options.smartContractId) throw new FailureByDesign('BAD_REQUEST', 'Parameter `smartContractId` is required')
+    if (!options.smartContractId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required')
     return await this.delete(`/contract/${options.smartContractId}`) as Response<DragonchainContractCreateResponse>
   }
 
@@ -497,10 +497,10 @@ export class DragonchainClient {
      */
     transactionType?: string
   }) => {
-    if (options.smartContractId && options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Only one of `smartContractId` or `transactionType` can be specified')
+    if (options.smartContractId && options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Only one of `smartContractId` or `transactionType` can be specified')
     if (options.smartContractId) return await this.get(`/contract/${options.smartContractId}`) as Response<SmartContractAtRest>
     if (options.transactionType) return await this.get(`/contract/txn_type/${options.transactionType}`) as Response<SmartContractAtRest>
-    throw new FailureByDesign('BAD_REQUEST', 'At least one of `smartContractId` or `transactionType` must be supplied')
+    throw new FailureByDesign('PARAM_ERROR', 'At least one of `smartContractId` or `transactionType` must be supplied')
   }
 
   /**
@@ -550,7 +550,7 @@ export class DragonchainClient {
      */
     level?: number
   }) => {
-    if (!options.blockId) throw new FailureByDesign('BAD_REQUEST', 'Parameter `blockId` is required')
+    if (!options.blockId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockId` is required')
     if (options.level) {
       return await this.get(`/verifications/${options.blockId}?level=${options.level}`) as Response<levelVerifications>
     }
@@ -572,9 +572,9 @@ export class DragonchainClient {
      */
     smartContractId?: string
   }) => {
-    if (!options.key) throw new FailureByDesign('BAD_REQUEST', 'Parameter `key` is required')
+    if (!options.key) throw new FailureByDesign('PARAM_ERROR', 'Parameter `key` is required')
     if (!options.smartContractId) {
-      if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('BAD_REQUEST', 'Parameter `smartContractId` is required when not running within a smart contract')
+      if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract')
       options.smartContractId = process.env.SMART_CONTRACT_ID
     }
     const response = await this.get(`/get/${options.smartContractId}/${options.key}`, false) as unknown
@@ -601,12 +601,12 @@ export class DragonchainClient {
     smartContractId?: string
   }) => {
     if (!options.smartContractId) {
-      if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('BAD_REQUEST', 'Parameter `smartContractId` is required when not running within a smart contract')
+      if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract')
       options.smartContractId = process.env.SMART_CONTRACT_ID
     }
     let path = `/list/${options.smartContractId}/`
     if (options.prefixKey) {
-      if (options.prefixKey.endsWith('/')) throw new FailureByDesign('BAD_REQUEST', 'Parameter `prefixKey` cannot end with \'/\'')
+      if (options.prefixKey.endsWith('/')) throw new FailureByDesign('PARAM_ERROR', 'Parameter `prefixKey` cannot end with \'/\'')
       path += options.prefixKey + '/'
     }
     return await this.get(path) as Response<string[]>
@@ -626,7 +626,7 @@ export class DragonchainClient {
      */
     customIndexes?: TransactionTypeCustomIndexes[]
   }) => {
-    if (!options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionType` is required')
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     const body: any = {
       version: '1',
       txn_type: options.transactionType
@@ -644,7 +644,7 @@ export class DragonchainClient {
      */
     transactionType: string
   }) => {
-    if (!options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionType` is required')
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     return await this.delete(`/transaction-type/${options.transactionType}`) as Response<TransactionTypeSimpleResponse>
   }
 
@@ -668,8 +668,8 @@ export class DragonchainClient {
      */
     customIndexes: TransactionTypeCustomIndexes[]
   }) => {
-    if (!options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionType` is required')
-    if (!options.customIndexes) throw new FailureByDesign('BAD_REQUEST', 'Parameter `customIndexes` is required')
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    if (!options.customIndexes) throw new FailureByDesign('PARAM_ERROR', 'Parameter `customIndexes` is required')
     const body = {
       version: '1',
       custom_indexes: options.customIndexes
@@ -686,7 +686,7 @@ export class DragonchainClient {
      */
     transactionType: string
   }) => {
-    if (!options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionType` is required')
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     return await this.get(`/transaction-type/${options.transactionType}`) as Response<TransactionTypeResponse>
   }
 
@@ -721,7 +721,7 @@ export class DragonchainClient {
      */
     outputs?: BitcoinTransactionOutputs[]
   }) => {
-    if (!options.network) throw new FailureByDesign('BAD_REQUEST', 'Parameter `network` is required')
+    if (!options.network) throw new FailureByDesign('PARAM_ERROR', 'Parameter `network` is required')
     const body: any = {
       network: options.network,
       transaction: {}
@@ -767,9 +767,9 @@ export class DragonchainClient {
      */
     gas?: string
   }) => {
-    if (!options.network) throw new FailureByDesign('BAD_REQUEST', 'Parameter `network` is required')
-    if (!options.to) throw new FailureByDesign('BAD_REQUEST', 'Parameter `to` is required')
-    if (!options.value) throw new FailureByDesign('BAD_REQUEST', 'Parameter `value` is required')
+    if (!options.network) throw new FailureByDesign('PARAM_ERROR', 'Parameter `network` is required')
+    if (!options.to) throw new FailureByDesign('PARAM_ERROR', 'Parameter `to` is required')
+    if (!options.value) throw new FailureByDesign('PARAM_ERROR', 'Parameter `value` is required')
     const body: any = {
       network: options.network,
       transaction: {
