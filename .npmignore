@@ -17,4 +17,4 @@ tslint.json
 package-lock.json
 yarn.lock
 yarn-error.log
-*buildspec*
+buildspec*
