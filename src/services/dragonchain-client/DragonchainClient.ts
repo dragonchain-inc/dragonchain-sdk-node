@@ -38,7 +38,7 @@ import {
   SmartContractExecutionOrder,
   TransactionTypeSimpleResponse,
   TransactionTypeListResponse,
-  TransactionTypeCustomIndexes,
+  TransactionTypeCustomIndex,
   BitcoinTransactionOutputs,
   BulkTransactionPayload
 } from 'src/interfaces/DragonchainClientInterfaces'
@@ -607,7 +607,7 @@ export class DragonchainClient {
     let path = `/list/${options.smartContractId}/`
     if (options.prefixKey) {
       if (options.prefixKey.endsWith('/')) throw new FailureByDesign('PARAM_ERROR', 'Parameter `prefixKey` cannot end with \'/\'')
-      path += options.prefixKey + '/'
+      path = `${options.prefixKey}/`
     }
     return await this.get(path) as Response<string[]>
   }
@@ -624,7 +624,7 @@ export class DragonchainClient {
     /**
      * The custom indexes that should be associated with this transaction type
      */
-    customIndexes?: TransactionTypeCustomIndexes[]
+    customIndexes?: TransactionTypeCustomIndex[]
   }) => {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     const body: any = {
@@ -666,7 +666,7 @@ export class DragonchainClient {
     /**
      * The custom indexes that should be updated onto the transaction type
      */
-    customIndexes: TransactionTypeCustomIndexes[]
+    customIndexes: TransactionTypeCustomIndex[]
   }) => {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     if (!options.customIndexes) throw new FailureByDesign('PARAM_ERROR', 'Parameter `customIndexes` is required')

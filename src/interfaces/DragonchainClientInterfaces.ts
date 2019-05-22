@@ -756,7 +756,7 @@ export interface TransactionTypeListResponse {
   transaction_types: TransactionTypeResponse[]
 }
 
-export interface TransactionTypeCustomIndexes {
+export interface TransactionTypeCustomIndex {
   key: string,
   path: string
 }
@@ -781,7 +781,7 @@ export interface TransactionTypeCustomIndexes {
 export interface TransactionTypeResponse {
   version: '1',
   txn_type: string,
-  custom_indexes: TransactionTypeCustomIndexes[],
+  custom_indexes: TransactionTypeCustomIndex[],
   /**
    * If this is a ledger contract type, (not assigned to a contract), then this field will simply be the boolean false,
    * otherwise this will be the string of the associated contract id
