@@ -16,18 +16,23 @@
 
 import { expect } from 'chai'
 import { CredentialService } from './CredentialService'
-import { createSandbox } from 'sinon'
 
 describe('CredentialService', () => {
-  const testBed = createSandbox()
   let credentialService: CredentialService
 
-  afterEach(() => {
-    testBed.restore()
+  beforeEach(() => {
+    credentialService = new CredentialService('testId', { authKey: 'key', authKeyId: 'keyId' }, 'SHA256')
   })
 
-  beforeEach(() => {
-    credentialService = new CredentialService('testId', 'key', 'keyId')
+  describe('.createCredentials', () => {
+    it('calls and uses getDragonchainCredentials when credentials are not provided', async () => {
+      const fakeGetCreds = async () => { return { authKey: 'key', authKeyId: 'keyId' } }
+      const dcid = 'dcid'
+      const service = await CredentialService.createCredentials(dcid, '', '', 'SHA256', { getDragonchainCredentials: fakeGetCreds })
+      expect(service.dragonchainId).to.equal(dcid)
+      expect(service.credentials.authKey).to.equal('key')
+      expect(service.credentials.authKeyId).to.equal('keyId')
+    })
   })
 
   describe('#constructor', () => {
@@ -36,7 +41,7 @@ describe('CredentialService', () => {
       const key = 'key'
       const keyId = 'keyId'
       const algo = 'SHA256'
-      const service = new CredentialService(dcid, key, keyId, algo)
+      const service = new CredentialService(dcid, { authKey: key, authKeyId: keyId }, algo)
       expect(service.dragonchainId).to.equal(dcid)
       expect(service.credentials.authKey).to.equal(key)
       expect(service.credentials.authKeyId).to.equal(keyId)
@@ -44,43 +49,7 @@ describe('CredentialService', () => {
     })
   })
 
-  describe('#getIdFromEnvVars', () => {
-    it('returns the environment variable when set', () => {
-      process.env.DRAGONCHAIN_ID = 'something'
-      expect(CredentialService.getIdFromEnvVars()).to.equal('something')
-    })
-
-    it('returns an empty string when the variable is not set', () => {
-      delete process.env.DRAGONCHAIN_ID
-      expect(CredentialService.getIdFromEnvVars()).to.equal('')
-    })
-  })
-
-  describe('#getCredsFromEnvVars', () => {
-    it('returns the creds from environment when set', () => {
-      process.env.AUTH_KEY = 'aKey'
-      process.env.AUTH_KEY_ID = 'aKeyId'
-      expect(CredentialService.getCredsFromEnvVars()).to.deep.equal({ authKey: 'aKey', authKeyId: 'aKeyId' })
-    })
-
-    it('returns an false when environment is not set', () => {
-      delete process.env.AUTH_KEY
-      delete process.env.AUTH_KEY_ID
-      expect(CredentialService.getCredsFromEnvVars()).to.equal(false)
-    })
-  })
-
-  describe('.overrideCredentials', () => {
-    it('sets new credentials correctly', () => {
-      const newKey = 'some value'
-      const newKeyId = 'another value'
-      credentialService.overrideCredentials(newKeyId, newKey)
-      expect(credentialService.credentials.authKey).to.equal(newKey)
-      expect(credentialService.credentials.authKeyId).to.equal(newKeyId)
-    })
-  })
-
-  describe('.getAuthorizationHeader', () => {
+  describe('#getAuthorizationHeader', () => {
     it('returns expected hmac', () => {
       const result = credentialService.getAuthorizationHeader('GET', '/path', 'timestamp', 'application/json', '')
       expect(result).to.equal('DC1-HMAC-SHA256 keyId:8Bc+h0parZxGeMB9rYzzRUuNxxHSIjGqSD4W/635A9k=')
@@ -89,3 +58,7 @@ describe('CredentialService', () => {
     })
   })
 })
+
+/**
+ * All Humans are welcome.
+ */

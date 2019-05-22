@@ -14,49 +14,46 @@
  * limitations under the License.
  */
 
+import { promisify } from 'util'
+import { readFile } from 'fs'
+import * as path from 'path'
 import fetch from 'node-fetch'
-import { readFileSync } from 'fs'
 import {
-  DragonchainTransactionCreatePayload,
   L1DragonchainTransactionFull,
   DragonchainTransactionCreateResponse,
   DragonchainBulkTransactionCreateResponse,
   SmartContractAtRest,
-  ContractCreationSchema,
-  L1DragonchainTransactionQueryResult,
   DragonchainContractCreateResponse,
   SupportedHTTP,
   FetchOptions,
   L1DragonchainStatusResult,
-  SmartContractType,
-  DragonchainBlockQueryResult,
   Response,
+  QueryResult,
+  BlockSchemaType,
   Verifications,
   levelVerifications,
-  DragonnetConfigSchema,
-  UpdateResponse,
-  TransactionTypeStructure,
   TransactionTypeResponse,
   PublicBlockchainTransactionResponse,
-  PublicBlockchainTransaction,
   PublicBlockchainAddressListResponse,
-  CustomIndexStructure,
   SmartContractExecutionOrder,
-  SmartContractDesiredState
+  TransactionTypeSimpleResponse,
+  TransactionTypeListResponse,
+  TransactionTypeCustomIndex,
+  BitcoinTransactionOutputs,
+  BulkTransactionPayload
 } from 'src/interfaces/DragonchainClientInterfaces'
-import { CredentialService } from '../credential-service/CredentialService'
+import { CredentialService, HmacAlgorithm } from '../credential-service/CredentialService'
+import { getDragonchainId, getDragonchainEndpoint } from '../config-service'
 import { URLSearchParams } from 'url'
 import { logger } from '../../index'
 import { FailureByDesign } from '../../errors/FailureByDesign'
-
-const validSmartContractTypes = [
-  'transaction',
-  'cron'
-]
+/**
+ * @hidden
+ */
+const readFileAsync = promisify(readFile)
 
 /**
- * HTTP Client that interfaces with the dragonchain api, using credentials stored on your machine.
- * @class DragonchainClient
+ * HTTP Client that interfaces with the dragonchain api
  */
 export class DragonchainClient {
   /**
@@ -70,7 +67,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private credentialService: any
+  private credentialService: CredentialService
   /**
    * @hidden
    */
@@ -78,360 +75,712 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private readFileSync: any
+  private readFileAsync: any
 
   /**
-   * Create an Instance of a DragonchainClient.
-   * @param dragonchainId id of a target dragonchain
-   * @param verify verify SSL Certs when talking to local dragonchains
-   * @param injected used only for testing
+   * @hidden
+   * Construct an instance of a DragonchainClient. THIS SHOULD NOT BE CALLED DIRECTLY. Instead use the `createClient` function to instantiate a client
    */
   constructor (
-    dragonchainId: string = '',
-    verify = true,
+    endpoint: string,
+    credentials: CredentialService,
+    verify: boolean,
     injected: any = {}
   ) {
-    if (!dragonchainId) {
-      logger.debug('Dragonchain ID not explicitly provided, will search env/disk')
-      dragonchainId = CredentialService.getDragonchainId()
-    }
-    this.verify = verify
-    this.endpoint = `https://${dragonchainId}.api.dragonchain.com`
-    this.fetch = injected.fetch || fetch
-    this.readFileSync = injected.readFileSync || readFileSync
-    this.credentialService = injected.CredentialService || new CredentialService(dragonchainId)
-  }
-
-  /**
-   * Checks if a smart contract type string is valid
-   * @hidden
-   * @static
-   * @name isValidSmartContractType
-   * @param {SmartContractType} smartContractType smartContractType to validate
-   * @returns {boolean} true if smart contract type is valid, false if not
-   */
-  static isValidSmartContractType = (smartContractType: SmartContractType) => validSmartContractTypes.includes(smartContractType)
-
-  /**
-   * This method is used to override this SDK's attempt to automatically fetch credentials automatically with manually specified creds
-   *
-   * @param {string} authKeyId Auth Key ID used in HMAC
-   * @param {string} authKey Auth Key used in HMAC
-   */
-  public overrideCredentials = (authKeyId: string, authKey: string) => {
-    this.credentialService.overrideCredentials(authKeyId, authKey)
-  }
-
-  /**
-   * Change the dragonchainId for this DragonchainClient instance.
-   *
-   * After using this command, subsequent requests to your dragonchain will attempt to re-locate credentials for the new dragonchain
-   * @param dragonchainId The id of the dragonchain you want to set
-   * @param setEndpoint Whether or not to set a new endpoint automatically (for managed chains at .api.dragonchain.com)
-   */
-  public setDragonchainId = (dragonchainId: string, setEndpoint: boolean = true) => {
-    this.credentialService = new CredentialService(dragonchainId)
-    if (setEndpoint) this.setEndpoint(`https://${dragonchainId}.api.dragonchain.com`)
-  }
-
-  /**
-   * Change the endpoint for this DragonchainClient instance.
-   *
-   * @param endpoint The endpoint of the dragonchain you want to set
-   */
-  public setEndpoint = (endpoint: string) => {
     this.endpoint = endpoint
+    this.verify = verify
+    this.credentialService = credentials
+    this.fetch = injected.fetch || fetch
+    this.readFileAsync = injected.readFileAsync || readFileAsync
   }
 
   /**
-   * Reads secrets given to a smart contract
+   * Reads secrets provided to a smart contract
    *
-   * @param secretName the name of the secret to retrieve for smart contract
+   * Note: This will only work when running within a smart contract, given that the smart contract was created/updated with secrets
    */
-  public getSecret = (secretName: string): string => this.readFileSync(`/var/openfaas/secrets/sc-${process.env.SMART_CONTRACT_ID}-${secretName}`, 'utf-8')
-
-  /**
-   * Get a transaction by Id.
-   * @param transactionId The transaction id you are looking for.
-   */
-  public getTransaction = async (transactionId: string) => {
-    return await this.get(`/transaction/${transactionId}`) as Response<L1DragonchainTransactionFull>
+  public getSmartContractSecret = async (options: {
+    /**
+     * the name of the secret to retrieve for smart contract
+     */
+    secretName: string
+  }) => {
+    if (!options.secretName) throw new FailureByDesign('PARAM_ERROR', 'Parameter `secretName` is required')
+    const secretPath = path.join('/', 'var', 'openfaas', 'secrets', `sc-${process.env.SMART_CONTRACT_ID}-${options.secretName}`)
+    return await this.readFileAsync(secretPath, 'utf-8') as string
   }
 
   /**
-   * Query transactions using ElasticSearch query-string syntax
-   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
-   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
-   * @example
-   * ```javascript
-   * myClient.queryTransactions('tag:(bananas OR apples)').then( ...do stuff )
-   * ```
+   * Get the status of your dragonchain
    */
-  public queryTransactions = async (luceneQuery?: string, sort?: string, offset = 0, limit = 10) => {
-    const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
-    return await this.get(`/transaction${queryParams}`) as Response<L1DragonchainTransactionQueryResult>
-  }
+  public getStatus = async () => await this.get('/status') as Response<L1DragonchainStatusResult>
 
   /**
-   * get the status of your dragonchain
+   * Get a transaction by id
    */
-  public getStatus = async () => await this.get(`/status`) as Response<L1DragonchainStatusResult>
-
-  /**
-   * Get a single block by ID
-   */
-  public getBlock = async (blockId: string) => {
-    return await this.get(`/block/${blockId}`) as Response<L1DragonchainTransactionFull>
-  }
-
-  /**
-   * Query blocks using ElasticSearch query-string syntax
-   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
-   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
-   * @example
-   * ```javascript
-   * myClient.queryBlocks('tag:(bananas OR apples)').then( ...do stuff )
-   * ```
-   */
-  public queryBlocks = async (luceneQuery?: string, sort?: string, offset = 0, limit = 10) => {
-    const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
-    return await this.get(`/block${queryParams}`) as Response<DragonchainBlockQueryResult>
-  }
-
-  /**
-   * Get a single smart contract by id
-   */
-  public getSmartContract = async (contractId: string) => {
-    return await this.get(`/contract/${contractId}`) as Response<SmartContractAtRest>
-  }
-
-  /**
-   * Query smart contracts using ElasticSearch query-string syntax
-   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
-   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
-   * @example
-   * ```javascript
-   * myClient.querySmartContracts('tag:(bananas OR apples)').then( ...do stuff )
-   * ```
-   */
-  public querySmartContracts = async (luceneQuery?: string, sort?: string, offset = 0, limit = 10) => {
-    const queryParams: string = this.getLuceneParams(luceneQuery, sort, offset, limit)
-    return await this.get(`/contract${queryParams}`) as Response<SmartContractAtRest>
-  }
-
-  /**
-   * Updates existing contract fields
-   * @param {string} txnType The name of the existing contract you want to update
-   * @param {string} image The docker image containing the smart contract logic
-   * @param {string} cmd Entrypoint command to run in the docker container
-   * @param {SmartContractExecutionOrder} executionOrder Order of execution. Valid values 'parallel' or 'serial'
-   * @param {SmartContractDesiredState} desiredState Change the state of a contract. Valid values are "active" and "inactive". You may only change the state of an active or inactive contract.
-   * @param {string[]} args List of arguments to the cmd field
-   * @param {object} env mapping of environment variables for your contract
-   * @param {object} secrets mapping of secrets for your contract
-   * @param {number} seconds The seconds of scheduled execution
-   * @param {string} cron The rate of scheduled execution specified as a cron
-   * @param {string} auth basic-auth for pulling docker images, base64 encoded (e.g. username:password)
-   */
-  public updateSmartContract = async (contractId: string, image?: string, cmd?: string, executionOrder?: SmartContractExecutionOrder, desiredState?: SmartContractDesiredState, args?: string[], env?: {}, secrets?: {}, seconds?: number, cron?: string, auth?: string) => {
-    const body: any = {
-      version: '3',
-      dcrn: 'SmartContract::L1::Update'
-    }
-
-    if (image) body['image'] = image
-    if (cmd) body['cmd'] = cmd
-    if (executionOrder) body['execution_order'] = executionOrder
-    if (desiredState) body['desired_state'] = desiredState
-    if (args) body['args'] = args
-    if (env) body['env'] = env
-    if (secrets) body['secrets'] = secrets
-    if (seconds) body['seconds'] = seconds
-    if (cron) body['cron'] = cron
-    if (auth) body['auth'] = auth
-
-    return await this.put(`/contract/${contractId}`, body) as Response<UpdateResponse>
-  }
-
-  /**
-   * Deletes a smart contract
-   * @param {string} contractId
-   * @returns {Promise<UpdateResponse>} success message upon successful update
-   */
-  public deleteSmartContract = async (contractId: string) => {
-    return await this.delete(`/contract/${contractId}`) as Response<UpdateResponse>
-  }
-
-  /**
-   * Update your matchmaking data. If you are a level 2-4, you're required to update your asking price.
-   * @param {number} askingPrice (0.0001-1000.0000) the price in DRGN to charge L1 nodes for your verification of their data. Setting this number too high will cause L1's to ignore you more often.
-   * @param {number} broadcastInterval Broadcast Interval is only for level 5 chains
-   */
-  public updateMatchmakingConfig = async (askingPrice?: number, broadcastInterval?: number) => {
-    if (askingPrice) {
-      if (isNaN(askingPrice) || askingPrice < 0.0001 || askingPrice > 1000) { throw new FailureByDesign('BAD_REQUEST', `askingPrice must be between 0.0001 and 1000.`) }
-    }
-    const matchmakingUpdate: any = {
-      'matchmaking': {
-        'askingPrice': askingPrice,
-        'broadcastInterval': broadcastInterval
-      }
-    }
-    return await this.put(`/update-matchmaking-data`, matchmakingUpdate) as Response<UpdateResponse>
-  }
-
-  /**
-   * Update your maximum price for each level of verification.
-   * This method is only relevant for L1 nodes.
-   * @param {DragonnetConfigSchema} maximumPrices maximum prices (0-1000) to set for each level (in DRGNs) If this number is too low, other nodes will not verify your blocks. Changing this number will affect older unverified blocks first.
-   */
-  public updateDragonnetConfig = async (maximumPrices: DragonnetConfigSchema) => {
-    const dragonnet = {} as any
-    [2,3,4,5].forEach(i => {
-      const item = maximumPrices[`l${i}`]
-      if (item) {
-        if (isNaN(item) || item < 0 || item > 1000) { throw new FailureByDesign('BAD_REQUEST', 'maxPrice must be between 0 and 1000.') }
-        dragonnet[`l${i}`] = { maximumPrice: item }
-      }
-    })
-    // Make sure SOME valid levels were provided by checking if dragonnet is an empty object
-    if (Object.keys(dragonnet).length === 0) throw new FailureByDesign('BAD_REQUEST', 'No valid levels provided')
-    return await this.put(`/update-matchmaking-data`, { dragonnet }) as Response<UpdateResponse>
+  public getTransaction = async (options: {
+    /**
+     * the transaction id of the transaction to get
+     */
+    transactionId: string
+  }) => {
+    if (!options.transactionId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionId` is required')
+    return await this.get(`/transaction/${options.transactionId}`) as Response<L1DragonchainTransactionFull>
   }
 
   /**
    * Create a new Transaction on your Dragonchain.
-   * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
-   * A POST request is made to the callback URL when the transaction has settled into a block on the Blockchain.
-   * The body of this POST request is the schema of an L1DragonchainTransactionFull.
-   * The `transaction_id` returned from this function can be used for checking the status of this transaction.
-   * Most importantly; the block in which it has been fixated.
    *
-   * @param {DragonchainTransactionCreatePayload} transactionObject
-   * @param {string} callbackURL
-   * @returns {Promise<DragonchainTransactionCreateResponse>}
+   * This transaction, if properly structured, will be received by your dragonchain, hashed, and put into a queue for processing into a block.
+   *
+   * A POST request is made to the callback URL when the transaction has settled into a block on the Blockchain.
+   *
+   * The `transaction_id` returned from this function can be used for checking the status of this transaction, including the block in which it was included.
    */
-  public createTransaction = async (transactionObject: DragonchainTransactionCreatePayload, callbackURL?: string) => {
-    return await this.post(`/transaction`, transactionObject, callbackURL) as Response<DragonchainTransactionCreateResponse>
+  public createTransaction = async (options: {
+    /**
+     * The transaction type to use for this new transaction. This transaction type must already exist on the chain (via `createTransactionType`)
+     */
+    transactionType: string,
+    /**
+     * Payload of the transaction. Must be a utf-8 encodable string, or any json object
+     */
+    payload?: string | object,
+    /**
+     * Tag of the transaction which gets indexed and can be searched on for queries
+     */
+    tag?: string,
+    /**
+     * URL to callback when this transaction is processed
+     */
+    callbackURL?: string
+  }) => {
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    if (!options.payload) options.payload = '' // default payload to an empty string if not provided
+    const transactionBody = {
+      version: '1',
+      txn_type: options.transactionType,
+      payload: options.payload
+    } as any
+    if (options.tag) transactionBody.tag = options.tag
+    return await this.post('/transaction', transactionBody, options.callbackURL) as Response<DragonchainTransactionCreateResponse>
   }
 
   /**
-   * Create a bulk transaction by string together a bunch of transactions as JSON objects into an array
-   * @param {DragonchainTransactionCreatePayload} transactionBulkObject array of transactions
-   * @return {Promise<DragonchainTransactionCreateResponse>}
+   * Create a bulk transaction to send many transactions to a chain with only a single call
    */
-  public createBulkTransaction = async (transactionBulkObject: DragonchainTransactionCreatePayload[]) => {
-    return await this.post(`/transaction_bulk`, transactionBulkObject) as Response<DragonchainBulkTransactionCreateResponse>
+  public createBulkTransaction = async (options: {
+    transactionList: BulkTransactionPayload[]
+  }) => {
+    if (!options.transactionList) throw new FailureByDesign('PARAM_ERROR', 'parameter `transactionList` is required')
+    let bulkTransactionBody: any[] = []
+    options.transactionList.forEach(transaction => {
+      const singleBody: any = {
+        version: '1',
+        txn_type: transaction.transactionType,
+        payload: transaction.payload || ''
+      }
+      if (transaction.tag) singleBody.tag = transaction.tag
+      bulkTransactionBody.push(singleBody)
+    })
+    return await this.post(`/transaction_bulk`, bulkTransactionBody) as Response<DragonchainBulkTransactionCreateResponse>
   }
 
   /**
-   * Create a new Smart Contract on your Dragonchain.
-   * @returns {Promise<DragonchainContractCreateResponse>}
+   * Query transactions using ElasticSearch query-string syntax
+   *
+   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
+   * @example
+   * ```javascript
+   * myClient.queryTransactions({luceneQuery: 'tag:(bananas OR apples)'}).then( ...do stuff )
+   * ```
    */
-  public createContract = async (body: ContractCreationSchema) => {
-    return await this.post(`/contract`, body) as Response<DragonchainContractCreateResponse>
+  public queryTransactions = async (options: {
+    /**
+     * lucene query to use for this query request
+     * @example `is_serial:true`
+     */
+    luceneQuery?: string,
+    /**
+     * Sort syntax of 'field:direction'
+     * @example `txn_type:asc`
+     */
+    sort?: string,
+    /**
+     * Pagination offset integer of query (default 0)
+     */
+    offset?: number,
+    /**
+     * Pagination limit integer of query (default 10)
+     */
+    limit?: number
+  } = {}) => {
+    const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10)
+    return await this.get(`/transaction${queryParams}`) as Response<QueryResult<L1DragonchainTransactionFull>>
   }
 
   /**
-   * Get all the verifications for one block_id.
-   * @param {string} block_id
-   * @param {number} level
+   * Get a single block by ID
    */
-  public getVerifications = async (blockId: string, level = 0) => {
-    if (level) {
-      return await this.get(`/verifications/${blockId}?level=${level}`) as Response<levelVerifications>
+  public getBlock = async (options: {
+    /**
+     * ID of the block to fetch
+     */
+    blockId: string
+  }) => {
+    if (!options.blockId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockId` is required')
+    return await this.get(`/block/${options.blockId}`) as Response<BlockSchemaType>
+  }
+
+  /**
+   * Query blocks using ElasticSearch query-string syntax
+   *
+   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
+   * @example
+   * ```javascript
+   * myClient.queryBlocks({sort: 'block_id:asc'}).then( ...do stuff )
+   * ```
+   */
+  public queryBlocks = async (options: {
+    /**
+     * lucene query to use for this query request
+     * @example `is_serial:true`
+     */
+    luceneQuery?: string,
+    /**
+     * Sort syntax of 'field:direction'
+     * @example `block_id:asc`
+     */
+    sort?: string,
+    /**
+     * Pagination offset integer of query (default 0)
+     */
+    offset?: number,
+    /**
+     * Pagination limit integer of query (default 10)
+     */
+    limit?: number
+  } = {}) => {
+    const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10)
+    return await this.get(`/block${queryParams}`) as Response<QueryResult<BlockSchemaType>>
+  }
+
+  /**
+   * Create a new Smart Contract on your Dragonchain
+   */
+  public createSmartContract = async (options: {
+    /**
+     * Transaction type to assign to this new smart contract
+     *
+     * Must not already exist as a transaction type on the chain
+     */
+    transactionType: string,
+    /**
+     * Docker image to use with the smart contract. Should be in the form registry/image:tag (or just image:tag if it's a docker hub image)
+     * @example quay.io/coreos/awscli:latest
+     * @example alpine:3.9
+     */
+    image: string,
+    /**
+     * The command to run in your docker container for your application
+     * @example echo
+     */
+    cmd: string,
+    /**
+     * The list of arguments to use in conjunction with cmd
+     * @example ['input', 'that', 'will', 'be', 'passed', 'in', 'as', 'args', 'to', 'cmd']
+     */
+    args?: string[],
+    /**
+     * The execution of the smart contract, can be `serial` or `parallel`. Will default to `parallel`
+     *
+     * If running in serial, the contract will be queued and executed in order, only one at a time
+     *
+     * If running in parallel, the contract will be executed as soon as possible after invocation, potentially out of order, and many at a time
+     */
+    executionOrder?: SmartContractExecutionOrder,
+    /**
+     * JSON object key-value pairs of strings for environments variables provided to the smart contract on execution
+     * @example
+     * ```javascript
+     *
+     * { MY_CUSTOM_ENV_VAR: "my_custom_env_value" }
+     * ```
+     */
+    environmentVariables?: object,
+    /**
+     * JSON object key-value pairs of strings for secrets provided to the smart contract on execution
+     *
+     * These are more securely stored than environment variables, and can be accessed during execution the smart contract by using the `getSmartContractSecret` method of the sdk
+     * @example
+     * ```javascript
+     *
+     * { MY_SECRET: "some secret special data" }
+     * ```
+     */
+    secrets?: object,
+    /**
+     * Schedule a smart contract to be automatically executed every `x` seconds
+     *
+     * For example: if `10` is supplied, then this contract will be automatically invoked and create a transaction once every 10 seconds
+     *
+     * This value should be a whole integer, and not a decimal
+     *
+     * Note: This is a mutually exclusive parameter with cronExpression
+     */
+    scheduleIntervalInSeconds?: number,
+    /**
+     * Schedule a smart contract to be automatically executed on a cadence via a cron expression
+     *
+     * Note: This is a mutually exclusive parameter with scheduleIntervalInSeconds
+     * @example `* * * * *` This will invoke the contract automatically every minute, on the minute
+     */
+    cronExpression?: string,
+    /**
+     * The basic-auth credentials necessary to pull the docker container.
+     *
+     * This should be a base64-encoded string of `username:password` for the docker registry
+     * @example ZXhhbXBsZVVzZXI6ZXhhbXBsZVBhc3N3b3JkCg==
+     */
+    registryCredentials?: string
+  }) => {
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    if (!options.image) throw new FailureByDesign('PARAM_ERROR', 'Parameter `image` is required')
+    if (!options.cmd) throw new FailureByDesign('PARAM_ERROR', 'Parameter `cmd` is required')
+    if (options.scheduleIntervalInSeconds && options.cronExpression) throw new FailureByDesign('PARAM_ERROR', 'Parameters `scheduleIntervalInSeconds` and `cronExpression` are mutually exclusive')
+    const body: any = {
+      version: '3',
+      txn_type: options.transactionType,
+      image: options.image,
+      execution_order: 'parallel', // default execution order
+      cmd: options.cmd
     }
-    return await this.get(`/verifications/${blockId}`) as Response<Verifications>
+    if (options.args) body.args = options.args
+    if (options.executionOrder) body.execution_order = options.executionOrder
+    if (options.environmentVariables) body.env = options.environmentVariables
+    if (options.secrets) body.secrets = options.secrets
+    if (options.scheduleIntervalInSeconds) body.seconds = options.scheduleIntervalInSeconds
+    if (options.cronExpression) body.cron = options.cronExpression
+    if (options.registryCredentials) body.auth = options.registryCredentials
+    return await this.post('/contract', body) as Response<DragonchainContractCreateResponse>
   }
 
   /**
-   * getSmartContractHeap
-   * Get from the smart contract heap
-   * This function, (unlike other SDK methods) returns raw utf-8 text by design.
-   * If you expect the result to be parsed json pass `true` as the jsonParse parameter.
-   * @param {string} key the key under which data has been stored in heap
-   * @param {string} scName the name of smart contract
-   * @param {boolean} jsonParse attempt to parse heap data as JSON. Throws JSONParse error if it fails.
+   * Update an existing Smart Contract on your Dragonchain
+   *
+   * Note that all parameters (aside from contract id) are optional, and only supplied parameters will be updated
    */
-  public getSmartContractHeap = async (key: string, scName: string, jsonParse: boolean = false) => {
-    const response = await this.get(`/get/${scName}/${key}`, jsonParse)
-    return response as Response<string>
+  public updateSmartContract = async (options: {
+    /**
+     * Smart contract id of which to update. Should be a guid
+     */
+    smartContractId: string,
+    /**
+     * Docker image to use with the smart contract. Should be in the form registry/image:tag (or just image:tag if it's a docker hub image)
+     * @example quay.io/coreos/awscli:latest
+     * @example alpine:3.9
+     */
+    image?: string,
+    /**
+     * The command to run in your docker container for your application
+     * @example echo
+     */
+    cmd?: string,
+    /**
+     * The list of arguments to use in conjunction with cmd
+     * @example ['input', 'that', 'will', 'be', 'passed', 'in', 'as', 'args', 'to', 'cmd']
+     */
+    args?: string[],
+    /**
+     * The execution of the smart contract, can be `serial` or `parallel`. Will default to `parallel`
+     *
+     * If running in serial, the contract will be queued and executed in order, only one at a time
+     *
+     * If running in parallel, the contract will be executed as soon as possible after invocation, potentially out of order, and many at a time
+     */
+    executionOrder?: SmartContractExecutionOrder,
+    /**
+     * Boolean whether or not the contract should be enabled, and able to be invoked
+     */
+    enabled?: boolean,
+    /**
+     * JSON object key-value pairs of strings for environments variables provided to the smart contract on execution
+     * @example
+     * ```javascript
+     *
+     * { MY_CUSTOM_ENV_VAR: "my_custom_env_value" }
+     * ```
+     */
+    environmentVariables?: object,
+    /**
+     * JSON object key-value pairs of strings for secrets provided to the smart contract on execution
+     *
+     * These are more securely stored than environment variables, and can be accessed during execution the smart contract by using the `getSmartContractSecret` method of the sdk
+     * @example
+     * ```javascript
+     *
+     * { MY_SECRET: "some secret special data" }
+     * ```
+     */
+    secrets?: object,
+    /**
+     * Schedule a smart contract to be automatically executed every `x` seconds
+     *
+     * For example, if `10` is supplied, then this contract will be automatically invoked and create a transaction once every 10 seconds
+     *
+     * This value should be a whole integer, and not a decimal
+     *
+     * Note: This is a mutually exclusive parameter with cronExpression
+     */
+    scheduleIntervalInSeconds?: number,
+    /**
+     * Schedule a smart contract to be automatically executed on a cadence via a cron expression
+     *
+     * Note: This is a mutually exclusive parameter with scheduleIntervalInSeconds
+     *
+     * @example `* * * * *` This will invoke the contract automatically every minute, on the minute
+     */
+    cronExpression?: string,
+    /**
+     * The basic-auth credentials necessary to pull the docker container.
+     *
+     * This should be a base64-encoded string of `username:password` for the docker registry
+     *
+     * @example ZXhhbXBsZVVzZXI6ZXhhbXBsZVBhc3N3b3JkCg==
+     */
+    registryCredentials?: string
+  }) => {
+    if (!options.smartContractId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required')
+    if (options.scheduleIntervalInSeconds && options.cronExpression) throw new FailureByDesign('PARAM_ERROR', 'Parameters `scheduleIntervalInSeconds` and `cronExpression` are mutually exclusive')
+    const body: any = {
+      version: '3'
+    }
+    if (options.image) body.image = options.image
+    if (options.cmd) body.cmd = options.cmd
+    if (options.args) body.args = options.args
+    if (options.executionOrder) body.execution_order = options.executionOrder
+    if (options.enabled === true) body.desired_state = 'active'
+    if (options.enabled === false) body.desired_state = 'inactive'
+    if (options.environmentVariables) body.env = options.environmentVariables
+    if (options.secrets) body.secrets = options.secrets
+    if (options.scheduleIntervalInSeconds) body.seconds = options.scheduleIntervalInSeconds
+    if (options.cronExpression) body.cron = options.cronExpression
+    if (options.registryCredentials) body.auth = options.registryCredentials
+    return await this.put(`/contract/${options.smartContractId}`, body) as Response<DragonchainContractCreateResponse>
   }
 
   /**
-   * listSmartcontractHeap
-   * List objects from a smart contract heap
-   * @param {string} scName the name of smart contract
-   * @param {string} key the sub-key ('folder') to list in the SC heap (optional. Defaults to root of SC heap)
+   * Deletes a deployed smart contract
    */
-  public listSmartcontractHeap = async (scName: string, key: string = '') => {
-    let path = `/list/${scName}/`
-    if (key) path += key
+  public deleteSmartContract = async (options: {
+    /**
+     * The id of the smart contract to delete. Should be a guid
+     */
+    smartContractId: string
+  }) => {
+    if (!options.smartContractId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required')
+    return await this.delete(`/contract/${options.smartContractId}`) as Response<DragonchainContractCreateResponse>
+  }
+
+  /**
+   * Get a single smart contract by one of id or transaction type
+   */
+  public getSmartContract = async (options: {
+    /**
+     * Contract id to get, mutually exclusive with transactionType
+     */
+    smartContractId?: string,
+    /**
+     * Transaction id of smart contract to get, mutually exclusive with smartContractId
+     */
+    transactionType?: string
+  }) => {
+    if (options.smartContractId && options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Only one of `smartContractId` or `transactionType` can be specified')
+    if (options.smartContractId) return await this.get(`/contract/${options.smartContractId}`) as Response<SmartContractAtRest>
+    if (options.transactionType) return await this.get(`/contract/txn_type/${options.transactionType}`) as Response<SmartContractAtRest>
+    throw new FailureByDesign('PARAM_ERROR', 'At least one of `smartContractId` or `transactionType` must be supplied')
+  }
+
+  /**
+   * Query smart contracts using ElasticSearch query-string syntax
+   *
+   * For more information on how to use the ElasticSearch query-string syntax checkout the Elastic Search documentation:
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax
+   * @example
+   * ```javascript
+   * myClient.querySmartContracts({ luceneQuery: 'tag:(bananas OR apples)' }).then( ...do stuff )
+   * ```
+   */
+  public querySmartContracts = async (options: {
+    /**
+     * lucene query to use for this query request
+     * @example `is_serial:true`
+     */
+    luceneQuery?: string,
+    /**
+     * Sort syntax of 'field:direction'
+     * @example `txn_type:asc`
+     */
+    sort?: string,
+    /**
+     * Pagination offset integer of query (default 0)
+     */
+    offset?: number,
+    /**
+     * Pagination limit integer of query (default 10)
+     */
+    limit?: number
+  } = {}) => {
+    const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10)
+    return await this.get(`/contract${queryParams}`) as Response<QueryResult<SmartContractAtRest>>
+  }
+
+  /**
+   * Get verifications for a block. Note that this is only relevant for level 1 chains
+   */
+  public getVerifications = async (options: {
+    /**
+     * The block ID to retrieve verifications for
+     */
+    blockId: string,
+    /**
+     * The level of verifications to retrieve (2-5). If not supplied, all levels are returned
+     */
+    level?: number
+  }) => {
+    if (!options.blockId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockId` is required')
+    if (options.level) {
+      return await this.get(`/verifications/${options.blockId}?level=${options.level}`) as Response<levelVerifications>
+    }
+    return await this.get(`/verifications/${options.blockId}`) as Response<Verifications>
+  }
+
+  /**
+   * Get an object from the smart contract heap. This is used for getting stateful data set by the outputs of smart contracts
+   */
+  public getSmartContractObject = async (options: {
+    /**
+     * Key of the object to retrieve
+     */
+    key: string,
+    /**
+     * Smart contract to get the object from
+     *
+     * When running from within a smart contract, this is provided via the SMART_CONTRACT_ID environment variable, and doesn't need to be explicitly provided
+     */
+    smartContractId?: string
+  }) => {
+    if (!options.key) throw new FailureByDesign('PARAM_ERROR', 'Parameter `key` is required')
+    if (!options.smartContractId) {
+      if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract')
+      options.smartContractId = process.env.SMART_CONTRACT_ID
+    }
+    const response = await this.get(`/get/${options.smartContractId}/${options.key}`, false) as unknown
+    return response as string
+  }
+
+  /**
+   * List objects from a folder within the heap of a smart contract
+   */
+  public listSmartContractObjects = async (options: {
+    /**
+     * The folder to list from the heap. Please note this CANNOT end in a '/'
+     *
+     * If nothing is provided, it will list at the root of the heap
+     * @example folder1
+     * @example folder1/subFolder
+     */
+    prefixKey?: string,
+    /**
+     * Smart contract to list the objects from
+     *
+     * When running from within a smart contract, this is provided via the SMART_CONTRACT_ID environment variable, and doesn't need to be explicitly provided
+     */
+    smartContractId?: string
+  }) => {
+    if (!options.smartContractId) {
+      if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract')
+      options.smartContractId = process.env.SMART_CONTRACT_ID
+    }
+    let path = `/list/${options.smartContractId}/`
+    if (options.prefixKey) {
+      if (options.prefixKey.endsWith('/')) throw new FailureByDesign('PARAM_ERROR', 'Parameter `prefixKey` cannot end with \'/\'')
+      path = `${options.prefixKey}/`
+    }
     return await this.get(path) as Response<string[]>
   }
 
   /**
-   * registerTransactionType
-   * Registers a new transaction type
-   * @param {TransactionTypeStructure} txnTypeStructure
+   * Create a new transaction type for ledgering transactions
    */
-  public registerTransactionType = async (txnTypeStructure: TransactionTypeStructure) => {
-    return await this.post('/transaction-type', txnTypeStructure) as Response<UpdateResponse>
+  public createTransactionType = async (options: {
+    /**
+     * The string of the transaction type to create
+     * @example cust1
+     */
+    transactionType: string,
+    /**
+     * The custom indexes that should be associated with this transaction type
+     */
+    customIndexes?: TransactionTypeCustomIndex[]
+  }) => {
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    const body: any = {
+      version: '1',
+      txn_type: options.transactionType
+    }
+    if (options.customIndexes) body.custom_indexes = options.customIndexes
+    return await this.post('/transaction-type', body) as Response<TransactionTypeSimpleResponse>
   }
 
   /**
-   * deleteTransactionType
-   * Deletes existing registered transaction type
-   * @param {string} transactionType
+   * Deletes an existing registered transaction type
    */
-  public deleteTransactionType = async (transactionType: string) => {
-    return await this.delete(`/transaction-type/${transactionType}`) as Response<UpdateResponse>
+  public deleteTransactionType = async (options: {
+    /**
+     * The name of the transaction type to delete
+     */
+    transactionType: string
+  }) => {
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    return await this.delete(`/transaction-type/${options.transactionType}`) as Response<TransactionTypeSimpleResponse>
   }
 
   /**
-   * listTransactionTypes
-   * Lists current accepted transaction types for a chain
+   * Lists currently created transaction types
    */
   public listTransactionTypes = async () => {
-    return await this.get('/transaction-types') as Response<TransactionTypeResponse[]>
+    return await this.get('/transaction-types') as Response<TransactionTypeListResponse>
   }
 
   /**
-   * updateTransactionType
-   * Updates a given transaction type structure
-   * @param {string} transactionType
-   * @param {CustomIndexStructure} customIndexes
+   * Updates an existing transaction type with new custom indexes
    */
-  public updateTransactionType = async (transactionType: string, customIndexes: CustomIndexStructure[]) => {
-    const params = { version: '1', custom_indexes: customIndexes }
-    return await this.put(`/transaction-type/${transactionType}`, params) as Response<UpdateResponse>
+  public updateTransactionType = async (options: {
+    /**
+     * The name of the transaction type to update
+     */
+    transactionType: string,
+    /**
+     * The custom indexes that should be updated onto the transaction type
+     */
+    customIndexes: TransactionTypeCustomIndex[]
+  }) => {
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    if (!options.customIndexes) throw new FailureByDesign('PARAM_ERROR', 'Parameter `customIndexes` is required')
+    const body = {
+      version: '1',
+      custom_indexes: options.customIndexes
+    }
+    return await this.put(`/transaction-type/${options.transactionType}`, body) as Response<TransactionTypeSimpleResponse>
   }
 
   /**
-   * getTransactionType
-   * Gets a specific transaction type
-   * @param {string} transactionType
+   * Gets an existing transaction type from the chain
    */
-  public getTransactionType = async (transactionType: string) => {
-    return await this.get(`/transaction-type/${transactionType}`) as Response<TransactionTypeResponse>
+  public getTransactionType = async (options: {
+    /**
+     * The name of the transaction type to get
+     */
+    transactionType: string
+  }) => {
+    if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
+    return await this.get(`/transaction-type/${options.transactionType}`) as Response<TransactionTypeResponse>
   }
 
   /**
-   * getPublicBlockchainAddresses
-   * Gets a list of your Dragonchain's interchain addresses
+   * Gets a list of the chain's interchain addresses
    */
   public getPublicBlockchainAddresses = async () => {
     return await this.get('/public-blockchain-address') as Response<PublicBlockchainAddressListResponse>
   }
 
-  /**
-   * createPublicBlockchainTransaction
-   * Creates and signs a transaction for a public blockchain using the chain's private keys
-   * Returns the signed raw transaction
-   * @param {PublicBlockchainTransaction} transaction
-   */
-  public createPublicBlockchainTransaction = async (transaction: PublicBlockchainTransaction) => {
-    return await this.post('/public-blockchain-transaction', transaction) as Response<PublicBlockchainTransactionResponse>
+  public createBitcoinTransaction = async (options: {
+    /**
+     * The bitcoin network that the transaction is for (mainnet or testnet)
+     */
+    network: 'BTC_MAINNET' | 'BTC_TESTNET3',
+    /**
+     * The desired fee in satoshis/byte
+     *
+     * If not supplied, an estimate will be automatically generated
+     */
+    satoshisPerByte?: number,
+    /**
+     * String data to embed in the transaction as null-data output type
+     */
+    data?: string,
+    /**
+     * Change address to use for this transaction. If not supplied, this will be the source address
+     */
+    changeAddress?: string,
+    /**
+     * The desired bitcoin outputs to create for this transaction
+     */
+    outputs?: BitcoinTransactionOutputs[]
+  }) => {
+    if (!options.network) throw new FailureByDesign('PARAM_ERROR', 'Parameter `network` is required')
+    const body: any = {
+      network: options.network,
+      transaction: {}
+    }
+    if (options.satoshisPerByte) body.transaction.fee = options.satoshisPerByte
+    if (options.data) body.transaction.data = options.data
+    if (options.changeAddress) body.transaction.change = options.changeAddress
+    if (options.outputs) {
+      body.transaction.outputs = []
+      options.outputs.forEach(output => {
+        body.transaction.outputs.push({
+          to: output.scriptPubKey,
+          value: output.value
+        })
+      })
+    }
+    return await this.post('/public-blockchain-transaction', body) as Response<PublicBlockchainTransactionResponse>
+  }
+
+  public createEthereumTransaction = async (options: {
+    /**
+     * The ethereum network that the transaction is for (ETH/ETC mainnet or testnet)
+     */
+    network: 'ETH_MAINNET' | 'ETH_ROPSTEN' | 'ETC_MAINNET' | 'ETC_MORDEN',
+    /**
+     * The (hex-encoded) address to send the transaction to
+     */
+    to: string,
+    /**
+     * The (hex-encoded) number of wei to send with this transaction
+     */
+    value: string,
+    /**
+     * The (hex-encoded) string of extra data to include with this transaction
+     */
+    data?: string,
+    /**
+     * The (hex-encoded) gas price in gwei to pay. If not supplied, this will be estimated automatically
+     */
+    gasPrice?: string,
+    /**
+     * The (hex-encoded) gas limit for this transaction. If not supplied, this will be estimated automatically
+     */
+    gas?: string
+  }) => {
+    if (!options.network) throw new FailureByDesign('PARAM_ERROR', 'Parameter `network` is required')
+    if (!options.to) throw new FailureByDesign('PARAM_ERROR', 'Parameter `to` is required')
+    if (!options.value) throw new FailureByDesign('PARAM_ERROR', 'Parameter `value` is required')
+    const body: any = {
+      network: options.network,
+      transaction: {
+        to: options.to,
+        value: options.value
+      }
+    }
+    if (options.data) body.transaction.data = options.data
+    if (options.gasPrice) body.transaction.data = options.gasPrice
+    if (options.gas) body.transaction.gas = options.gas
+    return await this.post('/public-blockchain-transaction', body) as Response<PublicBlockchainTransactionResponse>
   }
 
   /**
@@ -495,15 +844,13 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private getFetchOptions (path: string, method: SupportedHTTP, callbackURL: string = '', body: string, contentType: string = 'application/json'): FetchOptions {
+  private getFetchOptions (path: string, method: SupportedHTTP, callbackURL: string = '', body: string = '', contentType: string = ''): FetchOptions {
     const timestamp = new Date().toISOString()
-    return {
+    const options = {
       method: method,
       body: body || undefined,
       headers: {
-        'Content-Type': contentType,
         dragonchain: this.credentialService.dragonchainId,
-        'X-Callback-URL': callbackURL,
         Authorization: this.credentialService.getAuthorizationHeader(
           method,
           path,
@@ -513,13 +860,15 @@ export class DragonchainClient {
         ),
         timestamp
       }
-    }
+    } as FetchOptions
+    if (contentType) options.headers['Content-Type'] = contentType
+    if (callbackURL) options.headers['X-Callback-URL'] = callbackURL
+    return options
   }
 
   /**
    * @hidden
-   * @name toggleSslCertVerification
-   * @description For development purposes only! NodeJS naturally distrusts self signed certs (for good reason!). This function allows users the option to "not care" about self signed certs.
+   * For development purposes only! NodeJS naturally distrusts self signed certs (for good reason!). This function allows users the option to "not care" about self signed certs.
    * @param {function} asyncFunction an async function to call while NODE_TLS_REJECT_UNAUTHORIZED is quickly toggled from "1" to "0" and back to "1"
    */
   private toggleSslCertVerification = async (asyncFunction: Function) => {
@@ -533,7 +882,10 @@ export class DragonchainClient {
    * @hidden
    */
   private async makeRequest (path: string, method: SupportedHTTP, callbackURL: string = '', body: string = '', jsonParse: boolean = true) {
-    const fetchData = this.getFetchOptions(path, method, callbackURL, body)
+    let contentType = ''
+    // assume content type is json if a body is provided, as it's the only content-type supported
+    if (body) contentType = 'application/json'
+    const fetchData = this.getFetchOptions(path, method, callbackURL, body, contentType)
     const url = `${this.endpoint}${path}`
     logger.debug(`[DragonchainClient][FETCH][URL] ==> ${url}`)
     logger.debug(`[DragonchainClient][FETCH][DATA] ==> ${JSON.stringify(fetchData)}`)
@@ -545,6 +897,44 @@ export class DragonchainClient {
     logger.debug(`[DragonchainClient][${method}] <== ${JSON.stringify(response)}`)
     return { status, response, ok } as Response<any>
   }
+}
+
+/**
+ * Create and return an instantiation of a dragonchain client
+ */
+export const createClient = async (options: {
+  /**
+   * DragonchainId for this client. Not necessary if DRAGONCHAIN_ID env var is set, or if default is set in config file
+   */
+  dragonchainId?: string,
+  /**
+   * AuthKeyId to explicitly use with this client. Must be set along with authKey or it will be ignored
+   */
+  authKeyId?: string,
+  /**
+   * AuthKey to explicitly use with this client. Must be set along with authKeyId or it will be ignored
+   */
+  authKey?: string,
+  /**
+   * Endpoint to explicitly use with this client. Should not have a trailing slash and look something like https://some.url
+   */
+  endpoint?: string,
+  /**
+   * Whether or not to verify the https certificate for https connections. Defaults to true if not provided
+   */
+  verify?: boolean,
+  /**
+   * The hmac algorithm to use when generating authenticated requests. Defaults to SHA256
+   */
+  algorithm?: HmacAlgorithm
+} = {}) => {
+  if (!options.dragonchainId) options.dragonchainId = await getDragonchainId()
+  if (!options.endpoint) options.endpoint = await getDragonchainEndpoint(options.dragonchainId)
+  // Set defaults
+  if (!options.algorithm) options.algorithm = 'SHA256'
+  if (options.verify !== false) options.verify = true
+  const credentials = await CredentialService.createCredentials(options.dragonchainId, options.authKey || '', options.authKeyId || '', options.algorithm)
+  return new DragonchainClient(options.endpoint, credentials, options.verify)
 }
 
 /**

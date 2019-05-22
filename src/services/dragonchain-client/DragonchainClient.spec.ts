@@ -16,46 +16,26 @@
 
 import * as chai from 'chai'
 import * as sinonChai from 'sinon-chai'
-import { stub, assert, useFakeTimers, match } from 'sinon'
+import { stub, assert, useFakeTimers } from 'sinon'
 import { DragonchainClient } from './DragonchainClient'
-import { SmartContractType, ContractCreationSchema } from 'src/interfaces/DragonchainClientInterfaces'
-// ContractCreateCurrencyContract
-/**
- * @hidden
- */
+import { CredentialService } from '../credential-service/CredentialService'
 const expect = chai.expect
 chai.use(sinonChai)
-/**
- * @hidden
- */
 let fakeTimeStamp
-/**
- * @hidden
- */
 let fakeTime: string
 
 describe('DragonchainClient', () => {
   describe('#constructor', () => {
     it('returns instance of DragonchainClient', () => {
-      const client = new DragonchainClient('banana')
+      const client = new DragonchainClient('banana', new CredentialService('id', { authKey: 'key', authKeyId: 'keyId' }, 'SHA256'), true)
       expect(client instanceof DragonchainClient).to.equal(true)
-    })
-  })
-
-  describe('.isValidSmartContractType', () => {
-    it('returns true when valid', () => {
-      expect(DragonchainClient.isValidSmartContractType('transaction')).to.equal(true)
-      expect(DragonchainClient.isValidSmartContractType('cron')).to.equal(true)
-    })
-    it('returns false when invalid', () => {
-      expect(DragonchainClient.isValidSmartContractType('derp' as SmartContractType)).to.equal(false)
     })
   })
 
   describe('GET', () => {
     let fakeResponseObj
     let fetch: any
-    let readFileSync: any
+    let readFileAsync: any
     let CredentialService: any
     let logger: any
     let client: DragonchainClient
@@ -68,12 +48,12 @@ describe('DragonchainClient', () => {
       fakeResponseText = 'fakeString'
       fakeSecretText = 'fakeSecret'
       fetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
-      readFileSync = stub().returns(fakeSecretText)
+      readFileAsync = stub().returns(fakeSecretText)
       CredentialService = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
       logger = { log: stub(), debug: stub() }
-      const injected = { logger, CredentialService, fetch, readFileSync }
+      const injected = { logger, fetch, readFileAsync }
 
-      client = new DragonchainClient('fakeDragonchainId', true, injected)
+      client = new DragonchainClient('fakeUrl', CredentialService, true, injected)
       fakeTimeStamp = Date.now()
       useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
       fakeTime = new Date(fakeTimeStamp).toISOString()
@@ -81,8 +61,6 @@ describe('DragonchainClient', () => {
         method: 'GET',
         body: undefined,
         headers: {
-          'Content-Type': 'application/json',
-          'X-Callback-URL': '',
           'dragonchain': 'fakeDragonchainId',
           'Authorization': 'fakeCreds',
           'timestamp': fakeTime
@@ -90,91 +68,73 @@ describe('DragonchainClient', () => {
       }
     })
 
-    describe('.getSecret', () => {
-      it('calls readFileSync with correct dragonchain id and secret name', () => {
+    describe('.getSmartContractSecret', () => {
+      it('calls readFileAsync with correct dragonchain id and secret name', async () => {
         process.env.SMART_CONTRACT_ID = 'fakeSmartContractId'
-        client.getSecret('fakeSecretName')
-        assert.calledWith(readFileSync, '/var/openfaas/secrets/sc-fakeSmartContractId-fakeSecretName', 'utf-8')
+        await client.getSmartContractSecret({ secretName: 'fakeSecretName' })
+        assert.calledWith(readFileAsync, '/var/openfaas/secrets/sc-fakeSmartContractId-fakeSecretName', 'utf-8')
       })
     })
 
     describe('.getStatus', () => {
       it('calls #fetch() with correct params', async () => {
         await client.getStatus()
-        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/status', expectedFetchOptions)
+        assert.calledWith(fetch, 'fakeUrl/status', expectedFetchOptions)
       })
     })
 
     describe('.getTransaction', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'batman-transaction-id'
-        await client.getTransaction(id)
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/transaction/${id}`, expectedFetchOptions)
-      })
-    })
-
-    describe('.setDragonchainId', () => {
-      it('allows resetting the dragonchainId', async () => {
-        client.setDragonchainId('hotBanana')
-        await client.getStatus()
-        expectedFetchOptions.headers.dragonchain = 'hotBanana'
-        assert.calledWith(fetch, 'https://hotBanana.api.dragonchain.com/status', match({ headers: { dragonchain: 'hotBanana' } }))
-      })
-    })
-
-    describe('.setEndpoint', () => {
-      it('allows setting the endpoint manually', async () => {
-        const endpoint = 'https://some.domain.com'
-        client.setEndpoint(endpoint)
-        await client.getStatus()
-        assert.calledWith(fetch, `${endpoint}/status`, expectedFetchOptions)
+        await client.getTransaction({ transactionId: id })
+        assert.calledWith(fetch, `fakeUrl/transaction/${id}`, expectedFetchOptions)
       })
     })
 
     describe('.getBlock', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'robin-block-id'
-        await client.getBlock(id)
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/block/${id}`, expectedFetchOptions)
+        await client.getBlock({ blockId: id })
+        assert.calledWith(fetch, `fakeUrl/block/${id}`, expectedFetchOptions)
       })
     })
 
     describe('.getSmartContract', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'joker-smartcontract-id'
-        await client.getSmartContract(id)
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/contract/${id}`, expectedFetchOptions)
+        await client.getSmartContract({ smartContractId: id })
+        assert.calledWith(fetch, `fakeUrl/contract/${id}`, expectedFetchOptions)
       })
     })
 
     describe('.getPublicBlockchainAddresses', () => {
       it('calls #fetch() with correct params', async () => {
         await client.getPublicBlockchainAddresses()
-        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/public-blockchain-address', expectedFetchOptions)
+        assert.calledWith(fetch, 'fakeUrl/public-blockchain-address', expectedFetchOptions)
       })
     })
 
-    describe('.getVerification', () => {
+    describe('.getVerifications', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'block_id'
-        await client.getVerifications(id)
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/verifications/${id}`, expectedFetchOptions)
+        await client.getVerifications({ blockId: id })
+        assert.calledWith(fetch, `fakeUrl/verifications/${id}`, expectedFetchOptions)
       })
     })
 
     describe('.queryBlocks', () => {
       it('calls #fetch() with correct params', async () => {
         const params = 'banana'
-        await client.queryBlocks(params)
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/block?q=${params}&offset=0&limit=10`, expectedFetchOptions)
+        await client.queryBlocks({ luceneQuery: params })
+        assert.calledWith(fetch, `fakeUrl/block?q=${params}&offset=0&limit=10`, expectedFetchOptions)
       })
     })
 
     describe('.querySmartContracts', () => {
       it('calls #fetch() with correct params', async () => {
         const params = 'banana'
-        await client.querySmartContracts(params)
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/contract?q=${params}&offset=0&limit=10`, expectedFetchOptions)
+        await client.querySmartContracts({ luceneQuery: params })
+        assert.calledWith(fetch, `fakeUrl/contract?q=${params}&offset=0&limit=10`, expectedFetchOptions)
       })
     })
   })
@@ -183,18 +143,16 @@ describe('DragonchainClient', () => {
     const fakeResponseObj = { body: 'fakeResponseBody' }
     const fakeResponseText = 'fakeString'
     const fetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
-    const CredentialService = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
+    const CredentialService: any = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
     const logger = { log: stub(), debug: stub() }
-    const injected = { logger, CredentialService, fetch }
-    const client = new DragonchainClient('fakeDragonchainId', true, injected)
+    const injected = { logger, fetch }
+    const client = new DragonchainClient('fakeUrl', CredentialService, true, injected)
     fakeTimeStamp = Date.now()
     useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
     fakeTime = new Date(fakeTimeStamp).toISOString()
     const expectedFetchOptions = {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json',
-        'X-Callback-URL': '',
         dragonchain: 'fakeDragonchainId',
         Authorization: 'fakeCreds',
         timestamp: fakeTime
@@ -204,8 +162,8 @@ describe('DragonchainClient', () => {
 
     it('.deleteSmartContract', async () => {
       const param = 'banana'
-      await client.deleteSmartContract(param)
-      assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/contract/banana', expectedFetchOptions)
+      await client.deleteSmartContract({ smartContractId: param })
+      assert.calledWith(fetch, 'fakeUrl/contract/banana', expectedFetchOptions)
     })
   })
 
@@ -213,11 +171,11 @@ describe('DragonchainClient', () => {
     const fakeResponseObj = { body: 'fakeResponseBody' }
     const fakeResponseText = 'fakeString'
     const fetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
-    const CredentialService = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
+    const CredentialService: any = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
     const logger = { log: stub(), debug: stub() }
     const injected = { logger, CredentialService, fetch }
 
-    const client = new DragonchainClient('fakeDragonchainId', true, injected)
+    const client = new DragonchainClient('fakeUrl', CredentialService, true, injected)
     fakeTimeStamp = Date.now()
     useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
     fakeTime = new Date(fakeTimeStamp).toISOString()
@@ -225,7 +183,6 @@ describe('DragonchainClient', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Callback-URL': '',
         'dragonchain': 'fakeDragonchainId',
         'Authorization': 'fakeCreds',
         'timestamp': fakeTime
@@ -235,47 +192,63 @@ describe('DragonchainClient', () => {
     describe('.createTransaction', () => {
       it('calls #fetch() with correct params', async () => {
         const transactionCreatePayload = {
-          version: '1',
-          txn_type: 'transaction',
-          payload: 'hi!' ,
+          transactionType: 'transaction',
+          payload: 'hi!',
           tag: 'Awesome!'
         }
-        await client.createTransaction(transactionCreatePayload)
-        const obj = { ...expectedFetchOptions, body: JSON.stringify(transactionCreatePayload) }
-        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/transaction', obj)
-      })
-    })
-
-    describe('.createContract', () => {
-      it('create custom contract successfully', async () => {
-        const contractPayload: ContractCreationSchema = {
-          'version': '3',
-          'dcrn': 'SmartContract::L1::Create',
-          'txn_type': 'name',
-          'image': 'ubuntu:latest',
-          'execution_order': 'serial',
-          'env': { 'banana': 'banana', 'apple': 'banana' },
-          'cmd': 'banana',
-          'args': ['-m cool']
+        const expectedBody = {
+          version: '1',
+          txn_type: transactionCreatePayload.transactionType,
+          payload: transactionCreatePayload.payload,
+          tag: transactionCreatePayload.tag
         }
-        await client.createContract(contractPayload)
-        const obj = { ...expectedFetchOptions, body: JSON.stringify(contractPayload) }
-        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/contract', obj)
+        await client.createTransaction(transactionCreatePayload)
+        const obj = { ...expectedFetchOptions, body: JSON.stringify(expectedBody) }
+        assert.calledWith(fetch, 'fakeUrl/transaction', obj)
       })
     })
 
-    describe('.createPublicBlockchainTransaction', () => {
+    describe('.createSmartContract', () => {
+      it('create custom contract successfully', async () => {
+        const contractPayload = {
+          transactionType: 'name',
+          image: 'ubuntu:latest',
+          environmentVariables: { 'banana': 'banana', 'apple': 'banana' },
+          cmd: 'banana',
+          args: ['-m', 'cool']
+        }
+        const expectedBody = {
+          version: '3',
+          txn_type: 'name',
+          image: contractPayload.image,
+          execution_order: 'parallel',
+          cmd: contractPayload.cmd,
+          args: contractPayload.args,
+          env: contractPayload.environmentVariables
+        }
+        await client.createSmartContract(contractPayload)
+        const obj = { ...expectedFetchOptions, body: JSON.stringify(expectedBody) }
+        assert.calledWith(fetch, 'fakeUrl/contract', obj)
+      })
+    })
+
+    describe('.createEthereumTransaction', () => {
       it('calls #fetch() with correct params', async () => {
-        const transactionCreatePayload = {
+        const transactionCreatePayload: any = {
           network: 'ETH_MAINNET',
+          to: '0x0000000000000000000000000000000000000000',
+          value: '0x0'
+        }
+        const expectedBody = {
+          network: transactionCreatePayload.network,
           transaction: {
-            to: '0x0000000000000000000000000000000000000000',
-            value: '0x0'
+            to: transactionCreatePayload.to,
+            value: transactionCreatePayload.value
           }
         }
-        await client.createPublicBlockchainTransaction(transactionCreatePayload)
-        const obj = { ...expectedFetchOptions, body: JSON.stringify(transactionCreatePayload) }
-        assert.calledWith(fetch, 'https://fakeDragonchainId.api.dragonchain.com/public-blockchain-transaction', obj)
+        await client.createEthereumTransaction(transactionCreatePayload)
+        const obj = { ...expectedFetchOptions, body: JSON.stringify(expectedBody) }
+        assert.calledWith(fetch, 'fakeUrl/public-blockchain-transaction', obj)
       })
     })
   })
@@ -284,11 +257,11 @@ describe('DragonchainClient', () => {
     const fakeResponseObj = { body: 'fakeResponseBody' }
     const fakeResponseText = 'fakeString'
     const fetch = stub().resolves({ status: 200, json: stub().resolves(fakeResponseObj), text: stub().resolves(fakeResponseText) })
-    const CredentialService = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
+    const CredentialService: any = { getAuthorizationHeader: stub().returns('fakeCreds'), dragonchainId: 'fakeDragonchainId' }
     const logger = { log: stub(), debug: stub() }
     const injected = { logger, CredentialService, fetch }
 
-    const client = new DragonchainClient('fakeDragonchainId', true, injected)
+    const client = new DragonchainClient('fakeUrl', CredentialService, true, injected)
     fakeTimeStamp = Date.now()
     useFakeTimers({ now: fakeTimeStamp, shouldAdvanceTime: false })
     fakeTime = new Date(fakeTimeStamp).toISOString()
@@ -296,7 +269,6 @@ describe('DragonchainClient', () => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Callback-URL': '',
         'dragonchain': 'fakeDragonchainId',
         'Authorization': 'fakeCreds',
         'timestamp': fakeTime
@@ -305,22 +277,18 @@ describe('DragonchainClient', () => {
 
     describe('.updateSmartContract', () => {
       it('calls #fetch() with correct params', async () => {
-        const txnType = '616152367378'
+        const smartContractId = '616152367378'
         const status = 'active'
         const fakeBodyResponse: any = {
           'version': '3',
-          'dcrn': 'SmartContract::L1::Update',
           'desired_state': status
         }
-        await client.updateSmartContract(txnType, undefined, undefined, undefined, status)
-        const id = '616152367378'
+        await client.updateSmartContract({ smartContractId, enabled: true })
         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) }
-        assert.calledWith(fetch, `https://fakeDragonchainId.api.dragonchain.com/contract/${id}`, obj)
+        assert.calledWith(fetch, `fakeUrl/contract/${smartContractId}`, obj)
       })
     })
-
   })
-
 })
 
 /**

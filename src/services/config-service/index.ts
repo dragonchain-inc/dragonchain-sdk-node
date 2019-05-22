@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * Type of failure
- */
-type failureCode = 'PARAM_ERROR' | 'NOT_FOUND'
+import {
+  getDragonchainCredentials,
+  getDragonchainId,
+  getDragonchainEndpoint
+} from './ConfigCient'
 
-/**
- * Error class thrown by the SDK
- * All expected errors thrown by the SDK should be an instantiation of this class, with different codes as appropriate
- */
-export class FailureByDesign extends Error {
-  code: failureCode
-  message: string
-
-  constructor (code: failureCode, message: string) {
-    super(message)
-    this.code = code
-    this.message = message || 'Failure By Design'
-  }
+export {
+  getDragonchainCredentials,
+  getDragonchainId,
+  getDragonchainEndpoint
 }
 
 /**

@@ -1,6 +1,7 @@
 import * as chai from 'chai'
 import * as sinonChai from 'sinon-chai'
-import { DragonchainClient } from '../src/services/dragonchain-client/DragonchainClient'
+import { createClient } from '../src'
+import { DragonchainClient } from 'src/services/dragonchain-client/DragonchainClient'
 import { DragonchainTransactionCreateResponse, L1DragonchainTransactionFull } from '../src/interfaces/DragonchainClientInterfaces'
 // ContractCreationSchema
 
@@ -18,19 +19,21 @@ describe('DragonchainClient', () => {
   let client: DragonchainClient
   let postTransaction: DragonchainTransactionCreateResponse
   let getTransaction: L1DragonchainTransactionFull
-  let contractName: string
   let secrets = JSON.parse(process.env['INTEGRATION_CREDENTIALS']!)
 
-  beforeEach(() => {
-    client = new DragonchainClient(secrets.CHAIN_ID)
-    client.overrideCredentials(secrets.AUTH_KEY_ID, secrets.AUTH_KEY)
+  beforeEach(async () => {
+    client = await createClient({
+      dragonchainId: secrets.CHAIN_ID,
+      authKeyId: secrets.AUTH_KEY_ID,
+      authKey: secrets.AUTH_KEY,
+      endpoint: secrets.ENDPOINT
+    })
   })
 
   describe('POST', () => {
     it('POST transaction successfully', async () => {
       const payload: any = {
-        'version': '1',
-        'txn_type': 'test',
+        'transactionType': 'test',
         'tag': 'pottery',
         'payload': {}
       }
@@ -42,21 +45,21 @@ describe('DragonchainClient', () => {
   describe('GET', () => {
     it('Wait for the POST request updates to complete', async () => {
       console.log('waiting for the POST updates to complete.....')
-      await delay(5000)
+      await delay(6000)
     }).timeout(50000)
 
     it('calls getStatus successfully', async () => {
       const result = (await client.getStatus()).response
-      expect(result.level).to.equal('1')
+      expect(Number(result.level)).to.equal(1)
     })
 
     it('calls getTransaction successfully', async () => {
-      getTransaction = (await client.getTransaction(postTransaction.transaction_id)).response
+      getTransaction = (await client.getTransaction({ transactionId: postTransaction.transaction_id })).response
       expect(getTransaction.header.txn_id).to.equal(postTransaction.transaction_id)
     })
 
     it('calls queryTransaction with block_id successfully', async () => {
-      const result = await client.queryTransactions(`block_id=${getTransaction.header.block_id}`)
+      const result = await client.queryTransactions({ luceneQuery: `block_id=${getTransaction.header.block_id}` })
       assert.isOk(result)
     })
 
@@ -66,18 +69,13 @@ describe('DragonchainClient', () => {
     }).timeout(5000)
 
     it('calls getBlock successfully', async () => {
-      const result = (await client.getBlock(getTransaction.header.block_id)).response
+      const result = (await client.getBlock({ blockId: getTransaction.header.block_id })).response
       expect(result.header.block_id).to.equal(getTransaction.header.block_id)
     })
 
     it('calls queryBlocks successfully', async () => {
-      const result = await client.queryBlocks(`block_id=${getTransaction.header.block_id}`)
+      const result = await client.queryBlocks({ luceneQuery: `block_id=${getTransaction.header.block_id}` })
       assert.isOk(result)
-    })
-
-    it('calls getSmartContract successfully', async () => {
-      const result = (await client.getSmartContract(contractName)).response
-      expect(result.name).to.equal(contractName)
     })
   })
 })
