@@ -925,7 +925,7 @@ export const createClient = async (options: {
    * The hmac algorithm to use when generating authenticated requests. Defaults to SHA256
    */
   algorithm?: HmacAlgorithm
-}) => {
+} = {}) => {
   if (!options.dragonchainId) options.dragonchainId = await getDragonchainId()
   if (!options.endpoint) options.endpoint = await getDragonchainEndpoint(options.dragonchainId)
   // Set defaults
