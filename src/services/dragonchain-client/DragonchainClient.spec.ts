@@ -219,7 +219,9 @@ describe('DragonchainClient', () => {
         }
         const expectedBody = {
           version: '3',
+          txn_type: 'name',
           image: contractPayload.image,
+          execution_order: 'parallel',
           cmd: contractPayload.cmd,
           args: contractPayload.args,
           env: contractPayload.environmentVariables

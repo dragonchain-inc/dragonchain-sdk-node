@@ -145,7 +145,7 @@ export class DragonchainClient {
     /**
      * Payload of the transaction. Must be a utf-8 encodable string, or any json object
      */
-    payload: string | object,
+    payload?: string | object,
     /**
      * Tag of the transaction which gets indexed and can be searched on for queries
      */
@@ -156,7 +156,7 @@ export class DragonchainClient {
     callbackURL?: string
   }) => {
     if (!options.transactionType) throw new FailureByDesign('BAD_REQUEST', 'Parameter `transactionType` is required')
-    if (!options.payload) throw new FailureByDesign('BAD_REQUEST', 'Parameter `payload` is required')
+    if (!options.payload) options.payload = '' // default payload to an empty string if not provided
     const transactionBody = {
       version: '1',
       txn_type: options.transactionType,
@@ -178,7 +178,7 @@ export class DragonchainClient {
       const singleBody: any = {
         version: '1',
         txn_type: transaction.transactionType,
-        payload: transaction.payload
+        payload: transaction.payload || ''
       }
       if (transaction.tag) singleBody.tag = transaction.tag
       bulkTransactionBody.push(singleBody)
@@ -215,7 +215,7 @@ export class DragonchainClient {
      * Pagination limit integer of query (default 10)
      */
     limit?: number
-  }) => {
+  } = {}) => {
     const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10)
     return await this.get(`/transaction${queryParams}`) as Response<QueryResult<L1DragonchainTransactionFull>>
   }
@@ -262,7 +262,7 @@ export class DragonchainClient {
      * Pagination limit integer of query (default 10)
      */
     limit?: number
-  }) => {
+  } = {}) => {
     const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10)
     return await this.get(`/block${queryParams}`) as Response<QueryResult<BlockSchemaType>>
   }
@@ -352,7 +352,9 @@ export class DragonchainClient {
     if (options.scheduleIntervalInSeconds && options.cronExpression) throw new FailureByDesign('BAD_REQUEST', 'Parameters `scheduleIntervalInSeconds` and `cronExpression` are mutually exclusive')
     const body: any = {
       version: '3',
+      txn_type: options.transactionType,
       image: options.image,
+      execution_order: 'parallel', // default execution order
       cmd: options.cmd
     }
     if (options.args) body.args = options.args
@@ -530,7 +532,7 @@ export class DragonchainClient {
      * Pagination limit integer of query (default 10)
      */
     limit?: number
-  }) => {
+  } = {}) => {
     const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10)
     return await this.get(`/contract${queryParams}`) as Response<QueryResult<SmartContractAtRest>>
   }

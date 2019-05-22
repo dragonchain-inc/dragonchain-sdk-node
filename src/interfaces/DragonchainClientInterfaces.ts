@@ -176,7 +176,7 @@ export interface BulkTransactionPayload {
   /**
    * Payload of the transaction. Must be a utf-8 encodable string, or any json object
    */
-  payload: string | object,
+  payload?: string | object,
   /**
    * Tag of the transaction which gets indexed and can be searched on for queries
    */
@@ -206,10 +206,34 @@ export interface BitcoinTransactionOutputs {
   value: number
 }
 
+/**
+ * Example response for createEthereumTransaction
+ * @example
+ * ```json
+ *
+ * {
+ *   "signed": "0xf86380844160997982ea6094558c01dd95335749a29d040b24a183d8f7637bc880802aa05555e1cc2acd2543c3408855dea997678feaecdd66c2df1591109f43d4a7fc10a04594fe1c321f8dd344b5e7be43b2f58265d78d908a7520add57df0f31c69bc85"
+ * }
+ * ```
+ */
 export interface PublicBlockchainTransactionResponse {
   signed: string
 }
 
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "eth_mainnet": "0xa5C32bE6323Cd5E2BC87468F5F2D91849cDb3A3D",
+ *   "eth_ropsten": "0x558c01dd95335749a29D040b24a183D8f7637BC8",
+ *   "etc_mainnet": "0xf7A802DB95D783254A1f29F47785BA080daBF1db",
+ *   "etc_morden": "0x5dd0ac246B54f0267Ee4f33a074382D19AD0fa66",
+ *   "btc_mainnet": "17eK35gAem9Pezzs1RdntsoK9kK8dsF7DQ",
+ *   "btc_testnet3": "mrgFVPYFMojNsx3gih84PSbQCDiB4rnoQJ"
+ * }
+ * ```
+ */
 export interface PublicBlockchainAddressListResponse {
   eth_mainnet?: string,
   etc_mainnet?: string,
@@ -331,11 +355,29 @@ export interface DragonchainContractCreateResponse {
   success: SmartContractAtRest,
 }
 
+/**
+ * Example of the status result
+ * @example
+ * ```json
+ *
+ * {
+ *   "level": 1,
+ *   "cloud": "aws",
+ *   "url": "https://d3cabac3-e30d-4bb9-aeed-1fc8cbd38c66.api.dragonchain.com",
+ *   "region": "us-west-2",
+ *   "scheme": "trust",
+ *   "wallet": "0x9Dc783AD32989b4f533d941C3D799eB302E5A804",
+ *   "hashAlgo": "blake2b",
+ *   "version": "3.3.1",
+ *   "encryptionAlgo": "secp256k1"
+ * }
+ * ```
+ */
 export interface L1DragonchainStatusResult {
   /**
-   * Level of this dragonchain
+   * Level of this dragonchain (as an integer)
    */
-  level: string
+  level: number
   /**
    * Cloud that this chain is running in
    */
@@ -740,7 +782,11 @@ export interface TransactionTypeResponse {
   version: '1',
   txn_type: string,
   custom_indexes: TransactionTypeCustomIndexes[],
-  contract_id: boolean,
+  /**
+   * If this is a ledger contract type, (not assigned to a contract), then this field will simply be the boolean false,
+   * otherwise this will be the string of the associated contract id
+   */
+  contract_id: string | boolean,
 }
 
 /**
