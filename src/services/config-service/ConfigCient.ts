@@ -26,7 +26,8 @@ import { logger } from '../../index'
 /**
  * @hidden
  */
-const readFileAsync = promisify(readFile)
+let readFileAsync: any = async () => ''
+if (readFile) readFileAsync = promisify(readFile)
 
 /**
  * @hidden
