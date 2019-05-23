@@ -50,7 +50,8 @@ import { FailureByDesign } from '../../errors/FailureByDesign'
 /**
  * @hidden
  */
-const readFileAsync = promisify(readFile)
+let readFileAsync: any = async () => ''
+if (readFile) readFileAsync = promisify(readFile)
 
 /**
  * HTTP Client that interfaces with the dragonchain api
