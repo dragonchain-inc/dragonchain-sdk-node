@@ -41,7 +41,7 @@ import {
   TransactionTypeCustomIndex,
   BitcoinTransactionOutputs,
   BulkTransactionPayload
-} from 'src/interfaces/DragonchainClientInterfaces'
+} from '../../interfaces/DragonchainClientInterfaces'
 import { CredentialService, HmacAlgorithm } from '../credential-service/CredentialService'
 import { getDragonchainId, getDragonchainEndpoint } from '../config-service'
 import { URLSearchParams } from 'url'
