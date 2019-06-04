@@ -44,12 +44,22 @@ import {
 } from '../../interfaces/DragonchainClientInterfaces'
 import { CredentialService, HmacAlgorithm } from '../credential-service/CredentialService'
 import { getDragonchainId, getDragonchainEndpoint } from '../config-service'
-import { URLSearchParams } from 'url'
+import { URLSearchParams as nodeUrlSearchParams } from 'url'
 import { logger } from '../../index'
 import { FailureByDesign } from '../../errors/FailureByDesign'
+
 /**
  * @hidden
  */
+
+let UrlSearchParams: any = (queryParams: any) => {
+  if (!nodeUrlSearchParams) {
+    // @ts-ignore
+    return new URLSearchParams(queryParams) // used in browser ( method on window )
+  }
+  return new nodeUrlSearchParams(queryParams) // used in node
+}
+
 let readFileAsync: any = async () => ''
 if (readFile) readFileAsync = promisify(readFile)
 
@@ -806,7 +816,8 @@ export class DragonchainClient {
    */
   private generateQueryString = (queryObject: Map<string, string>) => {
     const query = '?'
-    const params = new URLSearchParams(queryObject)
+    // @ts-ignore
+    const params = UrlSearchParams(queryObject)
     const queryString = `${query}${params}`
 
     return queryString
