@@ -57,7 +57,7 @@ let UrlSearchParams: any = (queryParams: any) => {
     // @ts-ignore
     return new URLSearchParams(queryParams) // used in browser ( method on window )
   }
- return new nodeUrlSearchParams(queryParams) // used in node
+  return new nodeUrlSearchParams(queryParams) // used in node
 }
 
 let readFileAsync: any = async () => ''
