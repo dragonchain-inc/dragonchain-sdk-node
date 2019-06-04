@@ -55,9 +55,9 @@ import { FailureByDesign } from '../../errors/FailureByDesign'
 let UrlSearchParams: any = (queryParams: any) => {
   if (!nodeUrlSearchParams) {
     // @ts-ignore
-    return new URLSearchParams(queryParams)
+    return new URLSearchParams(queryParams) // used in browser ( method on window )
   }
- return new nodeUrlSearchParams(queryParams)
+ return new nodeUrlSearchParams(queryParams) // used in node
 }
 
 let readFileAsync: any = async () => ''
