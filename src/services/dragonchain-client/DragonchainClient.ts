@@ -161,7 +161,7 @@ export class DragonchainClient {
    */
   public getApiKey = async (options: {
     /**
-     * the transaction id of the transaction to get
+     * the key id of the key to get
      */
     keyId: string
   }) => {
@@ -174,7 +174,7 @@ export class DragonchainClient {
    */
   public deleteApiKey = async (options: {
     /**
-     * the transaction id of the transaction to get
+     * the key id of the key to delete
      */
     keyId: string
   }) => {
