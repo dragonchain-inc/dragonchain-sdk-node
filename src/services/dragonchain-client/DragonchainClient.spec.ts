@@ -83,6 +83,20 @@ describe('DragonchainClient', () => {
       })
     })
 
+    describe('.getApiKey', () => {
+      it('calls #fetch() with correct params', async () => {
+        await client.getApiKey({ keyId: 'MyKeyID' })
+        assert.calledWith(fetch, 'fakeUrl/api-key/MyKeyID', expectedFetchOptions)
+      })
+    })
+
+    describe('.listApiKeys', () => {
+      it('calls #fetch() with correct params', async () => {
+        await client.listApiKeys()
+        assert.calledWith(fetch, 'fakeUrl/api-key', expectedFetchOptions)
+      })
+    })
+
     describe('.getTransaction', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'batman-transaction-id'
@@ -165,6 +179,11 @@ describe('DragonchainClient', () => {
       await client.deleteSmartContract({ smartContractId: param })
       assert.calledWith(fetch, 'fakeUrl/contract/banana', expectedFetchOptions)
     })
+
+    it('.deleteApiKey', async () => {
+      await client.deleteApiKey({ keyId: 'MyKeyID' })
+      assert.calledWith(fetch, 'fakeUrl/api-key/MyKeyID', expectedFetchOptions)
+    })
   })
 
   describe('POST', () => {
@@ -188,6 +207,14 @@ describe('DragonchainClient', () => {
         'timestamp': fakeTime
       }
     }
+
+    describe('.createApiKey', () => {
+      it('calls #fetch() with correct params', async () => {
+        await client.createApiKey()
+        const expectedBody = {}
+        assert.calledWith(fetch, 'fakeUrl/api-key', { ...expectedFetchOptions, body: JSON.stringify(expectedBody) })
+      })
+    })
 
     describe('.createTransaction', () => {
       it('calls #fetch() with correct params', async () => {

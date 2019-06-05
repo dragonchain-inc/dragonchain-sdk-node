@@ -225,6 +225,56 @@ export interface PublicBlockchainTransactionResponse {
  * ```json
  *
  * {
+ *   "key": "d5K20n1VfHZYIgk55UdJO0bTyMTnjasdGkNyg66ASnd",
+ *   "id": "PDJSYJNBTDBP",
+ *   "registration_timestamp": 1548604295
+ * }
+ * ```
+ */
+export interface CreateAPIKeyResponse {
+  key: string,
+  id: string,
+  registration_timestamp: number,
+}
+
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "id": "PDJSYJNBTDBP",
+ *   "registration_timestamp": 1548604295
+ * }
+ * ```
+ */
+export interface GetAPIKeyResponse {
+  id: string,
+  registration_timestamp: number,
+}
+
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "keys": [
+ *      {
+ *         "id": "PDJSYJNBTDBP",
+ *         "registration_timestamp": 1548604295
+ *      }, ...
+ *   ]
+ * }
+ * ```
+ */
+export interface ListAPIKeyResponse {
+  keys: Array<GetAPIKeyResponse>,
+}
+
+/**
+ * @example
+ * ```json
+ *
+ * {
  *   "eth_mainnet": "0xa5C32bE6323Cd5E2BC87468F5F2D91849cDb3A3D",
  *   "eth_ropsten": "0x558c01dd95335749a29D040b24a183D8f7637BC8",
  *   "etc_mainnet": "0xf7A802DB95D783254A1f29F47785BA080daBF1db",

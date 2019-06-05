@@ -40,7 +40,10 @@ import {
   TransactionTypeListResponse,
   TransactionTypeCustomIndex,
   BitcoinTransactionOutputs,
-  BulkTransactionPayload
+  BulkTransactionPayload,
+  ListAPIKeyResponse,
+  CreateAPIKeyResponse,
+  GetAPIKeyResponse
 } from '../../interfaces/DragonchainClientInterfaces'
 import { CredentialService, HmacAlgorithm } from '../credential-service/CredentialService'
 import { getDragonchainId, getDragonchainEndpoint } from '../config-service'
@@ -137,6 +140,46 @@ export class DragonchainClient {
   }) => {
     if (!options.transactionId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionId` is required')
     return await this.get(`/transaction/${options.transactionId}`) as Response<L1DragonchainTransactionFull>
+  }
+
+  /**
+   * Generate a new HMAC API key
+   */
+  public createApiKey = async () => {
+    return await this.post('/api-key', {}) as Response<CreateAPIKeyResponse>
+  }
+
+  /**
+   * List HMAC API key IDs and their associated metadata
+   */
+  public listApiKeys = async () => {
+    return await this.get('/api-key') as Response<ListAPIKeyResponse>
+  }
+
+  /**
+   * Get metadata about an existing HMAC API key
+   */
+  public getApiKey = async (options: {
+    /**
+     * the transaction id of the transaction to get
+     */
+    keyId: string
+  }) => {
+    if (!options.keyId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` is required')
+    return await this.get(`/api-key/${options.keyId}`) as Response<GetAPIKeyResponse>
+  }
+
+  /**
+   * Delete an existing HMAC API key
+   */
+  public deleteApiKey = async (options: {
+    /**
+     * the transaction id of the transaction to get
+     */
+    keyId: string
+  }) => {
+    if (!options.keyId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` is required')
+    return await this.delete(`/api-key/${options.keyId}`) as Response<null>
   }
 
   /**
