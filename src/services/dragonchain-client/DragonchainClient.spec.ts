@@ -197,7 +197,6 @@ describe('DragonchainClient', () => {
           tag: 'Awesome!'
         }
         const expectedBody = {
-          version: '1',
           txn_type: transactionCreatePayload.transactionType,
           payload: transactionCreatePayload.payload,
           tag: transactionCreatePayload.tag
