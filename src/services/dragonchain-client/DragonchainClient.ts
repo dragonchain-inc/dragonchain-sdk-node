@@ -43,7 +43,8 @@ import {
   BulkTransactionPayload,
   ListAPIKeyResponse,
   CreateAPIKeyResponse,
-  GetAPIKeyResponse
+  GetAPIKeyResponse,
+  DeleteAPIKeyResponse
 } from '../../interfaces/DragonchainClientInterfaces'
 import { CredentialService, HmacAlgorithm } from '../credential-service/CredentialService'
 import { getDragonchainId, getDragonchainEndpoint } from '../config-service'
@@ -179,7 +180,7 @@ export class DragonchainClient {
     keyId: string
   }) => {
     if (!options.keyId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` is required')
-    return await this.delete(`/api-key/${options.keyId}`) as Response<null>
+    return await this.delete(`/api-key/${options.keyId}`) as Response<DeleteAPIKeyResponse>
   }
 
   /**

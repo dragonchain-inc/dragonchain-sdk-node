@@ -242,6 +242,19 @@ export interface CreateAPIKeyResponse {
  * ```json
  *
  * {
+ *   "success": true
+ * }
+ * ```
+ */
+export interface DeleteAPIKeyResponse {
+  success: boolean,
+}
+
+/**
+ * @example
+ * ```json
+ *
+ * {
  *   "id": "PDJSYJNBTDBP",
  *   "registration_timestamp": 1548604295
  * }
