@@ -789,7 +789,7 @@ export class DragonchainClient {
       }
     }
     if (options.data) body.transaction.data = options.data
-    if (options.gasPrice) body.transaction.data = options.gasPrice
+    if (options.gasPrice) body.transaction.gasPrice = options.gasPrice
     if (options.gas) body.transaction.gas = options.gas
     return await this.post('/public-blockchain-transaction', body) as Response<PublicBlockchainTransactionResponse>
   }

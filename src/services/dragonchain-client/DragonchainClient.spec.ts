@@ -237,13 +237,19 @@ describe('DragonchainClient', () => {
         const transactionCreatePayload: any = {
           network: 'ETH_MAINNET',
           to: '0x0000000000000000000000000000000000000000',
-          value: '0x0'
+          value: '0x0',
+          data: '0x111',
+          gasPrice: '0x222',
+          gas: '0x333'
         }
         const expectedBody = {
           network: transactionCreatePayload.network,
           transaction: {
             to: transactionCreatePayload.to,
-            value: transactionCreatePayload.value
+            value: transactionCreatePayload.value,
+            data: transactionCreatePayload.data,
+            gasPrice: transactionCreatePayload.gasPrice,
+            gas: transactionCreatePayload.gas
           }
         }
         await client.createEthereumTransaction(transactionCreatePayload)
