@@ -267,7 +267,7 @@ export interface GetAPIKeyResponse {
  * ```
  */
 export interface ListAPIKeyResponse {
-  keys: Array<GetAPIKeyResponse>,
+  keys: GetAPIKeyResponse[],
 }
 
 /**
