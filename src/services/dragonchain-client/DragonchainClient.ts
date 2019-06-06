@@ -169,7 +169,6 @@ export class DragonchainClient {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     if (!options.payload) options.payload = '' // default payload to an empty string if not provided
     const transactionBody = {
-      version: '1',
       txn_type: options.transactionType,
       payload: options.payload
     } as any
@@ -187,7 +186,6 @@ export class DragonchainClient {
     let bulkTransactionBody: any[] = []
     options.transactionList.forEach(transaction => {
       const singleBody: any = {
-        version: '1',
         txn_type: transaction.transactionType,
         payload: transaction.payload || ''
       }
@@ -639,7 +637,6 @@ export class DragonchainClient {
   }) => {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     const body: any = {
-      version: '1',
       txn_type: options.transactionType
     }
     if (options.customIndexes) body.custom_indexes = options.customIndexes
@@ -682,7 +679,6 @@ export class DragonchainClient {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
     if (!options.customIndexes) throw new FailureByDesign('PARAM_ERROR', 'Parameter `customIndexes` is required')
     const body = {
-      version: '1',
       custom_indexes: options.customIndexes
     }
     return await this.put(`/transaction-type/${options.transactionType}`, body) as Response<TransactionTypeSimpleResponse>
