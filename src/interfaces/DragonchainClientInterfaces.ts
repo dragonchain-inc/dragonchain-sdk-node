@@ -227,14 +227,14 @@ export interface PublicBlockchainTransactionResponse {
  * {
  *   "key": "d5K20n1VfHZYIgk55UdJO0bTyMTnjasdGkNyg66ASnd",
  *   "id": "PDJSYJNBTDBP",
- *   "registration_timestamp": 1548604295
+ *   "registration_time": 1548604295
  * }
  * ```
  */
 export interface CreateAPIKeyResponse {
   key: string,
   id: string,
-  registration_timestamp: number,
+  registration_time: number,
 }
 
 /**
@@ -256,13 +256,13 @@ export interface DeleteAPIKeyResponse {
  *
  * {
  *   "id": "PDJSYJNBTDBP",
- *   "registration_timestamp": 1548604295
+ *   "registration_time": 1548604295
  * }
  * ```
  */
 export interface GetAPIKeyResponse {
   id: string,
-  registration_timestamp: number,
+  registration_time: number,
 }
 
 /**
@@ -273,7 +273,7 @@ export interface GetAPIKeyResponse {
  *   "keys": [
  *      {
  *         "id": "PDJSYJNBTDBP",
- *         "registration_timestamp": 1548604295
+ *         "registration_time": 1548604295
  *      }, ...
  *   ]
  * }
