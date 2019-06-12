@@ -654,13 +654,13 @@ export class DragonchainClient {
      * When running from within a smart contract, this is provided via the SMART_CONTRACT_ID environment variable, and doesn't need to be explicitly provided
      */
     smartContractId?: string
-  }) => {
-    if (!options || !options.smartContractId) {
+  } = {}) => {
+    if (!options.smartContractId) {
       if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract')
       options.smartContractId = process.env.SMART_CONTRACT_ID
     }
     let path = `/list/${options.smartContractId}/`
-    if (options && options.prefixKey) {
+    if (options.prefixKey) {
       if (options.prefixKey.endsWith('/')) throw new FailureByDesign('PARAM_ERROR', 'Parameter `prefixKey` cannot end with \'/\'')
       path += `${options.prefixKey}/`
     }
