@@ -655,14 +655,14 @@ export class DragonchainClient {
      */
     smartContractId?: string
   }) => {
-    if (!options.smartContractId) {
+    if (!options || !options.smartContractId) {
       if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract')
       options.smartContractId = process.env.SMART_CONTRACT_ID
     }
     let path = `/list/${options.smartContractId}/`
-    if (options.prefixKey) {
+    if (options && options.prefixKey) {
       if (options.prefixKey.endsWith('/')) throw new FailureByDesign('PARAM_ERROR', 'Parameter `prefixKey` cannot end with \'/\'')
-      path = `${options.prefixKey}/`
+      path += `${options.prefixKey}/`
     }
     return await this.get(path) as Response<string[]>
   }
