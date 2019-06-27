@@ -905,6 +905,7 @@ export class DragonchainClient {
     const options = {
       method: method,
       body: body || undefined,
+      credentials: 'omit',
       headers: {
         dragonchain: this.credentialService.dragonchainId,
         Authorization: this.credentialService.getAuthorizationHeader(
