@@ -60,6 +60,7 @@ describe('DragonchainClient', () => {
       expectedFetchOptions = {
         method: 'GET',
         body: undefined,
+        credentials: 'omit',
         headers: {
           'dragonchain': 'fakeDragonchainId',
           'Authorization': 'fakeCreds',
@@ -166,6 +167,7 @@ describe('DragonchainClient', () => {
     fakeTime = new Date(fakeTimeStamp).toISOString()
     const expectedFetchOptions = {
       method: 'DELETE',
+      credentials: 'omit',
       headers: {
         dragonchain: 'fakeDragonchainId',
         Authorization: 'fakeCreds',
@@ -200,6 +202,7 @@ describe('DragonchainClient', () => {
     fakeTime = new Date(fakeTimeStamp).toISOString()
     const expectedFetchOptions = {
       method: 'POST',
+      credentials: 'omit',
       headers: {
         'Content-Type': 'application/json',
         'dragonchain': 'fakeDragonchainId',
@@ -300,6 +303,7 @@ describe('DragonchainClient', () => {
     fakeTime = new Date(fakeTimeStamp).toISOString()
     const expectedFetchOptions = {
       method: 'PUT',
+      credentials: 'omit',
       headers: {
         'Content-Type': 'application/json',
         'dragonchain': 'fakeDragonchainId',
