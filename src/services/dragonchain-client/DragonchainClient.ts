@@ -902,7 +902,6 @@ export class DragonchainClient {
    */
   private getFetchOptions (path: string, method: SupportedHTTP, callbackURL: string = '', body: string = '', contentType: string = ''): FetchOptions {
     const timestamp = new Date().toISOString()
-    console.log('LINKED!')
     const options = {
       method: method,
       body: body || undefined,
