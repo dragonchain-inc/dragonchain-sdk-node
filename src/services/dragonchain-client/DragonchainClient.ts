@@ -146,8 +146,11 @@ export class DragonchainClient {
   /**
    * Generate a new HMAC API key
    */
-  public createApiKey = async () => {
-    return await this.post('/api-key', {}) as Response<CreateAPIKeyResponse>
+  public createApiKey = async (options: {
+    nickname: string
+  }) => {
+    if (!options.nickname) throw new FailureByDesign('PARAM_ERROR', 'Parameter `nickname` is required')
+    return await this.post('/api-key', { nickname: options.nickname }) as Response<CreateAPIKeyResponse>
   }
 
   /**
