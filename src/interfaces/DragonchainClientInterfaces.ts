@@ -235,6 +235,7 @@ export interface CreateAPIKeyResponse {
   key: string,
   id: string,
   registration_time: number,
+  nickname: string,
 }
 
 /**
@@ -263,6 +264,7 @@ export interface DeleteAPIKeyResponse {
 export interface GetAPIKeyResponse {
   id: string,
   registration_time: number,
+  nickname: string,
 }
 
 /**
