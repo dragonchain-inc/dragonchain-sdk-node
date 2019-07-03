@@ -792,7 +792,7 @@ export type BlockSchemaType = L1BlockAtRest | L2BlockAtRest | L3BlockAtRest | L4
  * }
  * ```
  */
-export interface TransactionTypeSimpleResponse {
+export interface SimpleResponse {
   success: boolean
 }
 

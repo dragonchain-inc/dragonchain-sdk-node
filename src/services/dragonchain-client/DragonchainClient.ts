@@ -36,7 +36,7 @@ import {
   PublicBlockchainTransactionResponse,
   PublicBlockchainAddressListResponse,
   SmartContractExecutionOrder,
-  TransactionTypeSimpleResponse,
+  SimpleResponse,
   TransactionTypeListResponse,
   TransactionTypeCustomIndex,
   BitcoinTransactionOutputs,
@@ -184,6 +184,23 @@ export class DragonchainClient {
   }) => {
     if (!options.keyId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` is required')
     return await this.delete(`/api-key/${options.keyId}`) as Response<DeleteAPIKeyResponse>
+  }
+
+  /**
+   * Update nickname of existing HMAC API key
+   */
+  public updateApiKey = async (options: {
+    /**
+     * Key ID to modify
+     */
+    keyId: string,
+    /**
+     * New nickname to set for key
+     */
+    nickname: string
+  }) => {
+    if (!options.keyId || !options.nickname) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` and `nickname` are required');
+    return await this.put(`/api-key/${options.keyId}`, { nickname: options.nickname }) as Response<SimpleResponse>
   }
 
   /**
@@ -690,7 +707,7 @@ export class DragonchainClient {
       txn_type: options.transactionType
     }
     if (options.customIndexes) body.custom_indexes = options.customIndexes
-    return await this.post('/transaction-type', body) as Response<TransactionTypeSimpleResponse>
+    return await this.post('/transaction-type', body) as Response<SimpleResponse>
   }
 
   /**
@@ -703,7 +720,7 @@ export class DragonchainClient {
     transactionType: string
   }) => {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required')
-    return await this.delete(`/transaction-type/${options.transactionType}`) as Response<TransactionTypeSimpleResponse>
+    return await this.delete(`/transaction-type/${options.transactionType}`) as Response<SimpleResponse>
   }
 
   /**
@@ -732,7 +749,7 @@ export class DragonchainClient {
       version: '1',
       custom_indexes: options.customIndexes
     }
-    return await this.put(`/transaction-type/${options.transactionType}`, body) as Response<TransactionTypeSimpleResponse>
+    return await this.put(`/transaction-type/${options.transactionType}`, body) as Response<SimpleResponse>
   }
 
   /**
