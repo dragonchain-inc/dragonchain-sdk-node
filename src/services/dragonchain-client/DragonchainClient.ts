@@ -147,6 +147,9 @@ export class DragonchainClient {
    * Generate a new HMAC API key
    */
   public createApiKey = async (options: {
+    /**
+     * nickname for the newly created key
+     */
     nickname?: string
   }) => {
     const body: any = {}
