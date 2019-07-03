@@ -151,7 +151,7 @@ export class DragonchainClient {
      * nickname for the newly created key
      */
     nickname?: string
-  }) => {
+  } = {}) => {
     const body: any = {}
     if (options.nickname) body['nickname'] = options.nickname
     return await this.post('/api-key', body) as Response<CreateAPIKeyResponse>
