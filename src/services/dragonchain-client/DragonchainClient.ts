@@ -203,7 +203,7 @@ export class DragonchainClient {
      */
     nickname: string
   }) => {
-    if (!options.keyId || !options.nickname) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` and `nickname` are required');
+    if (!options.keyId || !options.nickname) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` and `nickname` are required')
     return await this.put(`/api-key/${options.keyId}`, { nickname: options.nickname }) as Response<SimpleResponse>
   }
 
