@@ -1,6 +1,6 @@
 {
   "name": "dragonchain-sdk",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "Dragonchain SDK for Node",
   "license": "Apache-2.0",
   "homepage": "https://github.com/dragonchain-inc/dragonchain-sdk-node#readme",
@@ -16,34 +16,20 @@
     "url": "https://github.com/dragonchain-inc/dragonchain-sdk-node/issues"
   },
   "author": "Dragonchain, Inc. <support@dragonchain.com>",
-  "main": "lib/module/commonjs/index.js",
-  "module": "lib/module/commonjs/index.js",
-  "jsnext:main": "lib/module/commonjs/index.js",
-  "types": "lib/types/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "engines": {
     "node": ">=8"
   },
   "scripts": {
-    "h": "yarn npm-scripts-info",
-    "build": "yarn build:commonjs && yarn build:esnext",
-    "build:commonjs": "tsc --project build/tsconfig.commonjs.json",
-    "build:esnext": "tsc --project build/tsconfig.esnext.json",
-    "lint": "tslint -p tsconfig.json --format codeFrame",
-    "fix": "tslint -p tsconfig.json --fix",
-    "test": "NODE_ENV=test nyc -x **/*spec.ts --reporter=text mocha --opts ./spec/mocha-unit.opts",
-    "docs": "typedoc ./src --exclude '**/*.spec.ts' --mode modules --target es6 --mode file --theme default --out docs --ignoreCompilerErrors --excludeExternals --gaSite 'dragonchain-sdk-node' --hideGenerator",
-    "test:ci": "yarn lint && yarn build && yarn docs && NODE_ENV=test nyc -x **/*spec.ts --reporter=lcov mocha --opts ./spec/mocha-unit.opts",
-    "integration": "INTEGRATION_CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id dragonchain-sdk-integration-key | jq '.SecretString' | jq fromjson) NODE_ENV=test mocha --opts ./spec/mocha-integration.opts"
-  },
-  "scripts-info": {
-    "h": "Display information about the scripts",
-    "build": "Build node module and browser bundle",
-    "build:commonjs": "Build node commonjs module",
-    "build:esnext": "Build node es6 module",
-    "lint": "Lint typescript code",
-    "fix": "Fix ts lint errors",
-    "test": "Run tests and check code coverage",
-    "docs": "Build documentation"
+    "build": "tsc",
+    "lint": "eslint --ext .ts --format unix src/ && prettier --check src 'src/**/*.ts'",
+    "format": "prettier --write 'src/**/*.ts'",
+    "docs": "typedoc ./src --exclude '**/*.spec.ts' --mode modules --target es5 --mode file --theme default --out docs --excludeExternals --gaSite 'dragonchain-sdk-node' --hideGenerator",
+    "test": "NODE_ENV=test nyc --reporter=lcov --reporter=text mocha -r ts-node/register 'src/**/*.spec.ts' --exit",
+    "test:built": "NODE_ENV=test mocha 'dist/**/*.spec.js' --exit",
+    "test:ci": "yarn lint && yarn build && yarn docs && yarn test"
   },
   "nyc": {
     "extension": [
@@ -54,28 +40,63 @@
     ],
     "all": true
   },
+  "prettier": {
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true,
+    "printWidth": 180
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier",
+      "prettier/@typescript-eslint"
+    ],
+    "env": {
+      "browser": true,
+      "node": true
+    },
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "rules": {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/camelcase": "off",
+      "max-len": "off"
+    }
+  },
   "dependencies": {
     "ini": "^1.3.5",
     "node-fetch": "^2.6.0",
-    "tslib": "^1.9.3"
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/ini": "^1.3.30",
-    "@types/mocha": "^5.2.6",
-    "@types/node": "^12.0.2",
-    "@types/node-fetch": "^2.3.4",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.6.1",
+    "@types/node-fetch": "^2.3.7",
+    "@types/sinon": "^7.0.13",
     "@types/sinon-chai": "^3.2.2",
+    "@typescript-eslint/eslint-plugin": "^1.11.0",
+    "@typescript-eslint/parser": "^1.11.0",
     "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^6.0.0",
     "mocha": "^6.1.4",
-    "npm-scripts-info": "^0.3.9",
     "nyc": "^14.1.1",
+    "prettier": "^1.18.2",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0",
-    "ts-node": "^8.1.0",
-    "tslint": "^5.16.0",
-    "tslint-config-standard": "^8.0.1",
+    "ts-node": "^8.3.0",
     "typedoc": "^0.14.2",
-    "typescript": "^3.4.5"
+    "typescript": "^3.5.3"
   }
 }

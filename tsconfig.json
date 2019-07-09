@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "outDir": "./",
-    "rootDir": "./",
+    "target": "es5",
+    "outDir": "./dist/",
+    "rootDir": "./src/",
     "moduleResolution": "node",
     "module": "commonjs",
-    "declaration": false,
+    "declaration": true,
+    "declarationDir": "./dist/types",
     "importHelpers": true,
-    "sourceMap": false,
-    "inlineSourceMap": true,
     "listFiles": false,
     "traceResolution": false,
-    "pretty": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
@@ -22,13 +20,8 @@
     "noUnusedParameters": false,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "downlevelIteration": true,
     "allowUnreachableCode": false,
     "allowJs": false,
-    "lib": [
-      "es6",
-      "esnext"
-    ],
     "typeRoots": [
       "./node_modules/@types"
     ],
@@ -36,19 +29,13 @@
       "node",
       "mocha"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "typescript-node-module-starter-kit": [
-        "src/index.ts"
-      ]
-    }
+    "baseUrl": "."
   },
   "include": [
     "**/*.ts"
   ],
   "exclude": [
-    "node_modules/**",
-    "lib/**/*.ts"
+    "node_modules/**"
   ],
   "compileOnSave": false
 }

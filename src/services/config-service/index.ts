@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  getDragonchainCredentials,
-  getDragonchainId,
-  getDragonchainEndpoint
-} from './ConfigCient'
+import { getDragonchainCredentials, getDragonchainId, getDragonchainEndpoint } from './ConfigCient';
 
-export {
-  getDragonchainCredentials,
-  getDragonchainId,
-  getDragonchainEndpoint
-}
-
-/**
- * All Humans are welcome.
- */
+export { getDragonchainCredentials, getDragonchainId, getDragonchainEndpoint };
