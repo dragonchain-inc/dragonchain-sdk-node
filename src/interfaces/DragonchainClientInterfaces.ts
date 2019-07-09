@@ -227,7 +227,8 @@ export interface PublicBlockchainTransactionResponse {
  * {
  *   "key": "d5K20n1VfHZYIgk55UdJO0bTyMTnjasdGkNyg66ASnd",
  *   "id": "PDJSYJNBTDBP",
- *   "registration_time": 1548604295
+ *   "registration_time": 1548604295,
+ *   "nickname": "key1"
  * }
  * ```
  */
@@ -235,7 +236,7 @@ export interface CreateAPIKeyResponse {
   key: string,
   id: string,
   registration_time: number,
-  nickname: string,
+  nickname?: string,
 }
 
 /**
@@ -264,7 +265,7 @@ export interface DeleteAPIKeyResponse {
 export interface GetAPIKeyResponse {
   id: string,
   registration_time: number,
-  nickname: string,
+  nickname?: string,
 }
 
 /**
