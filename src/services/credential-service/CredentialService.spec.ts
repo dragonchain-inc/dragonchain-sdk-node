@@ -14,51 +14,49 @@
  * limitations under the License.
  */
 
-import { expect } from 'chai'
-import { CredentialService } from './CredentialService'
+import { expect } from 'chai';
+import { CredentialService } from './CredentialService';
 
 describe('CredentialService', () => {
-  let credentialService: CredentialService
+  let credentialService: CredentialService;
 
   beforeEach(() => {
-    credentialService = new CredentialService('testId', { authKey: 'key', authKeyId: 'keyId' }, 'SHA256')
-  })
+    credentialService = new CredentialService('testId', { authKey: 'key', authKeyId: 'keyId' }, 'SHA256');
+  });
 
   describe('.createCredentials', () => {
     it('calls and uses getDragonchainCredentials when credentials are not provided', async () => {
-      const fakeGetCreds = async () => { return { authKey: 'key', authKeyId: 'keyId' } }
-      const dcid = 'dcid'
-      const service = await CredentialService.createCredentials(dcid, '', '', 'SHA256', { getDragonchainCredentials: fakeGetCreds })
-      expect(service.dragonchainId).to.equal(dcid)
-      expect(service.credentials.authKey).to.equal('key')
-      expect(service.credentials.authKeyId).to.equal('keyId')
-    })
-  })
+      const fakeGetCreds = async () => {
+        return { authKey: 'key', authKeyId: 'keyId' };
+      };
+      const dcid = 'dcid';
+      const service = await CredentialService.createCredentials(dcid, '', '', 'SHA256', { getDragonchainCredentials: fakeGetCreds });
+      expect(service.dragonchainId).to.equal(dcid);
+      expect(service.credentials.authKey).to.equal('key');
+      expect(service.credentials.authKeyId).to.equal('keyId');
+    });
+  });
 
   describe('#constructor', () => {
     it('initializes with correct variables', () => {
-      const dcid = 'dcid'
-      const key = 'key'
-      const keyId = 'keyId'
-      const algo = 'SHA256'
-      const service = new CredentialService(dcid, { authKey: key, authKeyId: keyId }, algo)
-      expect(service.dragonchainId).to.equal(dcid)
-      expect(service.credentials.authKey).to.equal(key)
-      expect(service.credentials.authKeyId).to.equal(keyId)
-      expect(service.hmacAlgo).to.equal(algo)
-    })
-  })
+      const dcid = 'dcid';
+      const key = 'key';
+      const keyId = 'keyId';
+      const algo = 'SHA256';
+      const service = new CredentialService(dcid, { authKey: key, authKeyId: keyId }, algo);
+      expect(service.dragonchainId).to.equal(dcid);
+      expect(service.credentials.authKey).to.equal(key);
+      expect(service.credentials.authKeyId).to.equal(keyId);
+      expect(service.hmacAlgo).to.equal(algo);
+    });
+  });
 
   describe('#getAuthorizationHeader', () => {
     it('returns expected hmac', () => {
-      const result = credentialService.getAuthorizationHeader('GET', '/path', 'timestamp', 'application/json', '')
-      expect(result).to.equal('DC1-HMAC-SHA256 keyId:8Bc+h0parZxGeMB9rYzzRUuNxxHSIjGqSD4W/635A9k=')
-      const result2 = credentialService.getAuthorizationHeader('POST', '/new_path', 'timestamp', 'application/json', '"body"')
-      expect(result2).to.equal('DC1-HMAC-SHA256 keyId:PkVjUxWZr6ST4xh+JxYFZresaFhQbk8sggWqyWv/XkU=')
-    })
-  })
-})
-
-/**
- * All Humans are welcome.
- */
+      const result = credentialService.getAuthorizationHeader('GET', '/path', 'timestamp', 'application/json', '');
+      expect(result).to.equal('DC1-HMAC-SHA256 keyId:8Bc+h0parZxGeMB9rYzzRUuNxxHSIjGqSD4W/635A9k=');
+      const result2 = credentialService.getAuthorizationHeader('POST', '/new_path', 'timestamp', 'application/json', '"body"');
+      expect(result2).to.equal('DC1-HMAC-SHA256 keyId:PkVjUxWZr6ST4xh+JxYFZresaFhQbk8sggWqyWv/XkU=');
+    });
+  });
+});

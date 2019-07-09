@@ -1,9 +1,40 @@
-/bundle-analysis
-/.nyc_output
-/node_modules
-/coverage
-/lib
-/docs
-yarn-error.log
-.coverage
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Coverage directories
+coverage
+*.lcov
+.nyc_output
+
+# Dependencies
+node_modules/
 package-lock.json
+.yarn-integrity
+
+# Cache directories
+*.tsbuildinfo
+.npm
+.eslintcache
+.cache
+
+# Optional REPL history
+.node_repl_history
+
+# Built TS
+dist/
+docs/
+
+# ide
+.idea
+*.swp
+.vscode
+
+# OS Files
+.DS_Store
+desktop.ini
+.direnv

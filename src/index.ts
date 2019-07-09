@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { createClient } from './services/dragonchain-client/DragonchainClient'
+import { createClient } from './services/dragonchain-client/DragonchainClient';
 
 /**
  * @hidden
  */
 // tslint:disable-next-line:no-empty
-const nullLog = () => {}
+const nullLog = () => {};
 /**
  * @hidden
  */
-let logger: any // singleton logger
+let logger: any; // singleton logger
 
 /**
  * Set the logger that the sdk uses
@@ -33,13 +33,9 @@ let logger: any // singleton logger
  * @param newLogger a logger object that implements functions for: `log`, `info`, `warn`, `error`, and `debug`
  */
 const setLogger = (newLogger: any = { log: nullLog, info: nullLog, warn: nullLog, error: nullLog, debug: nullLog }) => {
-  logger = newLogger
-}
+  logger = newLogger;
+};
 
-setLogger() // actually initialize the singleton on initial import
+setLogger(); // actually initialize the singleton on initial import
 
-export { createClient, setLogger, logger }
-
-/**
- * All Humans are welcome.
- */
+export { createClient, setLogger, logger };

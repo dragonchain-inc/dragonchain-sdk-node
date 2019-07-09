@@ -1,0 +1,4 @@
+# Built TS
+dist/
+
+**/*.js
