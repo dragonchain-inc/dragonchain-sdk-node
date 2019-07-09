@@ -13,5 +13,7 @@
   - Switch to eslint for linting
   - Add and enforce prettier for formatting
   - Remove outdated integration tests
+  - Added code owners which are required for PR review
+  - Added issue and PR templates for github
 - **Documentation:**
   - Added changelog
