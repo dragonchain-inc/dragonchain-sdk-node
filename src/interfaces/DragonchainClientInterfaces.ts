@@ -429,11 +429,8 @@ export interface DragonchainContractCreateResponse {
  *
  * {
  *   "level": 1,
- *   "cloud": "aws",
  *   "url": "https://d3cabac3-e30d-4bb9-aeed-1fc8cbd38c66.api.dragonchain.com",
- *   "region": "us-west-2",
  *   "scheme": "trust",
- *   "wallet": "0x9Dc783AD32989b4f533d941C3D799eB302E5A804",
  *   "hashAlgo": "blake2b",
  *   "version": "3.3.1",
  *   "encryptionAlgo": "secp256k1"
@@ -446,25 +443,13 @@ export interface L1DragonchainStatusResult {
    */
   level: number;
   /**
-   * Cloud that this chain is running in
-   */
-  cloud: string;
-  /**
    * URL of the chain
    */
   url: string;
   /**
-   * Region that this chain is operating in
-   */
-  region: string;
-  /**
    * Proof scheme that this chain uses
    */
   scheme: string;
-  /**
-   * Ethereum wallet assigned to this chain
-   */
-  wallet: string;
   /**
    * Hashing algorithm used for blocks on this chain
    */
