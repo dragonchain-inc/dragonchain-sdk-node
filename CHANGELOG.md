@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.10
+
+- **Feature:**
+  - Use new versioned api endpoints
+
 ## 3.0.9
 
 - **Feature:**
