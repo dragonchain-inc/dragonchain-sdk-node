@@ -1,6 +1,7 @@
 language: node_js
 node_js:
   - "8"
+  - "10"
 install:
   - yarn --frozen-lockfile --non-interactive
 before_script:
