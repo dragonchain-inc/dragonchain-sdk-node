@@ -23,7 +23,6 @@ import {
   DragonchainTransactionCreateResponse,
   DragonchainBulkTransactionCreateResponse,
   SmartContractAtRest,
-  DragonchainContractCreateResponse,
   SupportedHTTP,
   FetchOptions,
   L1DragonchainStatusResult,
@@ -442,7 +441,7 @@ export class DragonchainClient {
     if (options.scheduleIntervalInSeconds) body.seconds = options.scheduleIntervalInSeconds;
     if (options.cronExpression) body.cron = options.cronExpression;
     if (options.registryCredentials) body.auth = options.registryCredentials;
-    return (await this.post('/v1/contract', body)) as Response<DragonchainContractCreateResponse>;
+    return (await this.post('/v1/contract', body)) as Response<SmartContractAtRest>;
   };
 
   /**
@@ -547,7 +546,7 @@ export class DragonchainClient {
     if (options.scheduleIntervalInSeconds) body.seconds = options.scheduleIntervalInSeconds;
     if (options.cronExpression) body.cron = options.cronExpression;
     if (options.registryCredentials) body.auth = options.registryCredentials;
-    return (await this.put(`/v1/contract/${options.smartContractId}`, body)) as Response<DragonchainContractCreateResponse>;
+    return (await this.put(`/v1/contract/${options.smartContractId}`, body)) as Response<SmartContractAtRest>;
   };
 
   /**
@@ -560,7 +559,7 @@ export class DragonchainClient {
     smartContractId: string;
   }) => {
     if (!options.smartContractId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required');
-    return (await this.delete(`/v1/contract/${options.smartContractId}`)) as Response<DragonchainContractCreateResponse>;
+    return (await this.delete(`/v1/contract/${options.smartContractId}`)) as Response<SimpleResponse>;
   };
 
   /**

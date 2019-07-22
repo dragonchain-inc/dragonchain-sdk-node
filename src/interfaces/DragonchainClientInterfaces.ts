@@ -237,7 +237,8 @@ export interface CreateAPIKeyResponse {
   key: string;
   id: string;
   registration_time: number;
-  nickname?: string;
+  nickname: string;
+  root?: boolean;
 }
 
 /**
@@ -418,16 +419,13 @@ export interface SmartContractAtRest {
   execution_order: SmartContractExecutionOrder;
 }
 
-export interface DragonchainContractCreateResponse {
-  success: SmartContractAtRest;
-}
-
 /**
  * Example of the status result
  * @example
  * ```json
  *
  * {
+ *   "id": "23UeELiu8WDM7iVtvFqNbBJTt29xFS3J53zX5ZJTiRyob",
  *   "level": 1,
  *   "url": "https://d3cabac3-e30d-4bb9-aeed-1fc8cbd38c66.api.dragonchain.com",
  *   "scheme": "trust",
@@ -438,6 +436,10 @@ export interface DragonchainContractCreateResponse {
  * ```
  */
 export interface L1DragonchainStatusResult {
+  /**
+   * Public id of the dragonchain
+   */
+  id: string;
   /**
    * Level of this dragonchain (as an integer)
    */
