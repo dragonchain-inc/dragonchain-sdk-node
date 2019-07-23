@@ -23,7 +23,6 @@ import {
   DragonchainTransactionCreateResponse,
   DragonchainBulkTransactionCreateResponse,
   SmartContractAtRest,
-  DragonchainContractCreateResponse,
   SupportedHTTP,
   FetchOptions,
   L1DragonchainStatusResult,
@@ -122,7 +121,7 @@ export class DragonchainClient {
   /**
    * Get the status of your dragonchain
    */
-  public getStatus = async () => (await this.get('/status')) as Response<L1DragonchainStatusResult>;
+  public getStatus = async () => (await this.get('/v1/status')) as Response<L1DragonchainStatusResult>;
 
   /**
    * Get a transaction by id
@@ -134,7 +133,7 @@ export class DragonchainClient {
     transactionId: string;
   }) => {
     if (!options.transactionId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionId` is required');
-    return (await this.get(`/transaction/${options.transactionId}`)) as Response<L1DragonchainTransactionFull>;
+    return (await this.get(`/v1/transaction/${options.transactionId}`)) as Response<L1DragonchainTransactionFull>;
   };
 
   /**
@@ -150,14 +149,14 @@ export class DragonchainClient {
   ) => {
     const body: any = {};
     if (options.nickname) body['nickname'] = options.nickname;
-    return (await this.post('/api-key', body)) as Response<CreateAPIKeyResponse>;
+    return (await this.post('/v1/api-key', body)) as Response<CreateAPIKeyResponse>;
   };
 
   /**
    * List HMAC API key IDs and their associated metadata
    */
   public listApiKeys = async () => {
-    return (await this.get('/api-key')) as Response<ListAPIKeyResponse>;
+    return (await this.get('/v1/api-key')) as Response<ListAPIKeyResponse>;
   };
 
   /**
@@ -170,7 +169,7 @@ export class DragonchainClient {
     keyId: string;
   }) => {
     if (!options.keyId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` is required');
-    return (await this.get(`/api-key/${options.keyId}`)) as Response<GetAPIKeyResponse>;
+    return (await this.get(`/v1/api-key/${options.keyId}`)) as Response<GetAPIKeyResponse>;
   };
 
   /**
@@ -183,7 +182,7 @@ export class DragonchainClient {
     keyId: string;
   }) => {
     if (!options.keyId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` is required');
-    return (await this.delete(`/api-key/${options.keyId}`)) as Response<DeleteAPIKeyResponse>;
+    return (await this.delete(`/v1/api-key/${options.keyId}`)) as Response<DeleteAPIKeyResponse>;
   };
 
   /**
@@ -200,7 +199,7 @@ export class DragonchainClient {
     nickname: string;
   }) => {
     if (!options.keyId || !options.nickname) throw new FailureByDesign('PARAM_ERROR', 'Parameter `keyId` and `nickname` are required');
-    return (await this.put(`/api-key/${options.keyId}`, { nickname: options.nickname })) as Response<SimpleResponse>;
+    return (await this.put(`/v1/api-key/${options.keyId}`, { nickname: options.nickname })) as Response<SimpleResponse>;
   };
 
   /**
@@ -238,7 +237,7 @@ export class DragonchainClient {
       payload: options.payload
     } as any;
     if (options.tag) transactionBody.tag = options.tag;
-    return (await this.post('/transaction', transactionBody, options.callbackURL)) as Response<DragonchainTransactionCreateResponse>;
+    return (await this.post('/v1/transaction', transactionBody, options.callbackURL)) as Response<DragonchainTransactionCreateResponse>;
   };
 
   /**
@@ -256,7 +255,7 @@ export class DragonchainClient {
       if (transaction.tag) singleBody.tag = transaction.tag;
       bulkTransactionBody.push(singleBody);
     });
-    return (await this.post(`/transaction_bulk`, bulkTransactionBody)) as Response<DragonchainBulkTransactionCreateResponse>;
+    return (await this.post(`/v1/transaction_bulk`, bulkTransactionBody)) as Response<DragonchainBulkTransactionCreateResponse>;
   };
 
   /**
@@ -292,7 +291,7 @@ export class DragonchainClient {
     } = {}
   ) => {
     const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10);
-    return (await this.get(`/transaction${queryParams}`)) as Response<QueryResult<L1DragonchainTransactionFull>>;
+    return (await this.get(`/v1/transaction${queryParams}`)) as Response<QueryResult<L1DragonchainTransactionFull>>;
   };
 
   /**
@@ -305,7 +304,7 @@ export class DragonchainClient {
     blockId: string;
   }) => {
     if (!options.blockId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockId` is required');
-    return (await this.get(`/block/${options.blockId}`)) as Response<BlockSchemaType>;
+    return (await this.get(`/v1/block/${options.blockId}`)) as Response<BlockSchemaType>;
   };
 
   /**
@@ -341,7 +340,7 @@ export class DragonchainClient {
     } = {}
   ) => {
     const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10);
-    return (await this.get(`/block${queryParams}`)) as Response<QueryResult<BlockSchemaType>>;
+    return (await this.get(`/v1/block${queryParams}`)) as Response<QueryResult<BlockSchemaType>>;
   };
 
   /**
@@ -442,7 +441,7 @@ export class DragonchainClient {
     if (options.scheduleIntervalInSeconds) body.seconds = options.scheduleIntervalInSeconds;
     if (options.cronExpression) body.cron = options.cronExpression;
     if (options.registryCredentials) body.auth = options.registryCredentials;
-    return (await this.post('/contract', body)) as Response<DragonchainContractCreateResponse>;
+    return (await this.post('/v1/contract', body)) as Response<SmartContractAtRest>;
   };
 
   /**
@@ -547,7 +546,7 @@ export class DragonchainClient {
     if (options.scheduleIntervalInSeconds) body.seconds = options.scheduleIntervalInSeconds;
     if (options.cronExpression) body.cron = options.cronExpression;
     if (options.registryCredentials) body.auth = options.registryCredentials;
-    return (await this.put(`/contract/${options.smartContractId}`, body)) as Response<DragonchainContractCreateResponse>;
+    return (await this.put(`/v1/contract/${options.smartContractId}`, body)) as Response<SmartContractAtRest>;
   };
 
   /**
@@ -560,7 +559,7 @@ export class DragonchainClient {
     smartContractId: string;
   }) => {
     if (!options.smartContractId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required');
-    return (await this.delete(`/contract/${options.smartContractId}`)) as Response<DragonchainContractCreateResponse>;
+    return (await this.delete(`/v1/contract/${options.smartContractId}`)) as Response<SimpleResponse>;
   };
 
   /**
@@ -577,8 +576,8 @@ export class DragonchainClient {
     transactionType?: string;
   }) => {
     if (options.smartContractId && options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Only one of `smartContractId` or `transactionType` can be specified');
-    if (options.smartContractId) return (await this.get(`/contract/${options.smartContractId}`)) as Response<SmartContractAtRest>;
-    if (options.transactionType) return (await this.get(`/contract/txn_type/${options.transactionType}`)) as Response<SmartContractAtRest>;
+    if (options.smartContractId) return (await this.get(`/v1/contract/${options.smartContractId}`)) as Response<SmartContractAtRest>;
+    if (options.transactionType) return (await this.get(`/v1/contract/txn_type/${options.transactionType}`)) as Response<SmartContractAtRest>;
     throw new FailureByDesign('PARAM_ERROR', 'At least one of `smartContractId` or `transactionType` must be supplied');
   };
 
@@ -615,7 +614,7 @@ export class DragonchainClient {
     } = {}
   ) => {
     const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10);
-    return (await this.get(`/contract${queryParams}`)) as Response<QueryResult<SmartContractAtRest>>;
+    return (await this.get(`/v1/contract${queryParams}`)) as Response<QueryResult<SmartContractAtRest>>;
   };
 
   /**
@@ -633,9 +632,9 @@ export class DragonchainClient {
   }) => {
     if (!options.blockId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockId` is required');
     if (options.level) {
-      return (await this.get(`/verifications/${options.blockId}?level=${options.level}`)) as Response<levelVerifications>;
+      return (await this.get(`/v1/verifications/${options.blockId}?level=${options.level}`)) as Response<levelVerifications>;
     }
-    return (await this.get(`/verifications/${options.blockId}`)) as Response<Verifications>;
+    return (await this.get(`/v1/verifications/${options.blockId}`)) as Response<Verifications>;
   };
 
   /**
@@ -658,7 +657,7 @@ export class DragonchainClient {
       if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract');
       options.smartContractId = process.env.SMART_CONTRACT_ID;
     }
-    const response = (await this.get(`/get/${options.smartContractId}/${options.key}`, false)) as unknown;
+    const response = (await this.get(`/v1/get/${options.smartContractId}/${options.key}`, false)) as unknown;
     return response as string;
   };
 
@@ -687,7 +686,7 @@ export class DragonchainClient {
       if (!process.env.SMART_CONTRACT_ID) throw new FailureByDesign('PARAM_ERROR', 'Parameter `smartContractId` is required when not running within a smart contract');
       options.smartContractId = process.env.SMART_CONTRACT_ID;
     }
-    let path = `/list/${options.smartContractId}/`;
+    let path = `/v1/list/${options.smartContractId}/`;
     if (options.prefixKey) {
       if (options.prefixKey.endsWith('/')) throw new FailureByDesign('PARAM_ERROR', "Parameter `prefixKey` cannot end with '/'");
       path += `${options.prefixKey}/`;
@@ -715,7 +714,7 @@ export class DragonchainClient {
       txn_type: options.transactionType
     };
     if (options.customIndexes) body.custom_indexes = options.customIndexes;
-    return (await this.post('/transaction-type', body)) as Response<SimpleResponse>;
+    return (await this.post('/v1/transaction-type', body)) as Response<SimpleResponse>;
   };
 
   /**
@@ -728,14 +727,14 @@ export class DragonchainClient {
     transactionType: string;
   }) => {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required');
-    return (await this.delete(`/transaction-type/${options.transactionType}`)) as Response<SimpleResponse>;
+    return (await this.delete(`/v1/transaction-type/${options.transactionType}`)) as Response<SimpleResponse>;
   };
 
   /**
    * Lists currently created transaction types
    */
   public listTransactionTypes = async () => {
-    return (await this.get('/transaction-types')) as Response<TransactionTypeListResponse>;
+    return (await this.get('/v1/transaction-types')) as Response<TransactionTypeListResponse>;
   };
 
   /**
@@ -757,7 +756,7 @@ export class DragonchainClient {
       version: '1',
       custom_indexes: options.customIndexes
     };
-    return (await this.put(`/transaction-type/${options.transactionType}`, body)) as Response<SimpleResponse>;
+    return (await this.put(`/v1/transaction-type/${options.transactionType}`, body)) as Response<SimpleResponse>;
   };
 
   /**
@@ -770,14 +769,14 @@ export class DragonchainClient {
     transactionType: string;
   }) => {
     if (!options.transactionType) throw new FailureByDesign('PARAM_ERROR', 'Parameter `transactionType` is required');
-    return (await this.get(`/transaction-type/${options.transactionType}`)) as Response<TransactionTypeResponse>;
+    return (await this.get(`/v1/transaction-type/${options.transactionType}`)) as Response<TransactionTypeResponse>;
   };
 
   /**
    * Gets a list of the chain's interchain addresses
    */
   public getPublicBlockchainAddresses = async () => {
-    return (await this.get('/public-blockchain-address')) as Response<PublicBlockchainAddressListResponse>;
+    return (await this.get('/v1/public-blockchain-address')) as Response<PublicBlockchainAddressListResponse>;
   };
 
   public createBitcoinTransaction = async (options: {
@@ -821,7 +820,7 @@ export class DragonchainClient {
         });
       });
     }
-    return (await this.post('/public-blockchain-transaction', body)) as Response<PublicBlockchainTransactionResponse>;
+    return (await this.post('/v1/public-blockchain-transaction', body)) as Response<PublicBlockchainTransactionResponse>;
   };
 
   public createEthereumTransaction = async (options: {
@@ -863,7 +862,7 @@ export class DragonchainClient {
     if (options.data) body.transaction.data = options.data;
     if (options.gasPrice) body.transaction.gasPrice = options.gasPrice;
     if (options.gas) body.transaction.gas = options.gas;
-    return (await this.post('/public-blockchain-transaction', body)) as Response<PublicBlockchainTransactionResponse>;
+    return (await this.post('/v1/public-blockchain-transaction', body)) as Response<PublicBlockchainTransactionResponse>;
   };
 
   /**

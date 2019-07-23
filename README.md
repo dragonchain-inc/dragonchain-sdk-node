@@ -1,6 +1,7 @@
 # Dragonchain JS SDK
 
 [![Build Status](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node.svg?branch=master)](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node)
+![Banana Index](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fnode-sdk-docs.dragonchain.com%2Fbanana-shield.json)
 
 Talk to your dragonchain.
 

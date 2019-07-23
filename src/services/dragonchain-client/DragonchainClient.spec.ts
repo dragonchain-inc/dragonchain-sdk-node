@@ -80,21 +80,21 @@ describe('DragonchainClient', () => {
     describe('.getStatus', () => {
       it('calls #fetch() with correct params', async () => {
         await client.getStatus();
-        assert.calledWith(fetch, 'fakeUrl/status', expectedFetchOptions);
+        assert.calledWith(fetch, 'fakeUrl/v1/status', expectedFetchOptions);
       });
     });
 
     describe('.getApiKey', () => {
       it('calls #fetch() with correct params', async () => {
         await client.getApiKey({ keyId: 'MyKeyID' });
-        assert.calledWith(fetch, 'fakeUrl/api-key/MyKeyID', expectedFetchOptions);
+        assert.calledWith(fetch, 'fakeUrl/v1/api-key/MyKeyID', expectedFetchOptions);
       });
     });
 
     describe('.listApiKeys', () => {
       it('calls #fetch() with correct params', async () => {
         await client.listApiKeys();
-        assert.calledWith(fetch, 'fakeUrl/api-key', expectedFetchOptions);
+        assert.calledWith(fetch, 'fakeUrl/v1/api-key', expectedFetchOptions);
       });
     });
 
@@ -102,7 +102,7 @@ describe('DragonchainClient', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'batman-transaction-id';
         await client.getTransaction({ transactionId: id });
-        assert.calledWith(fetch, `fakeUrl/transaction/${id}`, expectedFetchOptions);
+        assert.calledWith(fetch, `fakeUrl/v1/transaction/${id}`, expectedFetchOptions);
       });
     });
 
@@ -110,7 +110,7 @@ describe('DragonchainClient', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'robin-block-id';
         await client.getBlock({ blockId: id });
-        assert.calledWith(fetch, `fakeUrl/block/${id}`, expectedFetchOptions);
+        assert.calledWith(fetch, `fakeUrl/v1/block/${id}`, expectedFetchOptions);
       });
     });
 
@@ -118,14 +118,14 @@ describe('DragonchainClient', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'joker-smartcontract-id';
         await client.getSmartContract({ smartContractId: id });
-        assert.calledWith(fetch, `fakeUrl/contract/${id}`, expectedFetchOptions);
+        assert.calledWith(fetch, `fakeUrl/v1/contract/${id}`, expectedFetchOptions);
       });
     });
 
     describe('.getPublicBlockchainAddresses', () => {
       it('calls #fetch() with correct params', async () => {
         await client.getPublicBlockchainAddresses();
-        assert.calledWith(fetch, 'fakeUrl/public-blockchain-address', expectedFetchOptions);
+        assert.calledWith(fetch, 'fakeUrl/v1/public-blockchain-address', expectedFetchOptions);
       });
     });
 
@@ -133,7 +133,7 @@ describe('DragonchainClient', () => {
       it('calls #fetch() with correct params', async () => {
         const id = 'block_id';
         await client.getVerifications({ blockId: id });
-        assert.calledWith(fetch, `fakeUrl/verifications/${id}`, expectedFetchOptions);
+        assert.calledWith(fetch, `fakeUrl/v1/verifications/${id}`, expectedFetchOptions);
       });
     });
 
@@ -141,7 +141,7 @@ describe('DragonchainClient', () => {
       it('calls #fetch() with correct params', async () => {
         const params = 'banana';
         await client.queryBlocks({ luceneQuery: params });
-        assert.calledWith(fetch, `fakeUrl/block?q=${params}&offset=0&limit=10`, expectedFetchOptions);
+        assert.calledWith(fetch, `fakeUrl/v1/block?q=${params}&offset=0&limit=10`, expectedFetchOptions);
       });
     });
 
@@ -149,7 +149,7 @@ describe('DragonchainClient', () => {
       it('calls #fetch() with correct params', async () => {
         const params = 'banana';
         await client.querySmartContracts({ luceneQuery: params });
-        assert.calledWith(fetch, `fakeUrl/contract?q=${params}&offset=0&limit=10`, expectedFetchOptions);
+        assert.calledWith(fetch, `fakeUrl/v1/contract?q=${params}&offset=0&limit=10`, expectedFetchOptions);
       });
     });
   });
@@ -179,12 +179,12 @@ describe('DragonchainClient', () => {
     it('.deleteSmartContract', async () => {
       const param = 'banana';
       await client.deleteSmartContract({ smartContractId: param });
-      assert.calledWith(fetch, 'fakeUrl/contract/banana', expectedFetchOptions);
+      assert.calledWith(fetch, 'fakeUrl/v1/contract/banana', expectedFetchOptions);
     });
 
     it('.deleteApiKey', async () => {
       await client.deleteApiKey({ keyId: 'MyKeyID' });
-      assert.calledWith(fetch, 'fakeUrl/api-key/MyKeyID', expectedFetchOptions);
+      assert.calledWith(fetch, 'fakeUrl/v1/api-key/MyKeyID', expectedFetchOptions);
     });
   });
 
@@ -215,7 +215,7 @@ describe('DragonchainClient', () => {
       it('calls #fetch() with correct params', async () => {
         await client.createApiKey();
         const expectedBody = {};
-        assert.calledWith(fetch, 'fakeUrl/api-key', { ...expectedFetchOptions, body: JSON.stringify(expectedBody) });
+        assert.calledWith(fetch, 'fakeUrl/v1/api-key', { ...expectedFetchOptions, body: JSON.stringify(expectedBody) });
       });
     });
 
@@ -234,7 +234,7 @@ describe('DragonchainClient', () => {
         };
         await client.createTransaction(transactionCreatePayload);
         const obj = { ...expectedFetchOptions, body: JSON.stringify(expectedBody) };
-        assert.calledWith(fetch, 'fakeUrl/transaction', obj);
+        assert.calledWith(fetch, 'fakeUrl/v1/transaction', obj);
       });
     });
 
@@ -258,7 +258,7 @@ describe('DragonchainClient', () => {
         };
         await client.createSmartContract(contractPayload);
         const obj = { ...expectedFetchOptions, body: JSON.stringify(expectedBody) };
-        assert.calledWith(fetch, 'fakeUrl/contract', obj);
+        assert.calledWith(fetch, 'fakeUrl/v1/contract', obj);
       });
     });
 
@@ -284,7 +284,7 @@ describe('DragonchainClient', () => {
         };
         await client.createEthereumTransaction(transactionCreatePayload);
         const obj = { ...expectedFetchOptions, body: JSON.stringify(expectedBody) };
-        assert.calledWith(fetch, 'fakeUrl/public-blockchain-transaction', obj);
+        assert.calledWith(fetch, 'fakeUrl/v1/public-blockchain-transaction', obj);
       });
     });
   });
@@ -322,7 +322,7 @@ describe('DragonchainClient', () => {
         };
         await client.updateSmartContract({ smartContractId, enabled: true });
         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBodyResponse) };
-        assert.calledWith(fetch, `fakeUrl/contract/${smartContractId}`, obj);
+        assert.calledWith(fetch, `fakeUrl/v1/contract/${smartContractId}`, obj);
       });
     });
   });
