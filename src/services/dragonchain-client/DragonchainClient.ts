@@ -30,6 +30,7 @@ import {
   QueryResult,
   BlockSchemaType,
   Verifications,
+  PendingVerifications,
   levelVerifications,
   TransactionTypeResponse,
   PublicBlockchainTransactionResponse,
@@ -615,6 +616,19 @@ export class DragonchainClient {
   ) => {
     const queryParams: string = this.getLuceneParams(options.luceneQuery, options.sort, options.offset || 0, options.limit || 10);
     return (await this.get(`/v1/contract${queryParams}`)) as Response<QueryResult<SmartContractAtRest>>;
+  };
+
+  /**
+   * Get chain ids for the pending verifications for a block. Note that this is only relevant for level 1 chains.
+   */
+  public getPendingVerifications = async (options: {
+    /**
+     * The block ID to retrieve pending verifications for
+     */
+    blockId: string;
+  }) => {
+    if (!options.blockId) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockId` is required');
+    return (await this.get(`/v1/verifications/pending/${options.blockId}`)) as Response<PendingVerifications>;
   };
 
   /**

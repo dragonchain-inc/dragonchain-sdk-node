@@ -762,6 +762,25 @@ export interface L5BlockAtRest {
   };
 }
 
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "2": [],
+ *   "3": [],
+ *   "4": ["21yog8rLpaH43D8JgoczsQf7oHhwa9JJDr2FdsedjmSV9"],
+ *   "5": ["vAo8DkPEPS8syjxEoJRmNNoX3tt6upXkSqhGxwzjz5Ws"],
+ * }
+ * ```
+ */
+export interface PendingVerifications {
+  '2': string[];
+  '3': string[];
+  '4': string[];
+  '5': string[];
+}
+
 export interface Verifications {
   '2': L2BlockAtRest[];
   '3': L3BlockAtRest[];
