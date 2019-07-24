@@ -134,8 +134,8 @@ describe('DragonchainClient', () => {
         const id = 'block_id';
         await client.getPendingVerifications({ blockId: id });
         assert.calledWith(fetch, `fakeUrl/v1/verifications/pending/${id}`, expectedFetchOptions);
-      })
-    })
+      });
+    });
 
     describe('.getVerifications', () => {
       it('calls #fetch() with correct params', async () => {
