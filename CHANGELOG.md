@@ -1,9 +1,10 @@
 # Changelog
 
-## 3.0.10
+## 3.1.0
 
 - **Feature:**
   - Use new versioned api endpoints
+  - Add support for pending verifications endpoint
 
 ## 3.0.9
 
