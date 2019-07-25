@@ -1,6 +1,10 @@
 # Dragonchain JS SDK
 
+[![Latest npm version](https://img.shields.io/npm/v/dragonchain-sdk)](https://www.npmjs.com/package/dragonchain-sdk)
 [![Build Status](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node.svg?branch=master)](https://travis-ci.org/dragonchain-inc/dragonchain-sdk-node)
+[![Node Version Support](https://img.shields.io/node/v/dragonchain-sdk)](https://github.com/dragonchain-inc/dragonchain-sdk-node)
+[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-informational.svg)](https://github.com/dragonchain-inc/dragonchain-sdk-node/blob/master/LICENSE)
 ![Banana Index](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fnode-sdk-docs.dragonchain.com%2Fbanana-shield.json)
 
 Talk to your dragonchain.
