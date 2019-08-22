@@ -220,7 +220,7 @@ describe('DragonchainClient', () => {
       });
     });
 
-    describe('.deleteInterchainNetworks', () => {
+    describe('.deleteInterchainNetwork', () => {
       it('calls #fetch() with correct params', async () => {
         await client.deleteInterchainNetwork({ blockchain: 'bitcoin', name: 'banana' });
         assert.calledWith(fetch, 'fakeUrl/v1/interchains/bitcoin/banana');
