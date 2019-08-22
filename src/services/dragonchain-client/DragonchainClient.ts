@@ -901,7 +901,6 @@ export class DragonchainClient {
    */
   private generateQueryString = (queryObject: Map<string, string>) => {
     const query = '?';
-    // @ts-ignore
     const params = UrlSearchParams(queryObject);
     const queryString = `${query}${params}`;
 
@@ -911,7 +910,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private async get(path: string, jsonParse: boolean = true) {
+  private async get(path: string, jsonParse = true) {
     return this.makeRequest(path, 'GET', undefined, undefined, jsonParse);
   }
 
@@ -941,7 +940,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private getFetchOptions(path: string, method: SupportedHTTP, callbackURL: string = '', body: string = '', contentType: string = ''): FetchOptions {
+  private getFetchOptions(path: string, method: SupportedHTTP, callbackURL = '', body = '', contentType = ''): FetchOptions {
     const timestamp = new Date().toISOString();
     const options: FetchOptions = {
       method: method,
@@ -973,7 +972,7 @@ export class DragonchainClient {
   /**
    * @hidden
    */
-  private async makeRequest(path: string, method: SupportedHTTP, callbackURL: string = '', body: string = '', jsonParse: boolean = true): Promise<Response<any>> {
+  private async makeRequest(path: string, method: SupportedHTTP, callbackURL = '', body = '', jsonParse = true): Promise<Response<any>> {
     let contentType = '';
     // assume content type is json if a body is provided, as it's the only content-type supported
     if (body) contentType = 'application/json';
@@ -1022,11 +1021,11 @@ export const createClient = async (
     algorithm?: HmacAlgorithm;
   } = {}
 ) => {
-  if (!options.dragonchainId) options.dragonchainId = await getDragonchainId();
-  if (!options.endpoint) options.endpoint = await getDragonchainEndpoint(options.dragonchainId);
+  if (!options.dragonchainId) options.dragonchainId = await getDragonchainId(); // eslint-disable-line require-atomic-updates
+  if (!options.endpoint) options.endpoint = await getDragonchainEndpoint(options.dragonchainId); // eslint-disable-line require-atomic-updates
   // Set defaults
-  if (!options.algorithm) options.algorithm = 'SHA256';
-  if (options.verify !== false) options.verify = true;
+  if (!options.algorithm) options.algorithm = 'SHA256'; // eslint-disable-line require-atomic-updates
+  if (options.verify !== false) options.verify = true; // eslint-disable-line require-atomic-updates
   const credentials = await CredentialService.createCredentials(options.dragonchainId, options.authKey || '', options.authKeyId || '', options.algorithm);
   return new DragonchainClient(options.endpoint, credentials, options.verify);
 };

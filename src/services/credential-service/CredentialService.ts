@@ -34,8 +34,8 @@ export class CredentialService {
    */
   public static createCredentials = async (
     dragonchainId: string,
-    authKey: string = '',
-    authKeyId: string = '',
+    authKey = '',
+    authKeyId = '',
     hmacAlgo: HmacAlgorithm = 'SHA256',
     injected: any = { getDragonchainCredentials }
   ) => {

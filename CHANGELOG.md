@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.0
+
+- **Development:**
+  - Update development dependencies
+
 ## 3.1.0
 
 - **Feature:**
