@@ -178,7 +178,7 @@ describe('DragonchainClient', () => {
     describe('.getDefaultInterchainNetwork', () => {
       it('calls #fetch() with correct params', async () => {
         await client.getDefaultInterchainNetwork();
-        assert.calledWith(fetch, 'fakeUrl/v1/interchains/default')
+        assert.calledWith(fetch, 'fakeUrl/v1/interchains/default');
       });
     });
   });
@@ -223,7 +223,7 @@ describe('DragonchainClient', () => {
     describe('.deleteInterchainNetworks', () => {
       it('calls #fetch() with correct params', async () => {
         await client.deleteInterchainNetwork({ blockchain: 'bitcoin', name: 'banana' });
-        assert.calledWith(fetch, 'fakeUrl/v1/interchains/bitcoin/banana')
+        assert.calledWith(fetch, 'fakeUrl/v1/interchains/bitcoin/banana');
       });
     });
   });
@@ -402,7 +402,7 @@ describe('DragonchainClient', () => {
         await client.setDefaultInterchainNetwork({ name: 'banana', blockchain: 'bitcoin' });
         const obj = { ...expectedFetchOptions, body: JSON.stringify(fakeBody) };
         assert.calledWith(fetch, 'fakeUrl/v1/interchains/default', obj);
-      })
+      });
     });
   });
 

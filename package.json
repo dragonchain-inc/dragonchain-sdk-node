@@ -27,6 +27,7 @@
     "lint": "eslint --ext .ts --format unix src/ && prettier --check src 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*.ts'",
     "docs": "typedoc ./src --exclude '**/*.spec.ts' --mode modules --target es5 --mode file --theme default --out docs --excludeExternals --gaSite 'dragonchain-sdk-node' --hideGenerator",
+    "clean": "rm -rf ./docs/ ./dist/ ./coverage/ ./.nyc_output/",
     "test": "NODE_ENV=test nyc --reporter=lcov --reporter=text mocha -r ts-node/register 'src/**/*.spec.ts' --exit",
     "test:built": "NODE_ENV=test mocha 'dist/**/*.spec.js' --exit",
     "test:ci": "yarn lint && yarn build && yarn docs && yarn test"
