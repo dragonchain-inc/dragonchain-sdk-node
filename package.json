@@ -70,6 +70,7 @@
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/camelcase": "off",
+      "require-atomic-updates": "off",
       "max-len": "off"
     }
   },

@@ -1366,11 +1366,11 @@ export const createClient = async (
     algorithm?: HmacAlgorithm;
   } = {}
 ) => {
-  if (!options.dragonchainId) options.dragonchainId = await getDragonchainId(); // eslint-disable-line require-atomic-updates
-  if (!options.endpoint) options.endpoint = await getDragonchainEndpoint(options.dragonchainId); // eslint-disable-line require-atomic-updates
+  if (!options.dragonchainId) options.dragonchainId = await getDragonchainId();
+  if (!options.endpoint) options.endpoint = await getDragonchainEndpoint(options.dragonchainId);
   // Set defaults
-  if (!options.algorithm) options.algorithm = 'SHA256'; // eslint-disable-line require-atomic-updates
-  if (options.verify !== false) options.verify = true; // eslint-disable-line require-atomic-updates
+  if (!options.algorithm) options.algorithm = 'SHA256';
+  if (options.verify !== false) options.verify = true;
   const credentials = await CredentialService.createCredentials(options.dragonchainId, options.authKey || '', options.authKeyId || '', options.algorithm);
   return new DragonchainClient(options.endpoint, credentials, options.verify);
 };
