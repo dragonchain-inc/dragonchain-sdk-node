@@ -7,7 +7,7 @@
   - Add support for new interchain management endpoints with client functions:
     - `createBitcoinInterchain`
     - `createEthereumInterchain`
-    - `updateBitcionInterchain`
+    - `updateBitcoinInterchain`
     - `updateEthereumInterchain`
     - `getInterchainNetwork`
     - `deleteInterchainNetwork`
