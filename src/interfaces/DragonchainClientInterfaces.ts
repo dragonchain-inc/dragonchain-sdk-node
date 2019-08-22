@@ -18,7 +18,7 @@
  * @hidden
  * Supported HTTP methods for the sdk
  */
-export type SupportedHTTP = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export type SupportedHTTP = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 /**
  * @hidden
@@ -203,12 +203,12 @@ export interface DragonchainBulkTransactionCreateResponse {
 }
 
 export interface BitcoinTransactionOutputs {
-  scriptPubKey: string;
+  to: string;
   value: number;
 }
 
 /**
- * Example response for createEthereumTransaction
+ * Example response for signEthereumTransaction
  * @example
  * ```json
  *
@@ -219,6 +219,75 @@ export interface BitcoinTransactionOutputs {
  */
 export interface PublicBlockchainTransactionResponse {
   signed: string;
+}
+
+export type SupportedInterchains = 'ethereum' | 'bitcoin';
+
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "version": "1",
+ *   "blockchain": "ethereum",
+ *   "name": "myRopstenNetwork",
+ *   "rpc_address": "http://1.2.3.4:8545",
+ *   "chain_id": 3,
+ *   "address": "0xbbF5029Fd710d227630c8b7d338051B8E76d50B3"
+ * }
+ * ```
+ */
+export interface EthereumInterchainNetwork {
+  version: string;
+  blockchain: 'ethereum';
+  name: string;
+  rpc_address: string;
+  chain_id: number;
+  address: string;
+}
+
+/**
+ * @example
+ * ```json
+ *
+ * {
+ *   "version": "1",
+ *   "blockchain": "bitcoin",
+ *   "name": "myBTCTestNetwork",
+ *   "rpc_address": "http://1.2.3.4:18332",
+ *   "tesnet": true,
+ *   "address": "n1bUzF6LRENLPaiJRFTcnGLMLsbZSquft1"
+ * }
+ * ```
+ */
+export interface BitcoinInterchainNetwork {
+  version: string;
+  blockchain: 'bitcoin';
+  name: string;
+  rpc_address: string;
+  testnet: boolean;
+  address: string;
+}
+
+/**
+ * Array of interchains will be all of one type
+ * @example
+ * ```json
+ *
+ * {
+ *   "interchains": [{
+ *     "version": "1",
+ *     "blockchain": "bitcoin",
+ *     "name": "myBTCTestNetwork",
+ *     "rpc_address": "http://1.2.3.4:18332",
+ *     "tesnet": true,
+ *     "address": "n1bUzF6LRENLPaiJRFTcnGLMLsbZSquft1"
+ *   }]
+ * }
+ * ```
+ */
+export interface InterchainNetworkList {
+  interchains: BitcoinInterchainNetwork[] | EthereumInterchainNetwork[];
 }
 
 /**

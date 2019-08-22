@@ -44,7 +44,11 @@ import {
   ListAPIKeyResponse,
   CreateAPIKeyResponse,
   GetAPIKeyResponse,
-  DeleteAPIKeyResponse
+  DeleteAPIKeyResponse,
+  EthereumInterchainNetwork,
+  BitcoinInterchainNetwork,
+  SupportedInterchains,
+  InterchainNetworkList
 } from '../../interfaces/DragonchainClientInterfaces';
 import { CredentialService, HmacAlgorithm } from '../credential-service/CredentialService';
 import { getDragonchainId, getDragonchainEndpoint } from '../config-service';
@@ -787,19 +791,95 @@ export class DragonchainClient {
   };
 
   /**
-   * Gets a list of the chain's interchain addresses
+   * Create (or overwrite) a bitcoin wallet/network for interchain use
    */
-  public getPublicBlockchainAddresses = async () => {
-    return (await this.get('/v1/public-blockchain-address')) as Response<PublicBlockchainAddressListResponse>;
+  public createBitcoinInterchain = async (options: {
+    /**
+     * The name of the network to update
+     */
+    name: string;
+    /**
+     * Whether or not this is a testnet wallet/address (not required if providing privateKey as WIF)
+     */
+    testnet?: boolean;
+    /**
+     * The base64 encoded private key, or WIF for the desired wallet
+     */
+    privateKey?: string;
+    /**
+     * The endpoint of the bitcoin core RPC node to use (i.e. http://my-node:8332)
+     */
+    rpcAddress?: string;
+    /**
+     * The base64-encoded username:password for the rpc node. For example, user: a pass: b would be 'YTpi' (base64("a:b"))
+     */
+    rpcAuthorization?: string;
+    /**
+     * Whether or not to force a utxo-rescan for the address.
+     * If using a new private key for an existing wallet with funds, this must be true to use its existing funds
+     */
+    utxoScan?: boolean;
+  }) => {
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    const body: any = { version: '1', name: options.name };
+    if (typeof options.testnet === 'boolean') body.testnet = options.testnet;
+    if (options.privateKey) body.private_key = options.privateKey;
+    if (options.rpcAddress) body.rpc_address = options.rpcAddress;
+    if (options.rpcAuthorization) body.rpc_authorization = options.rpcAuthorization;
+    if (typeof options.utxoScan === 'boolean') body.utxo_scan = options.utxoScan;
+    return (await this.post(`/v1/interchains/bitcoin`, body)) as Response<BitcoinInterchainNetwork>;
   };
 
-  public createBitcoinTransaction = async (options: {
+  /**
+   * Update an existing bitcoin wallet/network for interchain use. Will only update the provided fields
+   */
+  public updateBitcoinInterchain = async (options: {
     /**
-     * The bitcoin network that the transaction is for (mainnet or testnet)
+     * The name of the network to update
      */
-    network: 'BTC_MAINNET' | 'BTC_TESTNET3';
+    name: string;
     /**
-     * The desired fee in satoshis/byte
+     * Whether or not this is a testnet wallet/address (not required if providing privateKey as WIF)
+     */
+    testnet?: boolean;
+    /**
+     * The base64 encoded private key, or WIF for the desired wallet
+     */
+    privateKey?: string;
+    /**
+     * The endpoint of the bitcoin core RPC node to use (i.e. http://my-node:8332)
+     */
+    rpcAddress?: string;
+    /**
+     * The base64-encoded username:password for the rpc node. For example, user: a pass: b would be 'YTpi' (base64("a:b"))
+     */
+    rpcAuthorization?: string;
+    /**
+     * Whether or not to force a utxo-rescan for the address.
+     * If using a new private key for an existing wallet with funds, this must be true to use its existing funds
+     */
+    utxoScan?: boolean;
+  }) => {
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    const body: any = { version: '1' };
+    if (typeof options.testnet === 'boolean') body.testnet = options.testnet;
+    if (options.privateKey) body.private_key = options.privateKey;
+    if (options.rpcAddress) body.rpc_address = options.rpcAddress;
+    if (options.rpcAuthorization) body.rpc_authorization = options.rpcAuthorization;
+    if (typeof options.utxoScan === 'boolean') body.utxo_scan = options.utxoScan;
+    return (await this.patch(`/v1/interchains/bitcoin/${options.name}`, body)) as Response<BitcoinInterchainNetwork>;
+  };
+
+  /**
+   * Sign a transaction for a bitcoin network on the chain
+   */
+  public signBitcoinTransaction = async (options: {
+    /**
+     * The name of the bitcoin network to use for signing
+     */
+    name: string;
+    /**
+     * The desired fee in satoshis/byte. Must be an integer
      *
      * If not supplied, an estimate will be automatically generated
      */
@@ -817,7 +897,257 @@ export class DragonchainClient {
      */
     outputs?: BitcoinTransactionOutputs[];
   }) => {
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    if (options.satoshisPerByte && !Number.isInteger(options.satoshisPerByte)) throw new FailureByDesign('PARAM_ERROR', 'Parameter `satoshisPerByte` must be an integer');
+    const body: any = { version: '1' };
+    if (options.satoshisPerByte) body.fee = options.satoshisPerByte;
+    if (options.data) body.data = options.data;
+    if (options.changeAddress) body.change = options.changeAddress;
+    if (options.outputs) {
+      body.outputs = [];
+      options.outputs.forEach(output => {
+        body.outputs.push({
+          to: output.to,
+          value: output.value
+        });
+      });
+    }
+    return (await this.post(`/v1/interchains/bitcoin/${name}/transaction`, body)) as Response<PublicBlockchainTransactionResponse>;
+  };
+
+  /**
+   * Create (or overwrite) an ethereum wallet/network for interchain use
+   */
+  public createEthereumInterchain = async (options: {
+    /**
+     * The name of the network to update
+     */
+    name: string;
+    /**
+     * The base64 or hex encoded private key to use. Will automatically generate a random one if not provided
+     */
+    privateKey?: string;
+    /**
+     * The endpoint of the ethereum RPC node to use (i.e. http://my-node:8545)
+     */
+    rpcAddress?: string;
+    /**
+     * The ethereum chain id to use. Will automatically derive this if providing a custom rpcAddress. This should be an integer.
+     * Without providing a custom rpcAddress, Dragonchain manages and supports: 1=ETH Mainnet|3=ETH Ropsten|61=ETC Mainnet|2=ETC Morden
+     */
+    chainId?: number;
+  }) => {
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    if (options.chainId && !Number.isInteger(options.chainId)) throw new FailureByDesign('PARAM_ERROR', 'Parameter `chainId` must be an integer');
+    const body: any = { version: '1', name: options.name };
+    if (options.privateKey) body.private_key = options.privateKey;
+    if (options.rpcAddress) body.rpc_address = options.rpcAddress;
+    if (options.chainId) body.chain_id = options.chainId;
+    return (await this.post(`/v1/interchains/ethereum`, body)) as Response<EthereumInterchainNetwork>;
+  };
+
+  /**
+   * Update an existing ethereum wallet/network for interchain use
+   */
+  public updateEthereumInterchain = async (options: {
+    /**
+     * The name of the network to update
+     */
+    name: string;
+    /**
+     * The base64 or hex encoded private key to use. Will automatically generate a random one if not provided
+     */
+    privateKey?: string;
+    /**
+     * The endpoint of the ethereum RPC node to use (i.e. http://my-node:8545)
+     */
+    rpcAddress?: string;
+    /**
+     * The ethereum chain id to use. Will automatically derive this if providing a custom rpcAddress. This should be an integer.
+     * Without providing a custom rpcAddress, Dragonchain manages and supports: 1=ETH Mainnet|3=ETH Ropsten|61=ETC Mainnet|2=ETC Morden
+     */
+    chainId?: number;
+  }) => {
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    if (options.chainId && !Number.isInteger(options.chainId)) throw new FailureByDesign('PARAM_ERROR', 'Parameter `chainId` must be an integer');
+    const body: any = { version: '1' };
+    if (options.privateKey) body.private_key = options.privateKey;
+    if (options.rpcAddress) body.rpc_address = options.rpcAddress;
+    if (options.chainId) body.chain_id = options.chainId;
+    return (await this.patch(`/v1/interchains/ethereum/${options.name}`, body)) as Response<EthereumInterchainNetwork>;
+  };
+
+  /**
+   * Create and sign an ethereum transaction using your chain's interchain network
+   */
+  public signEthereumTransaction = async (options: {
+    /**
+     * The name of the ethereum network to use for signing
+     */
+    name: string;
+    /**
+     * The (hex-encoded) address to send the transaction to
+     */
+    to: string;
+    /**
+     * The (hex-encoded) number of wei to send with this transaction
+     */
+    value: string;
+    /**
+     * The (hex-encoded) string of extra data to include with this transaction
+     */
+    data?: string;
+    /**
+     * The (hex-encoded) gas price in gwei to pay. If not supplied, this will be estimated automatically
+     */
+    gasPrice?: string;
+    /**
+     * The (hex-encoded) gas limit for this transaction. If not supplied, this will be estimated automatically
+     */
+    gas?: string;
+    /**
+     * The (hex-encoded) nonce for this transaction. If not supplied, it will be fetched automatically
+     */
+    nonce?: string;
+  }) => {
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    if (!options.to) throw new FailureByDesign('PARAM_ERROR', 'Parameter `to` is required');
+    if (!options.value) throw new FailureByDesign('PARAM_ERROR', 'Parameter `value` is required');
+    const body: any = {
+      version: '1',
+      to: options.to,
+      value: options.value
+    };
+    if (options.data) body.data = options.data;
+    if (options.gasPrice) body.gasPrice = options.gasPrice;
+    if (options.gas) body.gas = options.gas;
+    if (options.nonce) body.nonce = options.nonce;
+    return (await this.post(`/v1/interchains/ethereum/${name}/transaction`, body)) as Response<PublicBlockchainTransactionResponse>;
+  };
+
+  /**
+   * Get a configured interchain network/wallet from the chain
+   */
+  public getInterchainNetwork = async (options: {
+    /**
+     * The blockchain type to get (i.e. 'bitcoin', 'ethereum')
+     */
+    blockchain: SupportedInterchains;
+    /**
+     * The name of that blockchain's network (set when creating the network)
+     */
+    name: string;
+  }) => {
+    if (!options.blockchain) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockchain` is required');
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    return (await this.get(`/v1/interchains/${options.blockchain}/${options.name}`)) as Response<EthereumInterchainNetwork | BitcoinInterchainNetwork>;
+  };
+
+  /**
+   * Delete an interchain network/wallet from the chain
+   */
+  public deleteInterchainNetworks = async (options: {
+    /**
+     * The blockchain type to delete (i.e. 'bitcoin', 'ethereum')
+     */
+    blockchain: SupportedInterchains;
+    /**
+     * The name of that blockchain's network (set when creating the network)
+     */
+    name: string;
+  }) => {
+    if (!options.blockchain) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockchain` is required');
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    return (await this.delete(`/v1/interchains/${options.blockchain}/${options.name}`)) as Response<SimpleResponse>;
+  };
+
+  /**
+   * List all the interchain network/wallets for a blockchain type
+   */
+  public listInterchainNetworks = async (options: {
+    /**
+     * The blockchain type to get (i.e. 'bitcoin', 'ethereum')
+     */
+    blockchain: SupportedInterchains;
+  }) => {
+    if (!options.blockchain) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockchain` is required');
+    return (await this.get(`/v1/interchains/${options.blockchain}`)) as Response<InterchainNetworkList>;
+  };
+
+  /**
+   * Set the default interchain network for the chain to use (L5 Only)
+   */
+  public setDefaultInterchainNetwork = async (options: {
+    /**
+     * The blockchain type to set (i.e. 'bitcoin', 'ethereum')
+     */
+    blockchain: SupportedInterchains;
+    /**
+     * The name of that blockchain's network to use (set when creating the network)
+     */
+    name: string;
+  }) => {
+    if (!options.blockchain) throw new FailureByDesign('PARAM_ERROR', 'Parameter `blockchain` is required');
+    if (!options.name) throw new FailureByDesign('PARAM_ERROR', 'Parameter `name` is required');
+    const body: any = {
+      version: '1',
+      blockchain: options.blockchain,
+      name: options.name
+    };
+    return (await this.post(`/v1/interchains/default`, body)) as Response<EthereumInterchainNetwork | BitcoinInterchainNetwork>;
+  };
+
+  /**
+   * Get the set default interchain network for this chain (L5 Only)
+   */
+  public getDefaultInterchainNetwork = async () => {
+    return (await this.get('/v1/interchains/default')) as Response<EthereumInterchainNetwork | BitcoinInterchainNetwork>;
+  };
+
+  /**
+   * !This method is deprecated and should not be used!
+   * Backwards compatibility will exist for legacy chains, but will not work on new chains. listInterchainNetworks should be used instead
+   *
+   * Gets a list of the chain's interchain addresses
+   */
+  public getPublicBlockchainAddresses = async () => {
+    logger.warn('This method is deprecated. It will continue to work for legacy chains, but will not work on any new chains. Use listInterchainNetworks instead');
+    return (await this.get('/v1/public-blockchain-address')) as Response<PublicBlockchainAddressListResponse>;
+  };
+
+  /**
+   * !This method is deprecated and should not be used!
+   * Backwards compatibility will exist for legacy chains, but will not work on new chains. signBitcoinTransaction should be used instead
+   *
+   * Sign a transaction for a bitcoin network
+   */
+  public createBitcoinTransaction = async (options: {
+    /**
+     * The bitcoin network that the transaction is for (mainnet or testnet)
+     */
+    network: 'BTC_MAINNET' | 'BTC_TESTNET3';
+    /**
+     * The desired fee in satoshis/byte. Must be an integer
+     *
+     * If not supplied, an estimate will be automatically generated
+     */
+    satoshisPerByte?: number;
+    /**
+     * String data to embed in the transaction as null-data output type
+     */
+    data?: string;
+    /**
+     * Change address to use for this transaction. If not supplied, this will be the source address
+     */
+    changeAddress?: string;
+    /**
+     * The desired bitcoin outputs to create for this transaction
+     */
+    outputs?: BitcoinTransactionOutputs[];
+  }) => {
+    logger.warn('This method is deprecated. It will continue to work for legacy chains, but will not work on any new chains. Use signBitcoinTransaction instead');
     if (!options.network) throw new FailureByDesign('PARAM_ERROR', 'Parameter `network` is required');
+    if (options.satoshisPerByte && !Number.isInteger(options.satoshisPerByte)) throw new FailureByDesign('PARAM_ERROR', 'Parameter `satoshisPerByte` must be an integer');
     const body: any = {
       network: options.network,
       transaction: {}
@@ -829,7 +1159,7 @@ export class DragonchainClient {
       body.transaction.outputs = [];
       options.outputs.forEach(output => {
         body.transaction.outputs.push({
-          to: output.scriptPubKey,
+          to: output.to,
           value: output.value
         });
       });
@@ -837,6 +1167,12 @@ export class DragonchainClient {
     return (await this.post('/v1/public-blockchain-transaction', body)) as Response<PublicBlockchainTransactionResponse>;
   };
 
+  /**
+   * !This method is deprecated and should not be used!
+   * Backwards compatibility will exist for legacy chains, but will not work on new chains. signEthereumTransaction should be used instead
+   *
+   * Sign a transaction for an ethereum network
+   */
   public createEthereumTransaction = async (options: {
     /**
      * The ethereum network that the transaction is for (ETH/ETC mainnet or testnet)
@@ -863,6 +1199,7 @@ export class DragonchainClient {
      */
     gas?: string;
   }) => {
+    logger.warn('This method is deprecated. It will continue to work for legacy chains, but will not work on any new chains. Use signEthereumTransaction instead');
     if (!options.network) throw new FailureByDesign('PARAM_ERROR', 'Parameter `network` is required');
     if (!options.to) throw new FailureByDesign('PARAM_ERROR', 'Parameter `to` is required');
     if (!options.value) throw new FailureByDesign('PARAM_ERROR', 'Parameter `value` is required');
@@ -928,6 +1265,14 @@ export class DragonchainClient {
   private async put(path: string, body: string | object) {
     const bodyString = typeof body === 'string' ? body : JSON.stringify(body);
     return this.makeRequest(path, 'PUT', undefined, bodyString);
+  }
+
+  /**
+   * @hidden
+   */
+  private async patch(path: string, body: string | object) {
+    const bodyString = typeof body === 'string' ? body : JSON.stringify(body);
+    return this.makeRequest(path, 'PATCH', undefined, bodyString);
   }
 
   /**
