@@ -912,7 +912,7 @@ export class DragonchainClient {
         });
       });
     }
-    return (await this.post(`/v1/interchains/bitcoin/${name}/transaction`, body)) as Response<PublicBlockchainTransactionResponse>;
+    return (await this.post(`/v1/interchains/bitcoin/${options.name}/transaction`, body)) as Response<PublicBlockchainTransactionResponse>;
   };
 
   /**
@@ -1022,7 +1022,7 @@ export class DragonchainClient {
     if (options.gasPrice) body.gasPrice = options.gasPrice;
     if (options.gas) body.gas = options.gas;
     if (options.nonce) body.nonce = options.nonce;
-    return (await this.post(`/v1/interchains/ethereum/${name}/transaction`, body)) as Response<PublicBlockchainTransactionResponse>;
+    return (await this.post(`/v1/interchains/ethereum/${options.name}/transaction`, body)) as Response<PublicBlockchainTransactionResponse>;
   };
 
   /**
@@ -1046,7 +1046,7 @@ export class DragonchainClient {
   /**
    * Delete an interchain network/wallet from the chain
    */
-  public deleteInterchainNetworks = async (options: {
+  public deleteInterchainNetwork = async (options: {
     /**
      * The blockchain type to delete (i.e. 'bitcoin', 'ethereum')
      */
